@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence           http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+  <persistence-unit name="MuffetSolitarioPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    
+    <class>cr.ac.una.muffetsolitario.model.BoardColumn</class>
+    <class>cr.ac.una.muffetsolitario.model.UserAccount</class>
+    <class>cr.ac.una.muffetsolitario.model.Game</class>
+    <class>cr.ac.una.muffetsolitario.model.Card</class>
+    <class>cr.ac.una.muffetsolitario.model.Deck</class>
+    <class>cr.ac.una.muffetsolitario.model.CompletedSequence</class>
+    
+    <properties>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:oracle:thin:@//localhost:1521/XEPDB1"/>
+      <property name="jakarta.persistence.jdbc.user" value="USUARIO AQUII"/>
+      <property name="jakarta.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+      <property name="jakarta.persistence.jdbc.password" value="CONTRA AQUIII"/>
+    </properties>
+  </persistence-unit>
+</persistence>
