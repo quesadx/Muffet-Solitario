@@ -38,7 +38,7 @@ public class UserAccount implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "USER_ID")
-    private BigDecimal userId;
+    private Long userId;
     @Basic(optional = false)
     @Column(name = "USER_NICKNAME")
     private String userNickname;
@@ -54,21 +54,21 @@ public class UserAccount implements Serializable {
     public UserAccount() {
     }
 
-    public UserAccount(BigDecimal userId) {
+    public UserAccount(Long userId) {
         this.userId = userId;
     }
 
-    public UserAccount(BigDecimal userId, String userNickname, String userPassword) {
+    public UserAccount(Long userId, String userNickname, String userPassword) {
         this.userId = userId;
         this.userNickname = userNickname;
         this.userPassword = userPassword;
     }
 
-    public BigDecimal getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(BigDecimal userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

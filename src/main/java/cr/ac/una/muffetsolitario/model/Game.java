@@ -41,19 +41,19 @@ public class Game implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "GAME_ID")
-    private BigDecimal gameId;
+    private Long gameId;
     @Basic(optional = false)
     @Column(name = "GAME_MOVE_COUNT")
-    private BigInteger gameMoveCount;
+    private Integer gameMoveCount;
     @Basic(optional = false)
     @Column(name = "GAME_DIFFICULTY")
     private String gameDifficulty;
     @Basic(optional = false)
     @Column(name = "GAME_DURATION_SECONDS")
-    private BigInteger gameDurationSeconds;
+    private Integer gameDurationSeconds;
     @Basic(optional = false)
     @Column(name = "GAME_TOTAL_POINTS")
-    private BigInteger gameTotalPoints;
+    private Integer gameTotalPoints;
     @JoinColumn(name = "GAME_USER_FK", referencedColumnName = "USER_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private UserAccount gameUserFk;
@@ -67,11 +67,11 @@ public class Game implements Serializable {
     public Game() {
     }
 
-    public Game(BigDecimal gameId) {
+    public Game(Long gameId) {
         this.gameId = gameId;
     }
 
-    public Game(BigDecimal gameId, BigInteger gameMoveCount, String gameDifficulty, BigInteger gameDurationSeconds, BigInteger gameTotalPoints) {
+    public Game(Long gameId, Integer gameMoveCount, String gameDifficulty, Integer gameDurationSeconds, Integer gameTotalPoints) {
         this.gameId = gameId;
         this.gameMoveCount = gameMoveCount;
         this.gameDifficulty = gameDifficulty;
@@ -79,19 +79,19 @@ public class Game implements Serializable {
         this.gameTotalPoints = gameTotalPoints;
     }
 
-    public BigDecimal getGameId() {
+    public Long getGameId() {
         return gameId;
     }
 
-    public void setGameId(BigDecimal gameId) {
+    public void setGameId(Long gameId) {
         this.gameId = gameId;
     }
 
-    public BigInteger getGameMoveCount() {
+    public Integer getGameMoveCount() {
         return gameMoveCount;
     }
 
-    public void setGameMoveCount(BigInteger gameMoveCount) {
+    public void setGameMoveCount(Integer gameMoveCount) {
         this.gameMoveCount = gameMoveCount;
     }
 
@@ -103,19 +103,19 @@ public class Game implements Serializable {
         this.gameDifficulty = gameDifficulty;
     }
 
-    public BigInteger getGameDurationSeconds() {
+    public Integer getGameDurationSeconds() {
         return gameDurationSeconds;
     }
 
-    public void setGameDurationSeconds(BigInteger gameDurationSeconds) {
+    public void setGameDurationSeconds(Integer gameDurationSeconds) {
         this.gameDurationSeconds = gameDurationSeconds;
     }
 
-    public BigInteger getGameTotalPoints() {
+    public Integer getGameTotalPoints() {
         return gameTotalPoints;
     }
 
-    public void setGameTotalPoints(BigInteger gameTotalPoints) {
+    public void setGameTotalPoints(Integer gameTotalPoints) {
         this.gameTotalPoints = gameTotalPoints;
     }
 

@@ -35,7 +35,7 @@ public class CompletedSequence implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "CSEQ_ID")
-    private BigDecimal cseqId;
+    private Long cseqId;
     @JoinColumn(name = "CSEQ_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game cseqGameFk;
@@ -45,15 +45,15 @@ public class CompletedSequence implements Serializable {
     public CompletedSequence() {
     }
 
-    public CompletedSequence(BigDecimal cseqId) {
+    public CompletedSequence(Long cseqId) {
         this.cseqId = cseqId;
     }
 
-    public BigDecimal getCseqId() {
+    public Long getCseqId() {
         return cseqId;
     }
 
-    public void setCseqId(BigDecimal cseqId) {
+    public void setCseqId(Long cseqId) {
         this.cseqId = cseqId;
     }
 

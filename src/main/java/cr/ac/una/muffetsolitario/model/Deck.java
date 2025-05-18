@@ -35,7 +35,7 @@ public class Deck implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "DECK_ID")
-    private BigDecimal deckId;
+    private Long deckId;
     @JoinColumn(name = "DECK_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game deckGameFk;
@@ -45,15 +45,15 @@ public class Deck implements Serializable {
     public Deck() {
     }
 
-    public Deck(BigDecimal deckId) {
+    public Deck(Long deckId) {
         this.deckId = deckId;
     }
 
-    public BigDecimal getDeckId() {
+    public Long getDeckId() {
         return deckId;
     }
 
-    public void setDeckId(BigDecimal deckId) {
+    public void setDeckId(Long deckId) {
         this.deckId = deckId;
     }
 

@@ -37,10 +37,10 @@ public class BoardColumn implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "BCOLMN_ID")
-    private BigDecimal bcolmnId;
+    private Long bcolmnId;
     @Basic(optional = false)
     @Column(name = "BCOLMN_INDEX")
-    private BigInteger bcolmnIndex;
+    private Integer bcolmnIndex;
     @JoinColumn(name = "BCOLMN_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game bcolmnGameFk;
@@ -50,28 +50,28 @@ public class BoardColumn implements Serializable {
     public BoardColumn() {
     }
 
-    public BoardColumn(BigDecimal bcolmnId) {
+    public BoardColumn(Long bcolmnId) {
         this.bcolmnId = bcolmnId;
     }
 
-    public BoardColumn(BigDecimal bcolmnId, BigInteger bcolmnIndex) {
+    public BoardColumn(Long bcolmnId, Integer bcolmnIndex) {
         this.bcolmnId = bcolmnId;
         this.bcolmnIndex = bcolmnIndex;
     }
 
-    public BigDecimal getBcolmnId() {
+    public Long getBcolmnId() {
         return bcolmnId;
     }
 
-    public void setBcolmnId(BigDecimal bcolmnId) {
+    public void setBcolmnId(Long bcolmnId) {
         this.bcolmnId = bcolmnId;
     }
 
-    public BigInteger getBcolmnIndex() {
+    public Integer getBcolmnIndex() {
         return bcolmnIndex;
     }
 
-    public void setBcolmnIndex(BigInteger bcolmnIndex) {
+    public void setBcolmnIndex(Integer bcolmnIndex) {
         this.bcolmnIndex = bcolmnIndex;
     }
 

@@ -38,7 +38,7 @@ public class Card implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "CARD_ID")
-    private BigDecimal cardId;
+    private Long cardId;
     @Basic(optional = false)
     @Column(name = "CARD_INDEX")
     private String cardIndex;
@@ -50,7 +50,7 @@ public class Card implements Serializable {
     private String cardSuit;
     @Basic(optional = false)
     @Column(name = "CARD_VALUE")
-    private BigInteger cardValue;
+    private Integer cardValue;
     @JoinColumn(name = "CARD_BCOLMN_FK", referencedColumnName = "BCOLMN_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private BoardColumn cardBcolmnFk;
@@ -64,11 +64,11 @@ public class Card implements Serializable {
     public Card() {
     }
 
-    public Card(BigDecimal cardId) {
+    public Card(Long cardId) {
         this.cardId = cardId;
     }
 
-    public Card(BigDecimal cardId, String cardIndex, short cardFaceUp, String cardSuit, BigInteger cardValue) {
+    public Card(Long cardId, String cardIndex, short cardFaceUp, String cardSuit, Integer cardValue) {
         this.cardId = cardId;
         this.cardIndex = cardIndex;
         this.cardFaceUp = cardFaceUp;
@@ -76,11 +76,11 @@ public class Card implements Serializable {
         this.cardValue = cardValue;
     }
 
-    public BigDecimal getCardId() {
+    public Long getCardId() {
         return cardId;
     }
 
-    public void setCardId(BigDecimal cardId) {
+    public void setCardId(Long cardId) {
         this.cardId = cardId;
     }
 
@@ -108,11 +108,11 @@ public class Card implements Serializable {
         this.cardSuit = cardSuit;
     }
 
-    public BigInteger getCardValue() {
+    public Integer getCardValue() {
         return cardValue;
     }
 
-    public void setCardValue(BigInteger cardValue) {
+    public void setCardValue(Integer cardValue) {
         this.cardValue = cardValue;
     }
 
