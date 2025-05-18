@@ -8,6 +8,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+import cr.ac.una.muffetsolitario.util.FlowController;
+
 /**
  * JavaFX App
  */
@@ -17,18 +19,9 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("PrimaryView"), 640, 480);
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
-    }
-
-    private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("view/" + fxml + ".fxml"));
-        return fxmlLoader.load();
+        FlowController.getInstance().InitializeFlow(stage, null);
+        FlowController.getInstance().goMain();
+        FlowController.getInstance().goView("LogInView");
     }
 
     public static void main(String[] args) {

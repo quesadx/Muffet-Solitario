@@ -20,6 +20,11 @@
             <artifactId>javafx-fxml</artifactId>
             <version>23.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.palexdev</groupId>
+            <artifactId>materialfx</artifactId>
+            <version>11.16.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -29,6 +34,10 @@
                 <version>3.8.0</version>
                 <configuration>
                     <release>11</release>
+                    <compilerArgs>
+                        <arg>--add-reads</arg>
+                        <arg>cr.ac.una.muffetsolitario=ALL-UNNAMED</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -37,6 +46,11 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>cr.ac.una.muffetsolitario.App</mainClass>
+                    <jvmArgs>
+                        <jvmArg>--add-reads</jvmArg>
+                        <jvmArg>cr.ac.una.muffetsolitario=ALL-UNNAMED</jvmArg>
+                        <jvmArg>cr.ac.una.muffetsolitario.controller=ALL-UNNAMED</jvmArg>
+                    </jvmArgs>
                 </configuration>
                 <executions>
                     <execution>
