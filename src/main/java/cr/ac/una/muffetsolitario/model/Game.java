@@ -11,14 +11,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,10 +31,15 @@ import java.util.List;
 @NamedQueries({
     @NamedQuery(name = "Game.findAll", query = "SELECT g FROM Game g"),
     @NamedQuery(name = "Game.findByGameId", query = "SELECT g FROM Game g WHERE g.gameId = :gameId"),
+    @NamedQuery(name = "Game.findByGameCompletedSecuences", query = "SELECT g FROM Game g WHERE g.gameCompletedSecuences = :gameCompletedSecuences"),
+    @NamedQuery(name = "Game.findByGameDealsRemaining", query = "SELECT g FROM Game g WHERE g.gameDealsRemaining = :gameDealsRemaining"),
     @NamedQuery(name = "Game.findByGameMoveCount", query = "SELECT g FROM Game g WHERE g.gameMoveCount = :gameMoveCount"),
     @NamedQuery(name = "Game.findByGameDifficulty", query = "SELECT g FROM Game g WHERE g.gameDifficulty = :gameDifficulty"),
     @NamedQuery(name = "Game.findByGameDurationSeconds", query = "SELECT g FROM Game g WHERE g.gameDurationSeconds = :gameDurationSeconds"),
-    @NamedQuery(name = "Game.findByGameTotalPoints", query = "SELECT g FROM Game g WHERE g.gameTotalPoints = :gameTotalPoints")})
+    @NamedQuery(name = "Game.findByGameTotalPoints", query = "SELECT g FROM Game g WHERE g.gameTotalPoints = :gameTotalPoints"),
+    @NamedQuery(name = "Game.findByGameStatus", query = "SELECT g FROM Game g WHERE g.gameStatus = :gameStatus"),
+    @NamedQuery(name = "Game.findByGameCreatedDate", query = "SELECT g FROM Game g WHERE g.gameCreatedDate = :gameCreatedDate"),
+    @NamedQuery(name = "Game.findByGameLastPlayed", query = "SELECT g FROM Game g WHERE g.gameLastPlayed = :gameLastPlayed")})
 public class Game implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -42,6 +48,10 @@ public class Game implements Serializable {
     @Basic(optional = false)
     @Column(name = "GAME_ID")
     private Long gameId;
+    @Column(name = "GAME_COMPLETED_SECUENCES")
+    private Integer gameCompletedSecuences;
+    @Column(name = "GAME_DEALS_REMAINING")
+    private Integer gameDealsRemaining;
     @Basic(optional = false)
     @Column(name = "GAME_MOVE_COUNT")
     private Integer gameMoveCount;
@@ -54,11 +64,20 @@ public class Game implements Serializable {
     @Basic(optional = false)
     @Column(name = "GAME_TOTAL_POINTS")
     private Integer gameTotalPoints;
+    @Basic(optional = false)
+    @Column(name = "GAME_STATUS")
+    private String gameStatus;
+    @Column(name = "GAME_CREATED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date gameCreatedDate;
+    @Column(name = "GAME_LAST_PLAYED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date gameLastPlayed;
     @JoinColumn(name = "GAME_USER_FK", referencedColumnName = "USER_ID")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
     private UserAccount gameUserFk;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "deckGameFk", fetch = FetchType.LAZY)
-    private List<Deck> deckList;
+    @OneToOne(mappedBy = "deckGameId", fetch = FetchType.LAZY)
+    private Deck deck;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cseqGameFk", fetch = FetchType.LAZY)
     private List<CompletedSequence> completedSequenceList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "bcolmnGameFk", fetch = FetchType.LAZY)
@@ -71,12 +90,13 @@ public class Game implements Serializable {
         this.gameId = gameId;
     }
 
-    public Game(Long gameId, Integer gameMoveCount, String gameDifficulty, Integer gameDurationSeconds, Integer gameTotalPoints) {
+    public Game(Long gameId, Integer gameMoveCount, String gameDifficulty, Integer gameDurationSeconds, Integer gameTotalPoints, String gameStatus) {
         this.gameId = gameId;
         this.gameMoveCount = gameMoveCount;
         this.gameDifficulty = gameDifficulty;
         this.gameDurationSeconds = gameDurationSeconds;
         this.gameTotalPoints = gameTotalPoints;
+        this.gameStatus = gameStatus;
     }
 
     public Long getGameId() {
@@ -85,6 +105,22 @@ public class Game implements Serializable {
 
     public void setGameId(Long gameId) {
         this.gameId = gameId;
+    }
+
+    public Integer getGameCompletedSecuences() {
+        return gameCompletedSecuences;
+    }
+
+    public void setGameCompletedSecuences(Integer gameCompletedSecuences) {
+        this.gameCompletedSecuences = gameCompletedSecuences;
+    }
+
+    public Integer getGameDealsRemaining() {
+        return gameDealsRemaining;
+    }
+
+    public void setGameDealsRemaining(Integer gameDealsRemaining) {
+        this.gameDealsRemaining = gameDealsRemaining;
     }
 
     public Integer getGameMoveCount() {
@@ -119,6 +155,30 @@ public class Game implements Serializable {
         this.gameTotalPoints = gameTotalPoints;
     }
 
+    public String getGameStatus() {
+        return gameStatus;
+    }
+
+    public void setGameStatus(String gameStatus) {
+        this.gameStatus = gameStatus;
+    }
+
+    public Date getGameCreatedDate() {
+        return gameCreatedDate;
+    }
+
+    public void setGameCreatedDate(Date gameCreatedDate) {
+        this.gameCreatedDate = gameCreatedDate;
+    }
+
+    public Date getGameLastPlayed() {
+        return gameLastPlayed;
+    }
+
+    public void setGameLastPlayed(Date gameLastPlayed) {
+        this.gameLastPlayed = gameLastPlayed;
+    }
+
     public UserAccount getGameUserFk() {
         return gameUserFk;
     }
@@ -127,12 +187,12 @@ public class Game implements Serializable {
         this.gameUserFk = gameUserFk;
     }
 
-    public List<Deck> getDeckList() {
-        return deckList;
+    public Deck getDeckList() {
+        return deck;
     }
 
-    public void setDeckList(List<Deck> deckList) {
-        this.deckList = deckList;
+    public void setDeckList(Deck deck) {
+        this.deck = deck;
     }
 
     public List<CompletedSequence> getCompletedSequenceList() {

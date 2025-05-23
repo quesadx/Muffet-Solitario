@@ -16,8 +16,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -44,7 +42,7 @@ public class BoardColumn implements Serializable {
     @JoinColumn(name = "BCOLMN_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game bcolmnGameFk;
-    @OneToMany(mappedBy = "cardBcolmnFk", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cardBcolmnId", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public BoardColumn() {

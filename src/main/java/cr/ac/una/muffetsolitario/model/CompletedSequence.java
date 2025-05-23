@@ -16,7 +16,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -27,7 +26,8 @@ import java.util.List;
 @Table(name = "COMPLETED_SEQUENCE")
 @NamedQueries({
     @NamedQuery(name = "CompletedSequence.findAll", query = "SELECT c FROM CompletedSequence c"),
-    @NamedQuery(name = "CompletedSequence.findByCseqId", query = "SELECT c FROM CompletedSequence c WHERE c.cseqId = :cseqId")})
+    @NamedQuery(name = "CompletedSequence.findByCseqId", query = "SELECT c FROM CompletedSequence c WHERE c.cseqId = :cseqId"),
+    @NamedQuery(name = "CompletedSequence.findByCseqOrder", query = "SELECT c FROM CompletedSequence c WHERE c.cseqOrder = :cseqOrder")})
 public class CompletedSequence implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -36,10 +36,12 @@ public class CompletedSequence implements Serializable {
     @Basic(optional = false)
     @Column(name = "CSEQ_ID")
     private Long cseqId;
+    @Column(name = "CSEQ_ORDER")
+    private Integer cseqOrder;
     @JoinColumn(name = "CSEQ_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game cseqGameFk;
-    @OneToMany(mappedBy = "cardCseqFk", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cardCseqId", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public CompletedSequence() {
@@ -55,6 +57,14 @@ public class CompletedSequence implements Serializable {
 
     public void setCseqId(Long cseqId) {
         this.cseqId = cseqId;
+    }
+
+    public Integer getCseqOrder() {
+        return cseqOrder;
+    }
+
+    public void setCseqOrder(Integer cseqOrder) {
+        this.cseqOrder = cseqOrder;
     }
 
     public Game getCseqGameFk() {

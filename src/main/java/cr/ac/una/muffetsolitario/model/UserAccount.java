@@ -5,19 +5,17 @@
 package cr.ac.una.muffetsolitario.model;
 
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -30,7 +28,12 @@ import java.util.List;
     @NamedQuery(name = "UserAccount.findAll", query = "SELECT u FROM UserAccount u"),
     @NamedQuery(name = "UserAccount.findByUserId", query = "SELECT u FROM UserAccount u WHERE u.userId = :userId"),
     @NamedQuery(name = "UserAccount.findByUserNickname", query = "SELECT u FROM UserAccount u WHERE u.userNickname = :userNickname"),
-    @NamedQuery(name = "UserAccount.findByUserPassword", query = "SELECT u FROM UserAccount u WHERE u.userPassword = :userPassword")})
+    @NamedQuery(name = "UserAccount.findByUserPassword", query = "SELECT u FROM UserAccount u WHERE u.userPassword = :userPassword"),
+    @NamedQuery(name = "UserAccount.findByUserCardDesign", query = "SELECT u FROM UserAccount u WHERE u.userCardDesign = :userCardDesign"),
+    @NamedQuery(name = "UserAccount.findByUserTotalGames", query = "SELECT u FROM UserAccount u WHERE u.userTotalGames = :userTotalGames"),
+    @NamedQuery(name = "UserAccount.findByUserWonGames", query = "SELECT u FROM UserAccount u WHERE u.userWonGames = :userWonGames"),
+    @NamedQuery(name = "UserAccount.findByUserTotalScore", query = "SELECT u FROM UserAccount u WHERE u.userTotalScore = :userTotalScore"),
+    @NamedQuery(name = "UserAccount.findByUserBestScore", query = "SELECT u FROM UserAccount u WHERE u.userBestScore = :userBestScore")})
 public class UserAccount implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -48,8 +51,19 @@ public class UserAccount implements Serializable {
     @Lob
     @Column(name = "USER_CARD_IMAGE")
     private Serializable userCardImage;
-    @OneToMany(mappedBy = "gameUserFk", fetch = FetchType.LAZY)
-    private List<Game> gameList;
+    @Basic(optional = false)
+    @Column(name = "USER_CARD_DESIGN")
+    private Integer userCardDesign;
+    @Column(name = "USER_TOTAL_GAMES")
+    private Integer userTotalGames;
+    @Column(name = "USER_WON_GAMES")
+    private Integer userWonGames;
+    @Column(name = "USER_TOTAL_SCORE")
+    private Integer userTotalScore;
+    @Column(name = "USER_BEST_SCORE")
+    private Integer userBestScore;
+    @OneToOne(mappedBy = "gameUserFk", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Game game;
 
     public UserAccount() {
     }
@@ -58,10 +72,11 @@ public class UserAccount implements Serializable {
         this.userId = userId;
     }
 
-    public UserAccount(Long userId, String userNickname, String userPassword) {
+    public UserAccount(Long userId, String userNickname, String userPassword, Integer userCardDesign) {
         this.userId = userId;
         this.userNickname = userNickname;
         this.userPassword = userPassword;
+        this.userCardDesign = userCardDesign;
     }
 
     public Long getUserId() {
@@ -96,12 +111,52 @@ public class UserAccount implements Serializable {
         this.userCardImage = userCardImage;
     }
 
-    public List<Game> getGameList() {
-        return gameList;
+    public Integer getUserCardDesign() {
+        return userCardDesign;
     }
 
-    public void setGameList(List<Game> gameList) {
-        this.gameList = gameList;
+    public void setUserCardDesign(Integer userCardDesign) {
+        this.userCardDesign = userCardDesign;
+    }
+
+    public Integer getUserTotalGames() {
+        return userTotalGames;
+    }
+
+    public void setUserTotalGames(Integer userTotalGames) {
+        this.userTotalGames = userTotalGames;
+    }
+
+    public Integer getUserWonGames() {
+        return userWonGames;
+    }
+
+    public void setUserWonGames(Integer userWonGames) {
+        this.userWonGames = userWonGames;
+    }
+
+    public Integer getUserTotalScore() {
+        return userTotalScore;
+    }
+
+    public void setUserTotalScore(Integer userTotalScore) {
+        this.userTotalScore = userTotalScore;
+    }
+
+    public Integer getUserBestScore() {
+        return userBestScore;
+    }
+
+    public void setUserBestScore(Integer userBestScore) {
+        this.userBestScore = userBestScore;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     @Override

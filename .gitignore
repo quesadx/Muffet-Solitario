@@ -19,3 +19,8 @@ buildNumber.properties
 .vscode/settings.json
 /.vscode
 .vscode/settings.json
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/vcs.xml

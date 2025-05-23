@@ -10,13 +10,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -36,10 +35,11 @@ public class Deck implements Serializable {
     @Basic(optional = false)
     @Column(name = "DECK_ID")
     private Long deckId;
-    @JoinColumn(name = "DECK_GAME_FK", referencedColumnName = "GAME_ID")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Game deckGameFk;
-    @OneToMany(mappedBy = "cardDeckFk", fetch = FetchType.LAZY)
+    @JoinColumn(name = "DECK_GAME_ID", referencedColumnName = "GAME_ID", unique = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    private Game deckGameId;
+
+    @OneToMany(mappedBy = "cardDeckId", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public Deck() {
@@ -57,12 +57,12 @@ public class Deck implements Serializable {
         this.deckId = deckId;
     }
 
-    public Game getDeckGameFk() {
-        return deckGameFk;
+    public Game getDeckGameId() {
+        return deckGameId;
     }
 
-    public void setDeckGameFk(Game deckGameFk) {
-        this.deckGameFk = deckGameFk;
+    public void setDeckGameId(Game deckGameId) {
+        this.deckGameId = deckGameId;
     }
 
     public List<Card> getCardList() {
