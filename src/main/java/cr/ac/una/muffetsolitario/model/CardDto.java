@@ -32,7 +32,7 @@ public class CardDto {
     public CardDto(Card card) {
        this();
        setCardId(card.getCardId());
-       //setCardFaceUp(card.isCardFaceUp());
+       setCardFaceUp(card.isCardFaceUp());
        setCardSuit(card.getCardSuit());
        setCardValue(card.getCardValue());
        setCardPositionInContainer(card.getCardPositionInContainer());

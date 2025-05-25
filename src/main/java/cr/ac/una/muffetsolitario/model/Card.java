@@ -39,7 +39,7 @@ public class Card implements Serializable {
     private Long cardId;
     @Basic(optional = false)
     @Column(name = "CARD_FACE_UP")
-    private short cardFaceUp;
+    private boolean cardFaceUp;
     @Basic(optional = false)
     @Column(name = "CARD_SUIT")
     private String cardSuit;
@@ -66,7 +66,7 @@ public class Card implements Serializable {
         this.cardId = cardId;
     }
 
-    public Card(Long cardId, short cardFaceUp, String cardSuit, Integer cardValue, Integer cardPositionInContainer) {
+    public Card(Long cardId, boolean cardFaceUp, String cardSuit, Integer cardValue, Integer cardPositionInContainer) {
         this.cardId = cardId;
         this.cardFaceUp = cardFaceUp;
         this.cardSuit = cardSuit;
@@ -82,11 +82,11 @@ public class Card implements Serializable {
         this.cardId = cardId;
     }
 
-    public short isCardFaceUp() {
+    public boolean isCardFaceUp() {
         return cardFaceUp;
     }
 
-    public void setCardFaceUp(short cardFaceUp) {
+    public void setCardFaceUp(boolean cardFaceUp) {
         this.cardFaceUp = cardFaceUp;
     }
 
@@ -160,7 +160,7 @@ public class Card implements Serializable {
 
     @Override
     public String toString() {
-        return "cr.ac.una.muffetsolitario.model.Card[ cardId=" + cardId + " ]";
+        return "cr.ac.una.muffetsolitario.model.Card[ cardId=" + cardId + "cardFaceUp=" + cardFaceUp + " ]";
     }
     
 }
