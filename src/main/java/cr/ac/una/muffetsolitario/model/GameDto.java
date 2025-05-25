@@ -176,7 +176,7 @@ public class GameDto {
         this.deckDto = deckDto;
     }
     
-    public ObservableList<BoardColumnDto> getBoardColumnList(ObservableList<BoardColumnDto> boardColumnList){
+    public ObservableList<BoardColumnDto> getBoardColumnList(){
         return boardColumnList;
     }
     

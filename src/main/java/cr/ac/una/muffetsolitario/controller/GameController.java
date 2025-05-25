@@ -83,9 +83,9 @@ public class GameController extends Controller implements Initializable {
             List<Card> cards = boardColumn.getCardList();
             for (int j = 0; j < cards.size(); j++) {
                 Card card = cards.get(j);
-                CardContainer cardView = createCardImageView(card);
-                cardView.setLayoutY(j * cardOffset); // Escalonar verticalmente
-                pane.getChildren().add(cardView);
+               // CardContainer cardView = createCardImageView(card);
+                //cardView.setLayoutY(j * cardOffset); // Escalonar verticalmente
+                //pane.getChildren().add(cardView);
             }
         }
     }
@@ -96,8 +96,8 @@ public class GameController extends Controller implements Initializable {
      private Image getCardFrontImage(Card card) {
         return new Image("DIRECCION AQUI" + card.getCardSuit() + "_" + card.getCardValue() + ".png");
     }
-    public void handlerMoveCards(int fromCol, int toCol, Card card) {
+    /*public void handlerMoveCards(int fromCol, int toCol, Card card) {
         gameLogic.moveCardsBetweenColumns(fromCol, toCol, card);
         updateBoard();
-    }
+    }*/
 }

@@ -14,12 +14,14 @@ import javafx.scene.image.ImageView;
  */
 public class CardContainer extends ImageView {
     private CardDto cardDto;
+    private String imagePath;
 
-    public CardContainer(){}
+    public CardContainer() {}
 
-    public CardContainer(Card card, Image image) {
+    public CardContainer(CardDto cardDto, Image image, String imagePath) {
         super(image);
-        this.cardDto = new CardDto(card);
+        this.cardDto = cardDto;
+        this.imagePath = imagePath;
         setFitWidth(80); // Tamaño estándar, ajusta según tu diseño
         setFitHeight(120);
         setPreserveRatio(true);
@@ -31,6 +33,14 @@ public class CardContainer extends ImageView {
 
     public void setCardDto(CardDto cardDto) {
         this.cardDto = cardDto;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public void updateImage(Image image) {
