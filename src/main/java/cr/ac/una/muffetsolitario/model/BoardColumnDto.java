@@ -14,8 +14,6 @@ public class BoardColumnDto {
     private IntegerProperty bcolmnIndex; 
     private Long bcolmnGameFk;
     private ObservableList<CardContainer> cardList;
-    //the type could change to CardContainer instead of CardDto -> @Kendall!!
-    //Or just added next to it as cardViews
     
     public BoardColumnDto() {
         this.bcolmnId = new SimpleLongProperty();
@@ -28,6 +26,25 @@ public class BoardColumnDto {
         setBcolmnId(bcolmnId);
         setBcolmnIndex(bcolmnIndex);
     }
+    
+    public BoardColumnDto(BoardColumn boardColumn) {
+        this();
+        if (boardColumn != null) {
+            setBcolmnId(boardColumn.getBcolmnId());
+            setBcolmnIndex(boardColumn.getBcolmnIndex());
+            this.bcolmnGameFk = boardColumn.getBcolmnGameFk().getGameId();
+
+            if (boardColumn.getCardList() != null) {
+                for(Card card: boardColumn.getCardList()){
+                    CardDto cardDto = new CardDto(card);
+                    CardContainer container = new CardContainer();
+                    container.setCardDto(cardDto);
+                    this.cardList.add(container);
+                }
+            }
+        }
+    }
+
     
     // Getters y Setters para Properties
     public LongProperty bcolmnIdProperty() {

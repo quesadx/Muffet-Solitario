@@ -13,7 +13,7 @@ public class DeckDto {
     private LongProperty deckId;
     private Long deckGameId;
     private ObservableList<CardContainer> cardList;
-    //Also could change to type CardContainer instead of CardDto
+    
     
     public DeckDto() {
         this.deckId = new SimpleLongProperty();
@@ -30,6 +30,24 @@ public class DeckDto {
         setDeckId(deckId);
         setDeckGameId(deckGameId);
     }
+    
+    public DeckDto(Deck deck) {
+        this();
+        if (deck != null) {
+            setDeckId(deck.getDeckId());
+            setDeckGameId(deck.getDeckGameId().getGameId());
+
+            if (deck.getCardList() != null) {
+                for (Card card : deck.getCardList()) {
+                    CardDto cardDto = new CardDto(card);
+                    CardContainer container = new CardContainer();
+                    container.setCardDto(cardDto);
+                    this.cardList.add(container);
+                }
+            }
+        }
+    }
+
     
     public LongProperty deckIdProperty() {
         return deckId;
