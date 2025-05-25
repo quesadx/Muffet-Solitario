@@ -82,7 +82,7 @@ public class Card implements Serializable {
         this.cardId = cardId;
     }
 
-    public short getCardFaceUp() {
+    public short isCardFaceUp() {
         return cardFaceUp;
     }
 

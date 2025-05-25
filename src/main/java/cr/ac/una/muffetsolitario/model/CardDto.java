@@ -29,15 +29,15 @@ public class CardDto {
         this.highlighted = new SimpleBooleanProperty(false);
     }
     
-    public CardDto(Long cardId, boolean cardFaceUp, String cardSuit, Integer cardValue, Integer cardPositionInContainer) {
-        this();
-        setCardId(cardId);
-        setCardFaceUp(cardFaceUp);
-        setCardSuit(cardSuit);
-        setCardValue(cardValue);
-        setCardPositionInContainer(cardPositionInContainer);
+    public CardDto(Card card) {
+       this();
+       setCardId(card.getCardId());
+       //setCardFaceUp(card.isCardFaceUp());
+       setCardSuit(card.getCardSuit());
+       setCardValue(card.getCardValue());
+       setCardPositionInContainer(card.getCardPositionInContainer());
     }
-    
+
     public LongProperty cardIdProperty() {
         return cardId;
     }

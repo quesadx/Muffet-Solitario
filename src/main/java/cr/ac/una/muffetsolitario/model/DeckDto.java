@@ -12,7 +12,7 @@ public class DeckDto {
     
     private LongProperty deckId;
     private Long deckGameId;
-    private ObservableList<CardDto> cardList;
+    private ObservableList<CardContainer> cardList;
     //Also could change to type CardContainer instead of CardDto
     
     public DeckDto() {
@@ -51,23 +51,23 @@ public class DeckDto {
         this.deckGameId = deckGameId;
     }
     
-    public ObservableList<CardDto> getCardList() {
+    public ObservableList<CardContainer> getCardList() {
         return cardList;
     }
     
-    public void setCardList(ObservableList<CardDto> cardList) {
+    public void setCardList(ObservableList<CardContainer> cardList) {
         this.cardList = cardList;
     }
     
     // Utility methods for card management
-    public void addCard(CardDto card) {
+    public void addCard(CardContainer card) {
         if (card != null) {
-            card.setCardDeckId(this.getDeckId());
+            card.getCardDto().setCardDeckId(this.getDeckId());
             this.cardList.add(card);
         }
     }
     
-    public void removeCard(CardDto card) {
+    public void removeCard(CardContainer card) {
         this.cardList.remove(card);
     }
     
