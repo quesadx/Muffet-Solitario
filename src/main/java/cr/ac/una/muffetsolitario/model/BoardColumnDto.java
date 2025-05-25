@@ -13,7 +13,7 @@ public class BoardColumnDto {
     private LongProperty bcolmnId;
     private IntegerProperty bcolmnIndex; 
     private Long bcolmnGameFk;
-    private ObservableList<CardDto> cardList;
+    private ObservableList<CardContainer> cardList;
     //the type could change to CardContainer instead of CardDto -> @Kendall!!
     //Or just added next to it as cardViews
     
@@ -64,11 +64,11 @@ public class BoardColumnDto {
     }
     
     // Getter y Setter para lista observable de cartas
-    public ObservableList<CardDto> getCardList() {
+    public ObservableList<CardContainer> getCardList() {
         return cardList;
     }
     
-    public void setCardList(ObservableList<CardDto> cardList) {
+    public void setCardList(ObservableList<CardContainer> cardList) {
         this.cardList = cardList;
     }
     
@@ -81,27 +81,27 @@ public class BoardColumnDto {
         return cardList != null ? cardList.size() : 0;
     }
     
-    public CardDto getTopCard() {
+    public CardContainer getTopCard() {
         if (isEmpty()) {
             return null;
         }
         return cardList.get(cardList.size() - 1);
     }
     
-    public CardDto getBottomCard() {
+    public CardContainer getBottomCard() {
         if (isEmpty()) {
             return null;
         }
         return cardList.get(0);
     }
     
-    public void addCard(CardDto card) {
+    public void addCard(CardContainer card) {
         if (cardList != null && card != null) {
             cardList.add(card);
         }
     }
     
-    public CardDto removeTopCard() {
+    public CardContainer removeTopCard() {
         if (isEmpty()) {
             return null;
         }
