@@ -9,16 +9,16 @@ import cr.ac.una.muffetsolitario.model.Deck;
 
 public class GameLogic {
     private List<BoardColumn> columns;
-    private List<Card> deck;
+    private Deck deck;
+    private List<Card> deckCardList = deck.getCardList();
 
     public GameLogic() {
     }
 
-    public GameLogic(Deck deckInstance) {
-        this.deck = deckInstance.getCardList();
-        this.columns = new ArrayList<>();
-        initColumns();
-        loadCardsToColumn();
+    public GameLogic(Deck deck, List<BoardColumn> columns) {
+        this.deck = deck;
+        this.columns = columns;
+        this.deckCardList = deck.getCardList();
     }
 
     public void initColumns() {
@@ -33,54 +33,16 @@ public class GameLogic {
             BoardColumn boardColumn = columns.get(i);
             int cardsToDeal = (i < 4) ? 5 : 6;
             for (int j = 0; j < cardsToDeal; j++) {
-                Card card = deck.get(deskIndex);
+                Card card = deckCardList.get(deskIndex);
                 deskIndex++;
                 if (j == cardsToDeal - 1) {
                     card.setCardFaceUp((short) 1);
-                }
-                card.setCardBcolmnFk(boardColumn);
+                }   
+                //TODO: FIX THIS
+               // card.setCardBcolmnFk(boardColumn);
             }
         }
     }
-    // TODO:THIS METHOD WORK TO ONE CARD BUT PROBABLY IT'S BETTER USE OTHER METHOD
-    // (SEQUENCE)
-
-    /*public void moveCardBetweenColumns(int fromColumnIndex, int toColumnIndex,
-            Card cardToMove) {
-        if (fromColumnIndex < 0 || fromColumnIndex >= columns.size()) {
-            throw new IllegalArgumentException("Índice de columna origen inválido.");
-            // TODO:Create message here with class mensaje
-        }
-        if (toColumnIndex < 0 || toColumnIndex >= columns.size()) {
-            throw new IllegalArgumentException("Índice de columna destino inválido.");
-            // // TODO:Create message here with class mensaje
-        }
-        if (cardToMove == null) {
-            throw new IllegalArgumentException("La carta a mover no puede ser nula.");
-            // // TODO:Create message here with class mensaje
-        }
-
-        BoardColumn fromColumn = columns.get(fromColumnIndex);
-        BoardColumn toColumn = columns.get(toColumnIndex);
-
-        List<Card> fromCards = fromColumn.getCardList();
-        List<Card> toCards = toColumn.getCardList();
-
-        if (!isValidMove(cardToMove, toColumn)) {
-            throw new IllegalArgumentException("El movimiento es invalido.");
-        }
-        if (!fromCards.contains(cardToMove)) {
-            throw new IllegalArgumentException("La carta no se encuentra en la columna origen.");
-        }
-
-        fromCards.remove(cardToMove);
-        toCards.add(cardToMove);
-        cardToMove.setCardBcolmnFk(toColumn);
-        if (!fromCards.isEmpty()) {
-            Card newTop = fromCards.get(fromCards.size() - 1);
-            newTop.setCardFaceUp((short) 1);
-        }
-    } */
 
     private boolean isValidMove(Card cardToMove, BoardColumn toColumn) {
         List<Card> toCards = toColumn.getCardList();
@@ -89,30 +51,38 @@ public class GameLogic {
             return cardToMove.getCardValue() == 13; // 13 = king
         } else {
             Card topCard = toCards.get(toCards.size() - 1);
-            // Ejemplo: valor descendente y color opuesto
+            //TODO: Maybe I need change this and use method "isValidSequence"
             return (cardToMove.getCardValue() == topCard.getCardValue() - 1) &&
                     (!cardToMove.getCardSuit().equals(topCard.getCardSuit()));
         }
     }
 
-    public void moveCardsBetweenColumns(int fromColumnIndex, int toColumnIndex, Card fistCardOfSequence) {
+    public void moveCardsBetweenColumns(int fromColumnIndex, int toColumnIndex, Card firstCardOfSequence) {
         BoardColumn fromColumn = columns.get(fromColumnIndex);
         BoardColumn toColumn = columns.get(toColumnIndex);
 
         List<Card> fromCards = fromColumn.getCardList();
         List<Card> toCards = toColumn.getCardList();
 
-        int startIndex = fromCards.indexOf(fistCardOfSequence);
+        int startIndex = fromCards.indexOf(firstCardOfSequence);
 
-        List<Card> sequence = new ArrayList<>(fromCards.subList(startIndex, fromCards.size()));
+        if (startIndex == -1) {
+            throw new IllegalArgumentException("La carta no se encuentra en la columna origen.");
+        }
 
-        if (!isValidMove(fistCardOfSequence, toColumn)) {
-            // TODO:Create message here with class mensaje
+        List<Card> sequence = new java.util.ArrayList<>(fromCards.subList(startIndex, fromCards.size()));
+
+        // Validar que la secuencia sea descendente y del mismo palo
+        if (!isValidSequence(sequence)) {
+            throw new IllegalArgumentException("La secuencia a mover no es válida (debe ser descendente y del mismo palo).");
+        }
+
+        if (!isValidMove(firstCardOfSequence, toColumn)) {
             throw new IllegalArgumentException("Movimiento no permitido según las reglas del juego.");
         }
         toCards.addAll(sequence);
         for (Card card : sequence) {
-            card.setCardBcolmnFk(toColumn);
+            card.setCardBcolmnId(toColumn);
         }
         fromCards.subList(startIndex, fromCards.size()).clear();
         if (!fromCards.isEmpty()) {
@@ -120,5 +90,37 @@ public class GameLogic {
             newTop.setCardFaceUp((short) 1);
         }
     }
-    //TODO: CREATE METHOD TO SHUFFLE CARDS
+
+    private boolean isValidSequence(List<Card> sequence) {
+        if (sequence.isEmpty())
+            return false;
+        String suit = sequence.get(0).getCardSuit();
+        int value = sequence.get(0).getCardValue();
+        for (int i = 1; i < sequence.size(); i++) {
+            Card card = sequence.get(i);
+            if (!card.getCardSuit().equals(suit))
+                return false;
+            if (card.getCardValue() != value - 1)
+                return false;
+            value = card.getCardValue();
+        }
+        return true;
+    }
+    // TODO: CREATE METHOD TO SHUFFLE CARDS
+
+    public void dealFromDeck() {
+        for (BoardColumn column : columns) {
+            if (column.getCardList().isEmpty()) {
+                // TODO: CREATE MESSAGE HERE TO SAID "ALL COLUMNS NEED CARDS TO DO THIS"
+            }
+        }
+        for (int i = 0; i < columns.size(); i++) {
+            if (!deckCardList.isEmpty()) {
+                Card card = deckCardList.remove(0);
+                card.setCardFaceUp((short) 1);
+                //fix this line
+                card.setCardBcolmnFk(columns.get(i));
+            }
+        }
+    }
 }
