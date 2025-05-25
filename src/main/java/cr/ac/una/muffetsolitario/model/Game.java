@@ -187,11 +187,11 @@ public class Game implements Serializable {
         this.gameUserFk = gameUserFk;
     }
 
-    public Deck getDeckList() {
+    public Deck getDeck() {
         return deck;
     }
 
-    public void setDeckList(Deck deck) {
+    public void setDeck(Deck deck) {
         this.deck = deck;
     }
 

@@ -2,6 +2,8 @@ package cr.ac.una.muffetsolitario.model;
 
 import javafx.beans.property.*;
 import java.time.LocalDate;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class GameDto {
     
@@ -15,6 +17,8 @@ public class GameDto {
     private StringProperty gameStatus;
     private ObjectProperty<LocalDate> gameCreatedDate;
     private ObjectProperty<LocalDate> gameLastPlayed;
+    private DeckDto deckDto;
+    private ObservableList<BoardColumnDto> boardColumnList;
     private Long gameUserFk;
     
     public GameDto() {
@@ -28,6 +32,8 @@ public class GameDto {
         this.gameStatus = new SimpleStringProperty();
         this.gameCreatedDate = new SimpleObjectProperty<>();
         this.gameLastPlayed = new SimpleObjectProperty<>();
+        this.deckDto = new DeckDto();
+        this.boardColumnList = FXCollections.observableArrayList();
     }
     
     public GameDto(Long gameId, Integer gameMoveCount, String gameDifficulty, 
@@ -39,6 +45,7 @@ public class GameDto {
         setGameDurationSeconds(gameDurationSeconds);
         setGameTotalPoints(gameTotalPoints);
         setGameStatus(gameStatus);
+        
     }
     
     public LongProperty gameIdProperty() {
@@ -159,6 +166,22 @@ public class GameDto {
     
     public void setGameLastPlayed(LocalDate gameLastPlayed) {
         this.gameLastPlayed.set(gameLastPlayed);
+    }
+    
+    public DeckDto getDeckDto(){
+        return deckDto;
+    }
+    
+    public void setDeckDto(DeckDto deckDto){
+        this.deckDto = deckDto;
+    }
+    
+    public ObservableList<BoardColumnDto> getBoardColumnList(ObservableList<BoardColumnDto> boardColumnList){
+        return boardColumnList;
+    }
+    
+    public void setBoardColumnList(ObservableList<BoardColumnDto> boardColumnList){
+        this.boardColumnList = boardColumnList;
     }
     
     public Long getGameUserFk() {
