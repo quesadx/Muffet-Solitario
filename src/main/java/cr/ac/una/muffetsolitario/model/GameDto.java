@@ -19,6 +19,7 @@ public class GameDto {
     private ObjectProperty<LocalDate> gameLastPlayed;
     private DeckDto deckDto;
     private ObservableList<BoardColumnDto> boardColumnList;
+    private ObservableList<CompletedSequenceDto> completedSequenceList;
     private Long gameUserFk;
     
     public GameDto() {
@@ -34,6 +35,7 @@ public class GameDto {
         this.gameLastPlayed = new SimpleObjectProperty<>();
         this.deckDto = new DeckDto();
         this.boardColumnList = FXCollections.observableArrayList();
+        this.completedSequenceList = FXCollections.observableArrayList();
     }
     
     public GameDto(Long gameId, Integer gameMoveCount, String gameDifficulty, 
@@ -46,6 +48,42 @@ public class GameDto {
         setGameTotalPoints(gameTotalPoints);
         setGameStatus(gameStatus);
         
+    }
+    
+    public GameDto(Game game) {
+        this();
+    
+        if (game != null) {
+            setGameId(game.getGameId());
+            setGameCompletedSequences(game.getGameCompletedSequences());
+            setGameDealsRemaining(game.getGameDealsRemaining());
+            setGameMoveCount(game.getGameMoveCount());
+            setGameDifficulty(game.getGameDifficulty());
+            setGameDurationSeconds(game.getGameDurationSeconds());
+            setGameTotalPoints(game.getGameTotalPoints());
+            setGameStatus(game.getGameStatus());
+            setGameCreatedDate(game.getGameCreatedDate());
+            setGameLastPlayed(game.getGameLastPlayed());
+            setGameUserFk(game.getGameUserFk().getUserId());
+        
+            if (game.getDeck() != null) {
+                this.deckDto = new DeckDto(game.getDeck());
+            }
+        
+            if (game.getBoardColumnList() != null && !game.getBoardColumnList().isEmpty()) {
+                boardColumnList.clear();
+                for (BoardColumn boardColumn : game.getBoardColumnList()) {
+                    boardColumnList.add(new BoardColumnDto(boardColumn));
+                }
+            }
+         
+            if (game.getCompletedSequenceList() != null && !game.getCompletedSequenceList().isEmpty()) {
+                this.completedSequenceList.clear();
+                for (CompletedSequence completedSequence : game.getCompletedSequenceList()) {
+                    this.completedSequenceList.add(new CompletedSequenceDto(completedSequence));
+                }
+            }
+        }
     }
     
     public LongProperty gameIdProperty() {
@@ -184,12 +222,56 @@ public class GameDto {
         this.boardColumnList = boardColumnList;
     }
     
+    public ObservableList<CompletedSequenceDto> getCompletedSequenceList() {
+        return completedSequenceList;
+    }
+    
+    public void setCompletedSequenceList(ObservableList<CompletedSequenceDto> completedSequenceList) {
+        this.completedSequenceList = completedSequenceList;
+    }
+    
     public Long getGameUserFk() {
         return gameUserFk;
     }
     
     public void setGameUserFk(Long gameUserFk) {
         this.gameUserFk = gameUserFk;
+    }
+    
+    public void addCompletedSequence(CompletedSequenceDto completedSequence) {
+        if (completedSequence != null) {
+            completedSequence.setCseqGameFk(this.getGameId());
+            completedSequenceList.add(completedSequence);
+            updateCompletedSequencesCount();
+        }
+    }
+    
+    public void removeCompletedSequence(CompletedSequenceDto completedSequence) {
+        completedSequenceList.remove(completedSequence);
+        updateCompletedSequencesCount();
+    }
+    
+    public void clearCompletedSequences() {
+        completedSequenceList.clear();
+        updateCompletedSequencesCount();
+    }
+    
+    public CompletedSequenceDto getCompletedSequenceByOrder(Integer order) {
+        return completedSequenceList.stream()
+                .filter(seq -> seq.getCseqOrder().equals(order))
+                .findFirst()
+                .orElse(null);
+    }
+    
+    public CompletedSequenceDto getCompletedSequenceById(Long id) {
+        return completedSequenceList.stream()
+                .filter(seq -> seq.getCseqId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+    
+    private void updateCompletedSequencesCount() {
+        setGameCompletedSequences(completedSequenceList.size());
     }
     
     public String getFormattedDuration() {

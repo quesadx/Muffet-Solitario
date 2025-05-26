@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class Game implements Serializable {
     @Column(name = "GAME_ID")
     private Long gameId;
     @Column(name = "GAME_COMPLETED_SECUENCES")
-    private Integer gameCompletedSecuences;
+    private Integer gameCompletedSecuences; //CHANGE LATER IN PL/SQL TABLE, GRAMMAR ERROR -> SEQUENCES*
     @Column(name = "GAME_DEALS_REMAINING")
     private Integer gameDealsRemaining;
     @Basic(optional = false)
@@ -68,11 +69,11 @@ public class Game implements Serializable {
     @Column(name = "GAME_STATUS")
     private String gameStatus;
     @Column(name = "GAME_CREATED_DATE")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date gameCreatedDate;
+    @Temporal(TemporalType.DATE)
+    private LocalDate gameCreatedDate;
     @Column(name = "GAME_LAST_PLAYED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date gameLastPlayed;
+    @Temporal(TemporalType.DATE)
+    private LocalDate gameLastPlayed;
     @JoinColumn(name = "GAME_USER_FK", referencedColumnName = "USER_ID")
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     private UserAccount gameUserFk;
@@ -107,12 +108,12 @@ public class Game implements Serializable {
         this.gameId = gameId;
     }
 
-    public Integer getGameCompletedSecuences() {
+    public Integer getGameCompletedSequences() {
         return gameCompletedSecuences;
     }
 
-    public void setGameCompletedSecuences(Integer gameCompletedSecuences) {
-        this.gameCompletedSecuences = gameCompletedSecuences;
+    public void setGameCompletedSequences(Integer gameCompletedSequences) {
+        this.gameCompletedSecuences = gameCompletedSequences;
     }
 
     public Integer getGameDealsRemaining() {
@@ -163,19 +164,19 @@ public class Game implements Serializable {
         this.gameStatus = gameStatus;
     }
 
-    public Date getGameCreatedDate() {
+    public LocalDate getGameCreatedDate() {
         return gameCreatedDate;
     }
 
-    public void setGameCreatedDate(Date gameCreatedDate) {
+    public void setGameCreatedDate(LocalDate gameCreatedDate) {
         this.gameCreatedDate = gameCreatedDate;
     }
 
-    public Date getGameLastPlayed() {
+    public LocalDate getGameLastPlayed() {
         return gameLastPlayed;
     }
 
-    public void setGameLastPlayed(Date gameLastPlayed) {
+    public void setGameLastPlayed(LocalDate gameLastPlayed) {
         this.gameLastPlayed = gameLastPlayed;
     }
 
