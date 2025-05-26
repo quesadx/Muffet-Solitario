@@ -237,6 +237,50 @@ public class GameDto {
     public void setGameUserFk(Long gameUserFk) {
         this.gameUserFk = gameUserFk;
     }
+
+    public void addBoardColumn(BoardColumnDto boardColumn) {
+        if (boardColumn != null) {
+            boardColumn.setBcolmnGameFk(this.getGameId());
+            boardColumnList.add(boardColumn);
+        }
+    }
+
+    public void removeBoardColumn(BoardColumnDto boardColumn) {
+        boardColumnList.remove(boardColumn);
+    }
+
+    public void clearBoardColumns() {
+        boardColumnList.clear();
+    }
+
+    public BoardColumnDto getBoardColumnByIndex(int index) {
+        if (index >= 0 && index < boardColumnList.size()) {
+            return boardColumnList.get(index);
+        }
+        return null;
+    }
+
+    public int getBoardColumnCount() {
+        return boardColumnList.size();
+    }
+
+    public boolean hasBoardColumns() {
+        return !boardColumnList.isEmpty();
+    }
+
+    public void sortBoardColumnsByIndex() {
+        boardColumnList.sort((col1, col2) -> col1.getBcolmnIndex().compareTo(col2.getBcolmnIndex()));
+    }
+
+    public void initializeBoardColumns(int columnCount) {
+        boardColumnList.clear();
+        for (int i = 0; i < columnCount; i++) {
+            BoardColumnDto column = new BoardColumnDto();
+            column.setBcolmnIndex(i);
+            column.setBcolmnGameFk(this.getGameId());
+            boardColumnList.add(column);
+        }
+    }
     
     public void addCompletedSequence(CompletedSequenceDto completedSequence) {
         if (completedSequence != null) {
