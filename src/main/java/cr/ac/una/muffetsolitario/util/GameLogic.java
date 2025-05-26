@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cr.ac.una.muffetsolitario.model.BoardColumnDto;
+import cr.ac.una.muffetsolitario.model.CompletedSequenceDto;
 import cr.ac.una.muffetsolitario.model.CardContainer;
 import cr.ac.una.muffetsolitario.model.GameDto;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class GameLogic {
-    private GameDto gameDto;
-    private final GameRuleValidator rulesValidator = new GameRuleValidator();
 
+    public GameDto gameDto;
+    private final GameRuleValidator rulesValidator = new GameRuleValidator();
 
     public GameLogic() {
     }
@@ -25,7 +26,6 @@ public class GameLogic {
         if (gameDto == null) {
             throw new IllegalStateException("GameDto no puede ser null");
         }
-
         ObservableList<BoardColumnDto> columns = gameDto.getBoardColumnList();
         if (columns == null) {
             columns = FXCollections.observableArrayList();
@@ -63,9 +63,7 @@ public class GameLogic {
         if (deckIndex > 0) {
             deckCards.subList(0, deckIndex).clear();
         }
-
     }
-
 
     public void moveCardsBetweenColumns(int fromColumnIndex, int toColumnIndex, CardContainer firstCardOfSequence) {
         List<BoardColumnDto> columns = gameDto.getBoardColumnList();
@@ -78,7 +76,12 @@ public class GameLogic {
         int startIndex = fromCards.indexOf(firstCardOfSequence);
 
         List<CardContainer> sequence = new ArrayList<>(fromCards.subList(startIndex, fromCards.size()));
-
+        // validate if all the cards are faceup
+        for (CardContainer card : sequence) {
+            if (!card.getCardDto().isCardFaceUp()) {
+                throw new IllegalArgumentException("No se puede mover una secuencia con cartas boca abajo.");
+            }
+        }
         // Validate that the sequence is descending and of the same suit
         if (!rulesValidator.isValidSequence(sequence)) {
             throw new IllegalArgumentException(
@@ -97,13 +100,18 @@ public class GameLogic {
             CardContainer newTop = fromCards.get(fromCards.size() - 1);
             newTop.getCardDto().setCardFaceUp(true);
         }
+
+        checkAndRemoveCompletedSequence(toColumn);
+        checkGameFinished();
+
     }
-
-    // TODO: CREATE METHOD TO SHUFFLE CARDS
-
     public void dealFromDeck() {
         List<BoardColumnDto> columns = gameDto.getBoardColumnList();
         List<CardContainer> deckCardList = gameDto.getDeckDto().getCardList();
+
+        if (deckCardList == null || deckCardList.isEmpty()) {
+            throw new IllegalStateException("No hay cartas en el mazo para repartir.");
+        }
 
         // Validate that all columns have at least one card
         for (BoardColumnDto column : columns) {
@@ -119,6 +127,65 @@ public class GameLogic {
                 card.getCardDto().setCardBcolmnId(columns.get(i).getBcolmnId());
                 columns.get(i).getCardList().add(card);
             }
+            checkGameFinished();
+        }
+    }
+
+    private void checkAndRemoveCompletedSequence(BoardColumnDto column) {
+        List<CardContainer> cards = column.getCardList();
+        if (cards.size() < 13)
+            return;
+
+        List<CardContainer> last13 = new ArrayList<>(cards.subList(cards.size() - 13, cards.size()));
+
+        if (rulesValidator.isValidSequence(last13) &&
+                last13.get(0).getCardDto().getCardValue() == 13) {
+
+            CompletedSequenceDto completed = new CompletedSequenceDto();
+            completed.setCseqGameFk(gameDto.getGameId());
+            completed.setCseqOrder(
+                    gameDto.getGameCompletedSequences() != null ? gameDto.getGameCompletedSequences() + 1 : 1);
+            for (CardContainer card : last13) {
+                card.getCardDto().setCardCseqId(completed.getCseqId());
+                completed.addCard(card);
+            }
+
+            if (gameDto.getCompletedSequenceList() == null) {
+                gameDto.setCompletedSequenceList((FXCollections.observableArrayList()));
+            }
+            gameDto.getCompletedSequenceList().add(completed);
+
+            cards.removeAll(last13);
+
+            if (!cards.isEmpty()) {
+                CardContainer newTop = cards.get(cards.size() - 1);
+                newTop.getCardDto().setCardFaceUp(true);
+            }
+        }
+    }
+
+    public void checkGameFinished() {
+        // Standard number of completed sequences
+        final int TOTAL_SEQUENCES_TO_COMPLETE = 8;
+
+        // Check if all sequences have been completed
+        int completedSequences = (gameDto.getCompletedSequenceList() != null) ? gameDto.getCompletedSequenceList().size(): 0;
+
+        boolean allSequencesCompleted = completedSequences >= TOTAL_SEQUENCES_TO_COMPLETE;
+
+        // Check if there are no cards left in the deck
+        boolean deckEmpty = gameDto.getDeckDto() == null
+                || gameDto.getDeckDto().getCardList() == null
+                || gameDto.getDeckDto().getCardList().isEmpty();
+
+        if (allSequencesCompleted || (deckEmpty)) {
+            // Update the game status (TODO: Confirm with Alex if "COMPLETED" is correct here)
+            gameDto.setGameStatus("COMPLETED");
+            gameDto.setGameTotalPoints(gameDto.getGameTotalPoints());
+            // Notify the UI or user here (e.g., show victory/defeat dialog)
+            // showGameEndDialog(allSequencesCompleted);
+
+            // (Optional) Save final state, statistics, etc.
         }
     }
 
