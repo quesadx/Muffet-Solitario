@@ -35,6 +35,11 @@
             <artifactId>eclipselink</artifactId>
             <version>4.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>23.0.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
