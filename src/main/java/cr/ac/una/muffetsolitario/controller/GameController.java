@@ -77,13 +77,20 @@ public class GameController extends Controller implements Initializable {
     
     private void loadCardsImages(ObservableList<CardContainer> cardList){
         //method is only a test for EASY MODE, it need to be updated later to receive different suits
+        //this method is to put all card face down
         for(int i = 0; i < 104; i++){
             CardDto cardDto = cardList.get(i).getCardDto();
-            String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/C_" + cardDto.getCardValue() + ".png";
+            String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
             cardList.get(i).setImagePath(getClass().getResource(imagePath).toExternalForm());
         }
     }
-
+    
+    private void updateCardImage(CardContainer card){
+        //this method is to update when a card change to face up
+        String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/C_" + card.getCardDto.getCardValue() + ".png";
+        card.setImagePath(imagePath);
+        
+    }
 
     private void renderBoard() {
         List<BoardColumn> boardColumns = currentGame.getBoardColumnList();
