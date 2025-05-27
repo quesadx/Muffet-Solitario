@@ -13,6 +13,7 @@ import cr.ac.una.muffetsolitario.model.Card;
 import cr.ac.una.muffetsolitario.model.CardContainer;
 import cr.ac.una.muffetsolitario.model.Game;
 import cr.ac.una.muffetsolitario.util.GameLogic;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.image.Image;
@@ -72,6 +73,16 @@ public class GameController extends Controller implements Initializable {
         // GameLogic(currentGame.getDeck(),currentGame.getBoardColumnList());//TODO:
         // Alex need fix logic in "Game" because we need only one deck, not a list
     }
+    
+    private void loadCardsImages(ObservableList<CardContainer> cardList){
+        //method is only a test for EASY MODE, it need to be updated later to receive different suits
+        for(int i = 0; i < 104; i++){
+            int cardNumber = (i % 13) + 1; // 1 a 13 en bucle
+            String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/C_" + cardNumber + ".png";
+            cardList.get(i).setImagePath(getClass().getResource(imagePath).toExternalForm());
+        }
+    }
+
 
     private void renderBoard() {
         List<BoardColumn> boardColumns = currentGame.getBoardColumnList();
