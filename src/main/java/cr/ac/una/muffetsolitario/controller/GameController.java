@@ -87,7 +87,7 @@ public class GameController extends Controller implements Initializable {
     
     private void updateCardImage(CardContainer card){
         //this method is to update when a card change to face up
-        String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/C_" + card.getCardDto.getCardValue() + ".png";
+        String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/C_" + card.getCardDto().getCardValue() + ".png";
         card.setImagePath(imagePath);
         
     }
