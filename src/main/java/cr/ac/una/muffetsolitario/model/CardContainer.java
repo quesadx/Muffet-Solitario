@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 public class CardContainer extends ImageView {
     private CardDto cardDto;
     private String imagePath;
+    private Image cardImage;
 
     public CardContainer() {}
 
@@ -41,9 +42,19 @@ public class CardContainer extends ImageView {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+        updateImage();
     }
 
-    public void updateImage(Image image) {
-        setImage(image);
+    public void updateImage() {
+        cardImage = new Image(imagePath);
     }
+    
+    public Image getCardImage(){
+        return cardImage;
+    }
+    
+    public void setCardImage(Image cardImage){
+        this.cardImage = cardImage;
+    }
+    
 }
