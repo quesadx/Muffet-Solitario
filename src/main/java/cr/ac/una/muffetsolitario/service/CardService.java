@@ -119,7 +119,8 @@ public class CardService {
             return new Respuesta(true, "Cartas de la secuencia completada " + completedSequenceId, cardDtos);
     
         } catch (Exception ex) {
-            Logger.getLogger(CardService.class.getName()).log(Level.SEVERE, "Error obteniendo cartas de la secuencia completada [gameId: " + gameId + ", sequenceId: " + completedSequenceId + "]", ex);
+            Logger.getLogger(CardService.class.getName()).log(Level.SEVERE, "Error obteniendo cartas de la secuencia completada [gameId: "
+                    + gameId + ", sequenceId: " + completedSequenceId + "]", ex);
             return new Respuesta(false, "Error obteniendo cartas de la secuencia completada.", "getCardsByCompletedSequence " + ex.getMessage());
         }
     }
@@ -141,69 +142,70 @@ public class CardService {
         
             String mensaje = "Se eliminaron " + totalDeleted + " cartas de la partida.";
         
-            return new Respuesta(true, mensaje, "eliminarCartasDePartida success");
+            return new Respuesta(true, mensaje, "deleteCardsByGame success");
         
         } catch (Exception ex) {
             if(et != null && et.isActive()) {
                 et.rollback();
             }
             Logger.getLogger(CardService.class.getName()).log(Level.SEVERE, "Error eliminando cartas de la partida [" + gameId + "]", ex);
-            return new Respuesta(false, "Error eliminando las cartas de la partida.", "eliminarCartasDePartida " + ex.getMessage());
+            return new Respuesta(false, "Error eliminando las cartas de la partida.", "deleteCardsByGame" + ex.getMessage());
         }
     }
     
     public Respuesta saveCardsStateByGame(Long gameId, List<CardDto> cardsInDeck,
             List<CardDto> cardsInColumns,
             List<CardDto> cardsCsequences) {
-    try {
-        Game game = em.find(Game.class, gameId);
-        if(game == null) {
-            return new Respuesta(false, "No se encontró la partida especificada.", "saveCardsStateByGame GameNotFound");
-        }
+        try {
+            //entity game must be persisted before this method is called, remember!
+            Game game = em.find(Game.class, gameId);
+            if(game == null) {
+                return new Respuesta(false, "No se encontró la partida especificada.", "saveCardsStateByGame GameNotFound");
+            }
         
-        et = em.getTransaction();
-        et.begin();
+            et = em.getTransaction();
+            et.begin();
          
-        Query qryDeleteAllCards = em.createQuery(
-            "DELETE FROM Card c WHERE " +
-            "(c.cardDeckId IS NOT NULL AND c.cardDeckId.deckGameId.gameId = :gameId) OR " +
-            "(c.cardBcolmnId IS NOT NULL AND c.cardBcolmnId.bcolmnGameFk.gameId = :gameId) OR " +
-            "(c.cardCseqId IS NOT NULL AND c.cardCseqId.cseqGameFk.gameId = :gameId)");
-        qryDeleteAllCards.setParameter("gameId", gameId);
-        qryDeleteAllCards.executeUpdate();
+            Query qryDeleteAllCards = em.createQuery(
+                "DELETE FROM Card c WHERE " +
+                "(c.cardDeckId IS NOT NULL AND c.cardDeckId.deckGameId.gameId = :gameId) OR " +
+                "(c.cardBcolmnId IS NOT NULL AND c.cardBcolmnId.bcolmnGameFk.gameId = :gameId) OR " +
+                "(c.cardCseqId IS NOT NULL AND c.cardCseqId.cseqGameFk.gameId = :gameId)");
+            qryDeleteAllCards.setParameter("gameId", gameId);
+            qryDeleteAllCards.executeUpdate();
         
-        int totalSaved = 0;
+            int totalSaved = 0;
         
-        for(CardDto cardDto : cardsInDeck) {
-            Card card = new Card(cardDto, em);
-            em.persist(card);
-            totalSaved++;
+            for(CardDto cardDto : cardsInDeck) {
+                Card card = new Card(cardDto, em);
+                em.persist(card);
+                totalSaved++;
+            }
+        
+            for(CardDto cardDto : cardsInColumns) {
+                Card card = new Card(cardDto, em);
+                em.persist(card);
+                totalSaved++;
+            }
+        
+            for(CardDto cardDto : cardsCsequences) {
+                Card card = new Card(cardDto, em);
+                em.persist(card);
+                totalSaved++;
+            }
+        
+            et.commit();
+        
+            return new Respuesta(true, "Estado del juego guardado. Total de cartas: " + totalSaved, "saveCardsStateByGame success");
+        
+        } catch (Exception ex) {
+            if(et != null && et.isActive()) {
+                et.rollback();
+            }
+            Logger.getLogger(CardService.class.getName()).log(Level.SEVERE, "Error guardando el estado de las cartas en el juego [" 
+                    + gameId + "]", ex);
+            return new Respuesta(false, "Error guardando el estado de las cartas en el juego.", "saveCardsStateByGame " + ex.getMessage());
         }
-        
-        for(CardDto cardDto : cardsInColumns) {
-            Card card = new Card(cardDto, em);
-            em.persist(card);
-            totalSaved++;
-        }
-        
-        for(CardDto cardDto : cardsCsequences) {
-            Card card = new Card(cardDto, em);
-            em.persist(card);
-            totalSaved++;
-        }
-        
-        et.commit();
-        
-        return new Respuesta(true, "Estado del juego guardado. Total de cartas: " + totalSaved, "saveCardsStateByGame success");
-        
-    } catch (Exception ex) {
-        if(et != null && et.isActive()) {
-            et.rollback();
-        }
-        Logger.getLogger(CardService.class.getName()).log(Level.SEVERE, "Error guardando el estado de las cartas en el juego [" 
-                + gameId + "]", ex);
-        return new Respuesta(false, "Error guardando el estado de las cartas en el juego.", "saveCardsStateByGame " + ex.getMessage());
     }
-}
     
 }
