@@ -7,6 +7,7 @@ package cr.ac.una.muffetsolitario.model;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -58,7 +59,7 @@ public class Card implements Serializable {
     @JoinColumn(name = "CARD_DECK_ID", referencedColumnName = "DECK_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private Deck cardDeckId;
-
+    
     public Card() {
     }
 
@@ -72,6 +73,22 @@ public class Card implements Serializable {
         this.cardSuit = cardSuit;
         this.cardValue = cardValue;
         this.cardPositionInContainer = cardPositionInContainer;
+    }
+    
+    public Card(CardDto cardDto, EntityManager em) {
+        cardId = cardDto.getCardId();
+        cardFaceUp = cardDto.isCardFaceUp();
+        cardSuit = cardDto.getCardSuit();
+        cardValue = cardDto.getCardValue();
+        cardPositionInContainer = cardDto.getCardPositionInContainer();
+    
+        if (cardDto.getCardBcolmnId() != null) {
+            this.cardBcolmnId = em.getReference(BoardColumn.class, cardDto.getCardBcolmnId());
+        } else if (cardDto.getCardCseqId() != null) {
+            this.cardCseqId = em.getReference(CompletedSequence.class, cardDto.getCardCseqId());
+        } else if (cardDto.getCardDeckId() != null) {
+            this.cardDeckId = em.getReference(Deck.class, cardDto.getCardDeckId());
+        }
     }
 
     public Long getCardId() {
@@ -137,6 +154,7 @@ public class Card implements Serializable {
     public void setCardDeckId(Deck cardDeckId) {
         this.cardDeckId = cardDeckId;
     }
+
 
     @Override
     public int hashCode() {
