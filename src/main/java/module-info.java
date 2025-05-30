@@ -5,6 +5,7 @@ module cr.ac.una.muffetsolitario {
     requires java.logging;
     requires MaterialFX;
     requires jakarta.persistence;
+    requires javafx.graphics;
     
     opens cr.ac.una.muffetsolitario to javafx.fxml;
     opens cr.ac.una.muffetsolitario.controller to javafx.fxml; 

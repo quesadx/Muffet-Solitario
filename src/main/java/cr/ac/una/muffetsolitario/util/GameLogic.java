@@ -1,16 +1,24 @@
 package cr.ac.una.muffetsolitario.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cr.ac.una.muffetsolitario.model.BoardColumnDto;
 import cr.ac.una.muffetsolitario.model.CompletedSequenceDto;
 import cr.ac.una.muffetsolitario.model.CardContainer;
+import cr.ac.una.muffetsolitario.model.CardDto;
+import cr.ac.una.muffetsolitario.model.DeckDto;
 import cr.ac.una.muffetsolitario.model.GameDto;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class GameLogic {
+
+    public static enum Difficulty {
+        EASY,    // 1 palo
+        MEDIUM,  // 2 palos
+        HARD     // 4 palos
+    }
 
     public GameDto gameDto;
     private final GameRuleValidator rulesValidator = new GameRuleValidator();
@@ -22,15 +30,50 @@ public class GameLogic {
         this.gameDto = gameDto;
     }
 
-    public void initColumns() {
-        if (gameDto == null) {
-            throw new IllegalStateException("GameDto no puede ser null");
+    public void initializeDeck(Difficulty difficulty) {
+        String[] suits;
+        switch (difficulty) {
+            case EASY:
+                suits = new String[] { "C" };
+                break;
+            case MEDIUM:
+                suits = new String[] { "C", "D" };
+                break;
+            case HARD:
+            default:
+                suits = new String[] { "C", "D", "P", "T" };
+                break;
         }
-        ObservableList<BoardColumnDto> columns = gameDto.getBoardColumnList();
-        if (columns == null) {
-            columns = FXCollections.observableArrayList();
-            gameDto.setBoardColumnList(columns);
+        int maxValueCard = 13; 
+        List<CardContainer> cardContainers = new ArrayList<>();
+
+        int totalCards = 104;
+        int numSuits = suits.length;
+        int cardsPerSuit = totalCards / numSuits;
+
+        for (String suit : suits) {
+            int repeats = cardsPerSuit / maxValueCard;
+            for (int r = 0; r < repeats; r++) {
+                for (int cardValue = 1; cardValue <= maxValueCard; cardValue++) {
+                    CardDto cardDto = new CardDto();
+                    cardDto.setCardSuit(suit);
+                    cardDto.setCardValue(cardValue);
+                    cardDto.setCardFaceUp(false);
+
+                    CardContainer cardContainer = new CardContainer();
+                    cardContainer.setCardDto(cardDto);
+                    cardContainers.add(cardContainer);
+                }
+            }
         }
+
+        Collections.shuffle(cardContainers);
+
+        if (gameDto.getDeckDto() == null) {
+            gameDto.setDeckDto(new DeckDto());
+        }
+        gameDto.getDeckDto().setCardList(FXCollections.observableArrayList(cardContainers));
+        gameDto.setGameDifficulty(difficulty.name());
     }
 
     public void loadCardsToColumn() {
@@ -48,7 +91,7 @@ public class GameLogic {
         int deckIndex = 0;
         for (int i = 0; i < columns.size() && i < 10; i++) {
             BoardColumnDto boardColumn = columns.get(i);
-            int cardsToDeal = (i < 4) ? 5 : 6;
+            int cardsToDeal = (i > 4) ? 5 : 6;
             for (int j = 0; j < cardsToDeal && deckIndex < deckCards.size(); j++) {
                 CardContainer cardContainer = deckCards.get(deckIndex);
                 deckIndex++;
@@ -59,7 +102,7 @@ public class GameLogic {
                 boardColumn.getCardList().add(cardContainer);
             }
         }
-        // Remove dealt cards from the deckF
+        // Remove deal cards from the deck
         if (deckIndex > 0) {
             deckCards.subList(0, deckIndex).clear();
         }
@@ -70,10 +113,20 @@ public class GameLogic {
         BoardColumnDto fromColumn = columns.get(fromColumnIndex);
         BoardColumnDto toColumn = columns.get(toColumnIndex);
 
+        // Prevent moving to the same column
+        //TODO: Change this to show only a message in the corner 
+        if (fromColumnIndex == toColumnIndex) {
+            throw new IllegalArgumentException("No se puede mover cartas a la misma columna.");
+        }
+
         List<CardContainer> fromCards = fromColumn.getCardList();
         List<CardContainer> toCards = toColumn.getCardList();
 
         int startIndex = fromCards.indexOf(firstCardOfSequence);
+
+        if (startIndex == -1) {
+            throw new IllegalArgumentException("La carta seleccionada no se encuentra en la columna de origen.");
+        }
 
         List<CardContainer> sequence = new ArrayList<>(fromCards.subList(startIndex, fromCards.size()));
         // validate if all the cards are faceup
@@ -88,9 +141,12 @@ public class GameLogic {
                     "La secuencia a mover no es válida (debe ser descendente y del mismo palo).");
         }
 
+        // FIX: Only allow the move if it is valid
         if (!rulesValidator.isValidMove(firstCardOfSequence, toColumn)) {
             throw new IllegalArgumentException("Movimiento no permitido según las reglas del juego.");
         }
+
+        // Move the sequence
         toCards.addAll(sequence);
         for (CardContainer card : sequence) {
             card.getCardDto().setCardBcolmnId(toColumn.getBcolmnId());
@@ -103,8 +159,8 @@ public class GameLogic {
 
         checkAndRemoveCompletedSequence(toColumn);
         checkGameFinished();
-
     }
+
     public void dealFromDeck() {
         List<BoardColumnDto> columns = gameDto.getBoardColumnList();
         List<CardContainer> deckCardList = gameDto.getDeckDto().getCardList();
@@ -114,6 +170,7 @@ public class GameLogic {
         }
 
         // Validate that all columns have at least one card
+        // TODO: MOVE THIS TO GAMERULEVALIDATOR
         for (BoardColumnDto column : columns) {
             if (column.getCardList().isEmpty()) {
                 throw new IllegalStateException(
@@ -136,16 +193,16 @@ public class GameLogic {
         if (cards.size() < 13)
             return;
 
-        List<CardContainer> last13 = new ArrayList<>(cards.subList(cards.size() - 13, cards.size()));
+        List<CardContainer> last13Cards = new ArrayList<>(cards.subList(cards.size() - 13, cards.size()));
 
-        if (rulesValidator.isValidSequence(last13) &&
-                last13.get(0).getCardDto().getCardValue() == 13) {
+        if (rulesValidator.isValidSequence(last13Cards) &&
+                last13Cards.get(0).getCardDto().getCardValue() == 13) {
 
             CompletedSequenceDto completed = new CompletedSequenceDto();
             completed.setCseqGameFk(gameDto.getGameId());
             completed.setCseqOrder(
                     gameDto.getGameCompletedSequences() != null ? gameDto.getGameCompletedSequences() + 1 : 1);
-            for (CardContainer card : last13) {
+            for (CardContainer card : last13Cards) {
                 card.getCardDto().setCardCseqId(completed.getCseqId());
                 completed.addCard(card);
             }
@@ -155,7 +212,7 @@ public class GameLogic {
             }
             gameDto.getCompletedSequenceList().add(completed);
 
-            cards.removeAll(last13);
+            cards.removeAll(last13Cards);
 
             if (!cards.isEmpty()) {
                 CardContainer newTop = cards.get(cards.size() - 1);
@@ -164,12 +221,15 @@ public class GameLogic {
         }
     }
 
+    //TODO: Kendall need to improve this method 
     public void checkGameFinished() {
         // Standard number of completed sequences
         final int TOTAL_SEQUENCES_TO_COMPLETE = 8;
 
         // Check if all sequences have been completed
-        int completedSequences = (gameDto.getCompletedSequenceList() != null) ? gameDto.getCompletedSequenceList().size(): 0;
+        int completedSequences = (gameDto.getCompletedSequenceList() != null)
+                ? gameDto.getCompletedSequenceList().size()
+                : 0;
 
         boolean allSequencesCompleted = completedSequences >= TOTAL_SEQUENCES_TO_COMPLETE;
 
@@ -179,7 +239,8 @@ public class GameLogic {
                 || gameDto.getDeckDto().getCardList().isEmpty();
 
         if (allSequencesCompleted || (deckEmpty)) {
-            // Update the game status (TODO: Confirm with Alex if "COMPLETED" is correct here)
+            // Update the game status (TODO: Confirm with Alex if "COMPLETED" is correct
+            // here)
             gameDto.setGameStatus("COMPLETED");
             gameDto.setGameTotalPoints(gameDto.getGameTotalPoints());
             // Notify the UI or user here (e.g., show victory/defeat dialog)
@@ -188,5 +249,4 @@ public class GameLogic {
             // (Optional) Save final state, statistics, etc.
         }
     }
-
 }

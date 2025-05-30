@@ -23,9 +23,6 @@ public class CardContainer extends ImageView {
         super(image);
         this.cardDto = cardDto;
         this.imagePath = imagePath;
-        setFitWidth(80); // Tamaño estándar, ajusta según tu diseño
-        setFitHeight(120);
-        setPreserveRatio(true);
     }
 
     public CardDto getCardDto() {

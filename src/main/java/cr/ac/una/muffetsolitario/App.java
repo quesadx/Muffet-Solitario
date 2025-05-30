@@ -21,7 +21,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         FlowController.getInstance().InitializeFlow(stage, null);
         FlowController.getInstance().goMain();
-        FlowController.getInstance().goView("LogInView");
+        FlowController.getInstance().goView("GameView");
     }
 
     public static void main(String[] args) {
