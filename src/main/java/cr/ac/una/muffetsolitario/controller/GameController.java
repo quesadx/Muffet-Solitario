@@ -60,10 +60,9 @@ public class GameController extends Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         columns = List.of(
-            pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
-            pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen
-        );
-        // Handler to deck, this can be improved 
+                pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
+                pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen);
+        // Handler to deck, this can be improved
         pnDeck.setOnMouseClicked(event -> {
             try {
                 gameLogic.dealFromDeck();
@@ -71,7 +70,7 @@ public class GameController extends Controller implements Initializable {
             } catch (Exception e) {
                 showAlert("No se puede repartir", e.getMessage());
             }
-        });        
+        });
         startNewGame();
 
     }
@@ -79,7 +78,8 @@ public class GameController extends Controller implements Initializable {
     @Override
     public void initialize() {
     }
-     //TODO: This´s temporal 
+
+    // TODO: This´s temporal
     public void setDifficulty(GameLogic.Difficulty difficulty) {
         this.currentDifficulty = difficulty;
     }
@@ -106,8 +106,29 @@ public class GameController extends Controller implements Initializable {
         CardDto cardDto = cardContainer.getCardDto();
         String imagePath;
         if (cardDto.isCardFaceUp()) {
-            imagePath = "/cr/ac/una/muffetsolitario/resources/assets/" + cardDto.getCardSuit() + "_"
-                    + cardDto.getCardValue() + ".png";
+            switch (cardDto.getCardSuit()) {
+                case "C":
+                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/" + cardDto.getCardSuit() + "_"
+                            + cardDto.getCardValue() + ".png";
+                    break;
+                case "T":
+                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Treboles/" + cardDto.getCardSuit() + "_"
+                            + cardDto.getCardValue() + ".png";
+                    break;
+                case "P":
+                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Picas/" + cardDto.getCardSuit() + "_"
+                            + cardDto.getCardValue() + ".png";
+                    ;
+                    break;
+                case "D":
+                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Diamantes/" + cardDto.getCardSuit() + "_"
+                            + cardDto.getCardValue() + ".png";
+                    break;
+                default:
+                    System.out.println("Error cargando las imagenes");
+                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
+                    break;
+            }
         } else {
             imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
         }
@@ -144,7 +165,7 @@ public class GameController extends Controller implements Initializable {
                 cardContainer.setFitHeight(160);
                 cardContainer.setLayoutY(j * cardOffset);
 
-                // Clear handlers 
+                // Clear handlers
                 cardContainer.setOnMousePressed(null);
                 cardContainer.setOnMouseDragged(null);
                 cardContainer.setOnMouseReleased(null);
@@ -200,7 +221,7 @@ public class GameController extends Controller implements Initializable {
             double width = pane.getWidth();
             double height = pane.getHeight();
             if (sceneX >= layoutX && sceneX <= layoutX + width &&
-                sceneY >= layoutY && sceneY <= layoutY + height) {
+                    sceneY >= layoutY && sceneY <= layoutY + height) {
                 return i;
             }
         }
@@ -220,6 +241,7 @@ public class GameController extends Controller implements Initializable {
             showAlert("Movimiento inválido", e.getMessage());
         }
     }
+
     //
     private void showAlert(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
