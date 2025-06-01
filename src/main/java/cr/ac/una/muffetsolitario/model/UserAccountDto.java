@@ -45,6 +45,25 @@ public class UserAccountDto {
         setUserCardDesign(userCardDesign);
     }
     
+    public UserAccountDto(UserAccount userAccount) {
+        this();
+        if (userAccount != null) {
+            setUserId(userAccount.getUserId());
+            setUserNickname(userAccount.getUserNickname());
+            setUserPassword(userAccount.getUserPassword());
+            setUserCardImage(userAccount.getUserCardImage());
+            setUserCardDesign(userAccount.getUserCardDesign());
+            setUserTotalGames(userAccount.getUserTotalGames() != null ? userAccount.getUserTotalGames() : 0);
+            setUserWonGames(userAccount.getUserWonGames() != null ? userAccount.getUserWonGames() : 0);
+            setUserTotalScore(userAccount.getUserTotalScore() != null ? userAccount.getUserTotalScore() : 0);
+            setUserBestScore(userAccount.getUserBestScore() != null ? userAccount.getUserBestScore() : 0);
+        
+            if (userAccount.getGame() != null) {
+                setGameId(userAccount.getGame().getGameId());
+            }
+        }
+    }
+    
     public LongProperty userIdProperty() {
         return userId;
     }

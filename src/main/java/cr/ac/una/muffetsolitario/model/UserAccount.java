@@ -43,7 +43,7 @@ public class UserAccount implements Serializable {
     @Column(name = "USER_ID")
     private Long userId;
     @Basic(optional = false)
-    @Column(name = "USER_NICKNAME")
+    @Column(name = "USER_NICKNAME", unique = true)
     private String userNickname;
     @Basic(optional = false)
     @Column(name = "USER_PASSWORD")
@@ -77,6 +77,33 @@ public class UserAccount implements Serializable {
         this.userNickname = userNickname;
         this.userPassword = userPassword;
         this.userCardDesign = userCardDesign;
+    }
+    
+    public UserAccount(UserAccountDto userDto) {
+        if (userDto != null) {
+            this.userId = userDto.getUserId();
+            this.userNickname = userDto.getUserNickname();
+            this.userPassword = userDto.getUserPassword();
+            this.userCardImage = userDto.getUserCardImage();
+            this.userCardDesign = userDto.getUserCardDesign();
+            this.userTotalGames = userDto.getUserTotalGames();
+            this.userWonGames = userDto.getUserWonGames();
+            this.userTotalScore = userDto.getUserTotalScore();
+            this.userBestScore = userDto.getUserBestScore();
+        }
+    }
+
+    public void update(UserAccountDto userDto) {
+        if (userDto != null) {
+            this.userNickname = userDto.getUserNickname();
+            this.userPassword = userDto.getUserPassword();
+            this.userCardImage = userDto.getUserCardImage();
+            this.userCardDesign = userDto.getUserCardDesign();
+            this.userTotalGames = userDto.getUserTotalGames();
+            this.userWonGames = userDto.getUserWonGames();
+            this.userTotalScore = userDto.getUserTotalScore();
+            this.userBestScore = userDto.getUserBestScore();
+        }
     }
 
     public Long getUserId() {
