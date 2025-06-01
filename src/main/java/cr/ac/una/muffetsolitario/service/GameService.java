@@ -63,14 +63,16 @@ public class GameService {
     
     public Respuesta getGameById(Long gameId) {
         try {
-            Game game = em.find(Game.class, gameId);
-            if (game == null) {
-                return new Respuesta(false, "Juego no encontrado", "getGameById GameNotFound");
-            }
-            
+            Query qryGame = em.createNamedQuery("Game.findByGameId");
+            qryGame.setParameter("gameId", gameId);
+
+            Game game = (Game) qryGame.getSingleResult();
             GameDto gameDto = new GameDto(game);
+
             return new Respuesta(true, "Juego encontrado", "getGameById success", "Game", gameDto);
             
+        } catch(NoResultException ex) {
+            return new Respuesta(false, "No existe el juego con el ID ingresado", "getGameById GameNotFound");
         } catch (Exception ex) {
             Logger.getLogger(GameService.class.getName()).log(Level.SEVERE, "Error obteniendo juego por ID [" + gameId + "]", ex);
             return new Respuesta(false, "Error obteniendo el juego", "getGameById " + ex.getMessage());
