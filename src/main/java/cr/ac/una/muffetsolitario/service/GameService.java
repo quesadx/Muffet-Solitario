@@ -79,7 +79,7 @@ public class GameService {
 
     public Respuesta getGameByUserId(Long userId) {
         try {
-            Query query = em.createQuery("SELECT g FROM Game g WHERE g.gameUserFk = :userId");
+            Query query = em.createQuery("SELECT g FROM Game g WHERE g.gameUserFk.userId = :userId");
             query.setParameter("userId", userId);
 
             Game game = (Game) query.getSingleResult();

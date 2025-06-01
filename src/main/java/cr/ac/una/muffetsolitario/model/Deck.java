@@ -4,17 +4,8 @@
  */
 package cr.ac.una.muffetsolitario.model;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -47,6 +38,21 @@ public class Deck implements Serializable {
 
     public Deck(Long deckId) {
         this.deckId = deckId;
+    }
+
+    public Deck(DeckDto deckDto, EntityManager em) {
+        deckId = deckDto.getDeckId();
+
+        if (deckDto.getDeckGameId() != null) {
+            deckGameId = em.getReference(Game.class, deckDto.getDeckGameId());
+        }
+    }
+
+    public void update(DeckDto deckDto, EntityManager em) {
+        deckId = deckDto.getDeckId();
+        if (deckDto.getDeckGameId() != null) {
+            deckGameId = em.getReference(Game.class, deckDto.getDeckGameId());
+        }
     }
 
     public Long getDeckId() {
