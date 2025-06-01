@@ -1,146 +1,120 @@
 package cr.ac.una.muffetsolitario.controller;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import cr.ac.una.muffetsolitario.model.BoardColumnDto;
-import cr.ac.una.muffetsolitario.model.CardContainer;
-import cr.ac.una.muffetsolitario.model.CardDto;
-import cr.ac.una.muffetsolitario.model.DeckDto;
-import cr.ac.una.muffetsolitario.model.GameDto;
+import cr.ac.una.muffetsolitario.model.*;
 import cr.ac.una.muffetsolitario.util.GameLogic;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.geometry.Point2D;
 
 public class GameController extends Controller implements Initializable {
 
     private GameDto currentGameDto;
     private GameLogic gameLogic;
     private List<Pane> columns;
+    private List<Pane> sequencePanes;
 
-    // Variables para drag & drop visual
-    private CardContainer draggedCard = null;
-    private double dragOffsetX, dragOffsetY;
-    private int fromColIdx = -1;
-    private int fromCardIdx = -1;
+    // Drag & drop variables
+    private List<CardContainer> draggedSequence = null;
+    private double[] dragOffsetsX, dragOffsetsY;
+    private int fromColIdx = -1, fromCardIdx = -1;
+    private static final double CARD_OFFSET = 25;
 
-    // Dificultad seleccionada (por defecto: fácil)
-    private GameLogic.Difficulty currentDifficulty = GameLogic.Difficulty.EASY;
-
-    @FXML
-    private Pane pnColumn0ne;
-    @FXML
-    private Pane pnColumnTwo;
-    @FXML
-    private Pane pnColumnThree;
-    @FXML
-    private Pane pnColumnFour;
-    @FXML
-    private Pane pnColumnFive;
-    @FXML
-    private Pane pnColumnSix;
-    @FXML
-    private Pane pnColumnSeven;
-    @FXML
-    private Pane pnColumnEight;
-    @FXML
-    private Pane pnColumnNine;
-    @FXML
-    private Pane pnColumnTen;
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private Pane pnDeck;
+    @FXML private Pane pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
+            pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen;
+    @FXML private AnchorPane root;
+    @FXML private Pane pnDeck, pnSequence1, pnSequence2, pnSequence3, pnSequence4,
+            pnSequence5, pnSequence6, pnSequence7, pnSequence8;
+    @FXML private Label lbUserName, lbDifficulty, lbUserPoints, lbTime;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        columns = List.of(
-                pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
+        columns = List.of(pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
                 pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen);
-        // Handler to deck, this can be improved
+        sequencePanes = List.of(pnSequence1, pnSequence2, pnSequence3, pnSequence4,
+                pnSequence5, pnSequence6, pnSequence7, pnSequence8);
         pnDeck.setOnMouseClicked(event -> {
-            try {
-                gameLogic.dealFromDeck();
-                updateBoard();
-            } catch (Exception e) {
-                showAlert("No se puede repartir", e.getMessage());
-            }
+            try { gameLogic.dealFromDeck(); updateBoard(); }
+            catch (Exception e) { showAlert("No se puede repartir", e.getMessage()); }
         });
         startNewGame();
-
     }
 
     @Override
     public void initialize() {
-    }
-
-    // TODO: This´s temporal
-    public void setDifficulty(GameLogic.Difficulty difficulty) {
-        this.currentDifficulty = difficulty;
+        // Requerido por la herencia, no eliminar.
     }
 
     public void startNewGame() {
         currentGameDto = new GameDto();
         gameLogic = new GameLogic(currentGameDto);
         currentGameDto.initializeBoardColumns(10);
-        gameLogic.initializeDeck(currentDifficulty);
+        gameLogic.initializeDeck(currentGameDto);
         gameLogic.loadCardsToColumn();
-
         for (BoardColumnDto col : currentGameDto.getBoardColumnList()) {
             List<CardContainer> cardList = col.getCardList();
-            if (!cardList.isEmpty()) {
-                CardContainer last = cardList.get(cardList.size() - 1);
-                last.getCardDto().setCardFaceUp(true);
-            }
+            if (!cardList.isEmpty())
+                cardList.get(cardList.size() - 1).getCardDto().setCardFaceUp(true);
         }
-        renderDeck();
-        renderBoard();
+        updateBoard();
     }
 
     private void updateCardImage(CardContainer cardContainer) {
         CardDto cardDto = cardContainer.getCardDto();
-        String imagePath;
-        if (cardDto.isCardFaceUp()) {
-            switch (cardDto.getCardSuit()) {
-                case "C":
-                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Corazones/" + cardDto.getCardSuit() + "_"
-                            + cardDto.getCardValue() + ".png";
-                    break;
-                case "T":
-                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Treboles/" + cardDto.getCardSuit() + "_"
-                            + cardDto.getCardValue() + ".png";
-                    break;
-                case "P":
-                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Picas/" + cardDto.getCardSuit() + "_"
-                            + cardDto.getCardValue() + ".png";
-                    ;
-                    break;
-                case "D":
-                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Diamantes/" + cardDto.getCardSuit() + "_"
-                            + cardDto.getCardValue() + ".png";
-                    break;
-                default:
-                    System.out.println("Error cargando las imagenes");
-                    imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
-                    break;
-            }
-        } else {
-            imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
-        }
+        String imagePath = cardDto.isCardFaceUp()
+                ? "/cr/ac/una/muffetsolitario/resources/assets/" +
+                  (cardDto.getCardSuit().equals("C") ? "Corazones" :
+                   cardDto.getCardSuit().equals("T") ? "Treboles" :
+                   cardDto.getCardSuit().equals("P") ? "Picas" : "Diamantes") +
+                  "/" + cardDto.getCardSuit() + "_" + cardDto.getCardValue() + ".png"
+                : "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
         try {
             URL resource = getClass().getResource(imagePath);
-            if (resource == null) {
-                throw new IllegalArgumentException("No se encontró la imagen: " + imagePath);
-            }
-            cardContainer.setImagePath(resource.toExternalForm());
-            cardContainer.setImage(new Image(resource.toExternalForm()));
+            cardContainer.setImagePath(resource != null ? resource.toExternalForm() : "");
+            cardContainer.setImage(new Image(resource != null ? resource.toExternalForm() : ""));
         } catch (Exception e) {
-            System.err.println("Error cargando imagen de carta: No se encontró la imagen: " + imagePath);
+            System.err.println("Error cargando imagen de carta: " + imagePath);
+        }
+    }
+
+private void moveSequenceToRoot(List<CardContainer> sequence) {
+    for (CardContainer card : sequence) {
+        Point2D scenePos = card.localToScene(0, 0);
+        Point2D rootPos = root.sceneToLocal(scenePos);
+
+        // Remueve de su padre actual
+        if (card.getParent() != null) {
+            ((Pane) card.getParent()).getChildren().remove(card);
+        }
+        // Añade al root y coloca en la posición absoluta
+        root.getChildren().add(card);
+        card.setLayoutX(rootPos.getX());
+        card.setLayoutY(rootPos.getY());
+        card.toFront();
+    }
+}
+    private void moveSequenceToColumn(List<CardContainer> sequence, Pane columnPane) {
+        double baseY = columnPane.getChildren().size() * CARD_OFFSET;
+        for (int k = 0; k < sequence.size(); k++) {
+            CardContainer card = sequence.get(k);
+            if (card.getParent() != null) {
+                ((Pane) card.getParent()).getChildren().remove(card);
+            }
+            root.getChildren().remove(card); 
+            if (!columnPane.getChildren().contains(card)) {
+                card.setLayoutX(0);
+                card.setLayoutY(baseY + k * CARD_OFFSET);
+                columnPane.getChildren().add(card);
+            }
         }
     }
 
@@ -150,7 +124,6 @@ public class GameController extends Controller implements Initializable {
             showAlert("Error de renderizado", "No hay suficientes columnas para renderizar el tablero.");
             return;
         }
-        double cardOffset = 25; // Distance between cards
         for (int i = 0; i < columns.size(); i++) {
             final int columnIdx = i;
             Pane pane = columns.get(i);
@@ -158,56 +131,67 @@ public class GameController extends Controller implements Initializable {
             BoardColumnDto boardColumn = boardColumns.get(i);
             List<CardContainer> cards = boardColumn.getCardList();
             for (int j = 0; j < cards.size(); j++) {
-                final int cardIdx = j;
                 CardContainer cardContainer = cards.get(j);
                 updateCardImage(cardContainer);
                 cardContainer.setFitWidth(120);
                 cardContainer.setFitHeight(160);
-                cardContainer.setLayoutY(j * cardOffset);
+                cardContainer.setLayoutX(0);
+                cardContainer.setLayoutY(j * CARD_OFFSET);
 
-                // Clear handlers
-                cardContainer.setOnMousePressed(null);
-                cardContainer.setOnMouseDragged(null);
-                cardContainer.setOnMouseReleased(null);
-
-                // DRAG & DROP VISUAL
                 cardContainer.setOnMousePressed(event -> {
-                    draggedCard = cardContainer;
-                    dragOffsetX = event.getSceneX() - cardContainer.getLayoutX();
-                    dragOffsetY = event.getSceneY() - cardContainer.getLayoutY();
+                    if (!cardContainer.getCardDto().isCardFaceUp()) return;
+                    List<CardContainer> cardsInColumn = boardColumn.getCardList();
+                    int idx = cardsInColumn.indexOf(cardContainer);
+                    draggedSequence = new ArrayList<>(cardsInColumn.subList(idx, cardsInColumn.size()));
+                    dragOffsetsX = new double[draggedSequence.size()];
+                    dragOffsetsY = new double[draggedSequence.size()];
+                    Point2D mouseScene = new Point2D(event.getSceneX(), event.getSceneY());
+                    for (int k = 0; k < draggedSequence.size(); k++) {
+                        CardContainer c = draggedSequence.get(k);
+                        Point2D cardScene = c.localToScene(0, 0);
+                        dragOffsetsX[k] = mouseScene.getX() - cardScene.getX();
+                        dragOffsetsY[k] = mouseScene.getY() - cardScene.getY();
+                    }
+                    moveSequenceToRoot(draggedSequence);
                     fromColIdx = columnIdx;
-                    fromCardIdx = cardIdx;
-                    cardContainer.toFront();
+                    fromCardIdx = idx;
                 });
 
                 cardContainer.setOnMouseDragged(event -> {
-                    if (draggedCard != null) {
-                        double newX = event.getSceneX() - dragOffsetX;
-                        double newY = event.getSceneY() - dragOffsetY;
-                        draggedCard.setLayoutX(newX);
-                        draggedCard.setLayoutY(newY);
-                        draggedCard.toFront();
+                    if (draggedSequence != null) {
+                        double mouseX = event.getSceneX(), mouseY = event.getSceneY();
+                        for (int k = 0; k < draggedSequence.size(); k++) {
+                            CardContainer c = draggedSequence.get(k);
+                            c.setLayoutX(mouseX - dragOffsetsX[k]);
+                            c.setLayoutY(mouseY - dragOffsetsY[k] + k * CARD_OFFSET);
+                            c.toFront();
+                        }
                     }
                 });
 
                 cardContainer.setOnMouseReleased(event -> {
-                    if (draggedCard != null) {
+                    if (draggedSequence != null) {
                         int targetColIdx = getTargetColumnIndex(event.getSceneX(), event.getSceneY());
+                        boolean moved = false;
                         if (targetColIdx != -1) {
                             try {
-                                handleMoveCards(fromColIdx, targetColIdx, draggedCard);
+                                handleMoveCards(fromColIdx, targetColIdx, draggedSequence.get(0));
+                                moved = true;
                             } catch (Exception e) {
                                 showAlert("Movimiento inválido", e.getMessage());
                             }
                         }
-                        draggedCard = null;
+                        Pane targetPane = columns.get((moved && targetColIdx != -1) ? targetColIdx : fromColIdx);
+                        moveSequenceToColumn(draggedSequence, targetPane);
+                        draggedSequence = null;
+                        dragOffsetsX = null;
+                        dragOffsetsY = null;
                         fromColIdx = -1;
                         fromCardIdx = -1;
                         updateBoard();
                     }
                 });
 
-                cardContainer.setLayoutX(0);
                 pane.getChildren().add(cardContainer);
             }
         }
@@ -216,12 +200,10 @@ public class GameController extends Controller implements Initializable {
     private int getTargetColumnIndex(double sceneX, double sceneY) {
         for (int i = 0; i < columns.size(); i++) {
             Pane pane = columns.get(i);
-            double layoutX = pane.localToScene(0, 0).getX();
-            double layoutY = pane.localToScene(0, 0).getY();
-            double width = pane.getWidth();
-            double height = pane.getHeight();
-            if (sceneX >= layoutX && sceneX <= layoutX + width &&
-                    sceneY >= layoutY && sceneY <= layoutY + height) {
+            Point2D paneScene = pane.localToScene(0, 0);
+            double width = pane.getWidth(), height = pane.getHeight();
+            if (sceneX >= paneScene.getX() && sceneX <= paneScene.getX() + width &&
+                sceneY >= paneScene.getY() && sceneY <= paneScene.getY() + height) {
                 return i;
             }
         }
@@ -231,18 +213,19 @@ public class GameController extends Controller implements Initializable {
     public void updateBoard() {
         renderBoard();
         renderDeck();
+        renderCompletedSequences();
     }
 
     public void handleMoveCards(int fromCol, int toCol, CardContainer cardContainer) {
         try {
             gameLogic.moveCardsBetweenColumns(fromCol, toCol, cardContainer);
             updateBoard();
+            gameLogic.suggestPossibleMoves(currentGameDto);
         } catch (IllegalArgumentException e) {
             showAlert("Movimiento inválido", e.getMessage());
         }
     }
 
-    //
     private void showAlert(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
@@ -254,20 +237,13 @@ public class GameController extends Controller implements Initializable {
     private void renderDeck() {
         pnDeck.getChildren().clear();
         DeckDto deckDto = currentGameDto.getDeckDto();
-        if (deckDto == null || deckDto.getCardList().isEmpty())
-            return;
-
+        if (deckDto == null || deckDto.getCardList().isEmpty()) return;
         List<CardContainer> deckCards = deckDto.getCardList();
         int cantCardsToShow = Math.min(3, deckCards.size());
-
-        double offsetX = 18; // Espace between Cards
-        double baseX = 0;
-        double baseY = 0;
-
+        double offsetX = 18;
         for (int i = 0; i < cantCardsToShow; i++) {
             int cardIdx = deckCards.size() - 1 - i;
             CardContainer card = deckCards.get(cardIdx);
-
             String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
             try {
                 URL resource = getClass().getResource(imagePath);
@@ -278,18 +254,35 @@ public class GameController extends Controller implements Initializable {
             } catch (Exception e) {
                 System.err.println("Error cargando imagen del mazo: " + imagePath);
             }
-
             card.setFitWidth(120);
             card.setFitHeight(160);
-
-            card.setLayoutX(baseX + i * offsetX);
-            card.setLayoutY(baseY);
-
-            card.setOnMousePressed(null);
-            card.setOnMouseDragged(null);
-            card.setOnMouseReleased(null);
-
+            card.setLayoutX(i * offsetX);
+            card.setLayoutY(0);
+            card.setDisable(true);
             pnDeck.getChildren().add(card);
+        }
+    }
+
+    private void renderCompletedSequences() {
+        for (Pane pane : sequencePanes) pane.getChildren().clear();
+        List<CompletedSequenceDto> completedSequences = currentGameDto.getCompletedSequenceList();
+        if (completedSequences == null) return;
+        double cardOffset = 30;
+        int maxCardsToShow = 3;
+        for (int i = 0; i < completedSequences.size() && i < sequencePanes.size(); i++) {
+            Pane pane = sequencePanes.get(i);
+            List<CardContainer> cards = completedSequences.get(i).getCardList();
+            for (int j = 0; j < Math.min(maxCardsToShow, cards.size()); j++) {
+                CardContainer card = cards.get(j);
+                card.getCardDto().setCardFaceUp(true);
+                updateCardImage(card);
+                card.setFitWidth(120);
+                card.setFitHeight(160);
+                card.setLayoutX(j * cardOffset);
+                card.setLayoutY(0);
+                card.setDisable(true);
+                pane.getChildren().add(card);
+            }
         }
     }
 }
