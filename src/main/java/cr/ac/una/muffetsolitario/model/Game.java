@@ -99,6 +99,25 @@ public class Game implements Serializable {
         this.gameTotalPoints = gameTotalPoints;
         this.gameStatus = gameStatus;
     }
+    
+    public Game(GameDto gameDto){
+        this.gameId = gameDto.getGameId();
+        update(gameDto);
+    }
+    
+    public void update(GameDto gameDto) {
+        if (gameDto != null) {
+            this.gameCompletedSecuences = gameDto.getGameCompletedSequences();
+            this.gameDealsRemaining = gameDto.getGameDealsRemaining();
+            this.gameMoveCount = gameDto.getGameMoveCount();
+            this.gameDifficulty = gameDto.getGameDifficulty();
+            this.gameDurationSeconds = gameDto.getGameDurationSeconds();
+            this.gameTotalPoints = gameDto.getGameTotalPoints();
+            this.gameStatus = gameDto.getGameStatus();
+            this.gameCreatedDate = gameDto.getGameCreatedDate();
+            this.gameLastPlayed = gameDto.getGameLastPlayed();
+        }
+}
 
     public Long getGameId() {
         return gameId;

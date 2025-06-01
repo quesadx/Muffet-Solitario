@@ -133,8 +133,8 @@ public class UserAccountService {
             
             et.commit();
             
-            String mensaje = isUpdate ? "Usuario actualizado exitosamente" : "Usuario creado exitosamente";
-            return new Respuesta(true, mensaje, "saveUserAccount success", "UserAccount", userAccountDto);
+            String message = isUpdate ? "Usuario actualizado exitosamente" : "Usuario creado exitosamente";
+            return new Respuesta(true, message, "saveUserAccount success", "UserAccount", userAccountDto);
             
         } catch (Exception ex) {
             if (et != null && et.isActive()) {
