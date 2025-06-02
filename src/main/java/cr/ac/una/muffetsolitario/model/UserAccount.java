@@ -81,28 +81,28 @@ public class UserAccount implements Serializable {
     
     public UserAccount(UserAccountDto userDto) {
         if (userDto != null) {
-            this.userId = userDto.getUserId();
-            this.userNickname = userDto.getUserNickname();
-            this.userPassword = userDto.getUserPassword();
-            this.userCardImage = userDto.getUserCardImage();
-            this.userCardDesign = userDto.getUserCardDesign();
-            this.userTotalGames = userDto.getUserTotalGames();
-            this.userWonGames = userDto.getUserWonGames();
-            this.userTotalScore = userDto.getUserTotalScore();
-            this.userBestScore = userDto.getUserBestScore();
+            userId = userDto.getUserId();
+            userNickname = userDto.getUserNickname();
+            userPassword = userDto.getUserPassword();
+            userCardImage = userDto.getUserCardImage();
+            userCardDesign = userDto.getUserCardDesign();
+            userTotalGames = userDto.getUserTotalGames();
+            userWonGames = userDto.getUserWonGames();
+            userTotalScore = userDto.getUserTotalScore();
+            userBestScore = userDto.getUserBestScore();
         }
     }
 
     public void update(UserAccountDto userDto) {
         if (userDto != null) {
-            this.userNickname = userDto.getUserNickname();
-            this.userPassword = userDto.getUserPassword();
-            this.userCardImage = userDto.getUserCardImage();
-            this.userCardDesign = userDto.getUserCardDesign();
-            this.userTotalGames = userDto.getUserTotalGames();
-            this.userWonGames = userDto.getUserWonGames();
-            this.userTotalScore = userDto.getUserTotalScore();
-            this.userBestScore = userDto.getUserBestScore();
+            userNickname = userDto.getUserNickname();
+            userPassword = userDto.getUserPassword();
+            userCardImage = userDto.getUserCardImage();
+            userCardDesign = userDto.getUserCardDesign();
+            userTotalGames = userDto.getUserTotalGames();
+            userWonGames = userDto.getUserWonGames();
+            userTotalScore = userDto.getUserTotalScore();
+            userBestScore = userDto.getUserBestScore();
         }
     }
 
