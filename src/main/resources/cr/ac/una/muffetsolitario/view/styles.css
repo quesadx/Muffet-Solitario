@@ -342,6 +342,150 @@
     -fx-border-width: 2px;
 }
 
+/* ========== TABLEVIEW ========== */
+.table-view {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-size: 13px;
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
+.table-view:focused {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0 0 2px 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0 1px 0 0;
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.table-view .column-header:last-visible {
+    -fx-border-width: 0;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #111111;
+}
+
+.table-view .table-row-cell:selected, .table-view .table-row-cell:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+}
+
+.table-view .table-cell {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 4 8 4 8;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.table-view .table-row-cell:selected .table-cell,
+.table-view .table-row-cell:focused .table-cell {
+    -fx-text-fill: #000000;
+    -fx-background-color: transparent;
+}
+
+.table-view .placeholder {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-size: 13px;
+    -fx-text-fill: #AAAAAA;
+    -fx-background-color: #000000;
+}
+
+.table-view .column-drag-header {
+    -fx-background-color: #222222;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0 0 2px 0;
+}
+
+.table-view .corner {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0 0 2px 0;
+}
+
+/* ========== TABLEVIEW SCROLLBARS ========== */
+.table-view .scroll-bar,
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.table-view .scroll-bar .thumb {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 0;
+}
+
+.table-view .increment-button,
+.table-view .decrement-button {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.table-view .increment-arrow,
+.table-view .decrement-arrow {
+    -fx-background-color: #FFFFFF;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+}
+
+/* ========== TABLEVIEW FOCUS & SELECTION ========== */
+.table-view:focused .table-row-cell:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+}
+
+.table-view .table-row-cell:selected .table-cell {
+    -fx-text-fill: #000000;
+}
+
+/* Remove rounded corners everywhere for pixel look */
+.table-view, .table-view * {
+    -fx-background-radius: 0 !important;
+    -fx-border-radius: 0 !important;
+}
 
 
 /* Remove rounded corners everywhere for pixel look */

@@ -129,6 +129,7 @@
                               <VBox alignment="CENTER" spacing="2.0" styleClass="jfx-container">
                                  <children>
                                     <MFXButton fx:id="btnStartGame" onAction="#onActionBtnStartGame" prefWidth="250.0" text="JUGAR" />
+                                    <MFXButton onAction="#onActionBtnRanking" prefWidth="250.0" text="RANKING" />
                                     <MFXButton onAction="#onActionBtnSettings" prefWidth="250.0" text="AJUSTES" />
                                     <MFXButton onAction="#onActionBtnExit" prefWidth="250.0" text="SALIR" />
                                  </children>

@@ -11,7 +11,7 @@ public class GameRuleValidator {
         List<CardContainer> toCards = toColumn.getCardList();
 
         if (toCards.isEmpty()) {
-            //Only can put king iun column Empty 
+            // Only can put king in column Empty 
             return firstCardOfSequence.getCardDto().getCardValue() == 13;
         } else {
             CardContainer topCard = toCards.get(toCards.size() - 1);

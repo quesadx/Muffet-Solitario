@@ -1,0 +1,9 @@
+Estándares de números:
+125-250-500-1000
+
+75
+
+10 SPACING, 2 BORDER
+
+60, 35
+

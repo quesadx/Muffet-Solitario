@@ -21,9 +21,6 @@ public class AnimationHandler {
 
     private double mouseX = -1000, mouseY = -1000; // Offscreen by default
 
-
-
-
     private AnimationHandler() {}
 
     public static AnimationHandler getInstance() {

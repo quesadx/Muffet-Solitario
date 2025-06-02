@@ -418,8 +418,90 @@ public class LogInController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnLogOut(ActionEvent event) {
+    
+    // == LOGOUT LOGIC GOES HERE ==
+    // (e.g., remove current logged user, clear session, etc.)
 
+    // Reset login fields
+    txfUser.clear();
+    psfPassword.clear();
+
+    // Hide logged-in display
+    vboxLoggedIn.setVisible(false);
+    vboxLoggedIn.setManaged(false);
+
+    // Hide continue/delete game dialog if visible
+    if (vboxContinueOrDeleteGame != null) {
+        vboxContinueOrDeleteGame.setVisible(false);
+        vboxContinueOrDeleteGame.setManaged(false);
     }
+
+    // Hide hearts and slash
+    imgHeart0.setVisible(false);
+    imgHeart1.setVisible(false);
+    imgHeart2.setVisible(false);
+    imgSlash.setVisible(false);
+
+    // Hide jumpscares
+    imgMuffetJumpscare0.setVisible(false);
+    imgMuffetJumpscare0.setManaged(false);
+    imgMuffetJumpscare1.setVisible(false);
+    imgMuffetJumpscare1.setManaged(false);
+
+    // Hide alerts
+    vboxMissingFieldsAlert.setVisible(false);
+    vboxMissingFieldsAlert.setManaged(false);
+    vboxWrongCredentials.setVisible(false);
+    vboxWrongCredentials.setManaged(false);
+
+    // Hide About, Guest, and SignUp buttons
+    btnAbout.setVisible(false);
+    btnAbout.setManaged(false);
+    btnGuest.setVisible(false);
+    btnGuest.setManaged(false);
+    btnSignUp.setVisible(false);
+    btnSignUp.setManaged(false);
+
+    // Show start display, hide login display
+    vboxStartDisplay.setVisible(true);
+    vboxStartDisplay.setManaged(true);
+    vboxLoginDisplay.setVisible(false);
+    vboxLoginDisplay.setManaged(false);
+
+    // Reset dog position and stop animation
+    if (imgDog != null) {
+        imgDog.setLayoutX(dogOriginalX);
+        imgDog.setScaleX(1.0);
+    }
+    if (dogMoveTimeline != null) {
+        dogMoveTimeline.stop();
+    }
+
+    // Reset cards and animations
+    imgCenterCard.setVisible(true);
+    imgLeftCard.setVisible(true);
+    imgRightCard.setVisible(true);
+    animationHandler.startLevitationWithGlitch(imgLeftCard, 240);
+    animationHandler.startLevitationWithGlitch(imgCenterCard, 120);
+    animationHandler.startLevitationWithGlitch(imgRightCard, 0);
+
+    // Reset glitch animations for labels/buttons
+    startLabelGlitch(lblTitle);
+    startLabelGlitch(lblPlay);
+    startNodeGlitch(imgLeftCard, "left");
+    startNodeGlitch(imgCenterCard, "center");
+    startNodeGlitch(imgRightCard, "right");
+    startNodeGlitch(btnLogIn, "loginButton");
+
+    // Reset logged-in state and stop jumpscare loop
+    isLoggedIn = false;
+    if (muffetJumpscareTimeline != null) muffetJumpscareTimeline.stop();
+
+    FlowController.getInstance().limpiarLoader("LogInView");
+    FlowController.getInstance().goView("LogInView");
+
+    // Optionally, reset any other stateful fields or services here
+}
 
     @FXML
     void onActionBtnStartGame(ActionEvent event) {
@@ -462,6 +544,11 @@ public class LogInController extends Controller implements Initializable {
      @FXML
     void onActionBtnDeleteGame(ActionEvent event){
         
+    }
+
+    @FXML
+    void onActionBtnRanking(ActionEvent event) {
+        FlowController.getInstance().goView("RankingsView");
     }
     
 

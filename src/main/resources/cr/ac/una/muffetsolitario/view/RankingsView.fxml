@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="600.0" prefWidth="1000.0" stylesheets="@styles.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="cr.ac.una.muffetsolitario.controller.RankingsController">
+   <children>
+      <ImageView fx:id="imgBackground" fitHeight="470.0" fitWidth="797.0" pickOnBounds="true">
+         <image>
+            <Image url="@../resources/assets/gifStars.gif" />
+         </image>
+      </ImageView>
+      <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox alignment="CENTER" spacing="2.0">
+               <children>
+                  <Label fx:id="lblRankingsTitle" styleClass="jfx-subtitle" text="RANKINGS" />
+                  <Label maxWidth="500.0" text="EN LA PRESENTE VISTA PUEDES VER LOS RANKINGS GLOBALES DE MUFFET SOLITARIO" textAlignment="CENTER" wrapText="true">
+                     <padding>
+                        <Insets top="2.0" />
+                     </padding>
+                  </Label>
+                  <TableView fx:id="tbvRankings" maxWidth="750.0">
+                    <columns>
+                      <TableColumn fx:id="tbcUsername" prefWidth="75.0" text="USUARIO" />
+                      <TableColumn fx:id="tbcUserPoints" prefWidth="75.0" text="PUNTOS" />
+                        <TableColumn fx:id="tbcUserPlayedGames" prefWidth="75.0" text="PARTIDAS JUGADAS" />
+                        <TableColumn fx:id="tbcRanking" prefWidth="75.0" text="RANKING" />
+                    </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+                  <MFXButton fx:id="btnSalir" onAction="#onActionBtnSalir" prefWidth="250.0" text="SALIR" />
+               </children>
+            </VBox>
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>
