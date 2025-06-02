@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" fx:id="root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.muffetsolitario.controller.AboutController">
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="700.0" prefWidth="1000.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.muffetsolitario.controller.AboutController">
    <children>
-      <ImageView fx:id="imgBackground" fitHeight="760.0" fitWidth="1280.0" pickOnBounds="true" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fx:id="imgBackground" fitHeight="518.0" fitWidth="667.0" pickOnBounds="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../resources/assets/gifStars.gif" />
          </image>
@@ -20,57 +20,61 @@
          <children>
             <VBox alignment="CENTER">
                <children>
-                  <Label styleClass="jfx-subtitle" text="MUFFET SOLITARIO" />
-                  <Label text="MUFFET SOLITARIO ES UN JUEGO DESARROLLADO EN JAVAFX v23.0.1 UTILIZANDO JAVA21" />
+                  <Label fx:id="lblAboutUs" minHeight="-Infinity" styleClass="jfx-subtitle" text="SOBRE NOSOTROS" />
+                  <Label minHeight="-Infinity" text="MUFFET SOLITARIO ES UN JUEGO DESARROLLADO EN JAVAFX v23.0.1 UTILIZANDO JAVA21" textAlignment="CENTER" wrapText="true" />
                </children>
             </VBox>
-            <HBox alignment="CENTER">
+            <VBox alignment="CENTER" spacing="2.0">
                <children>
-                  <VBox alignment="TOP_CENTER" maxWidth="200.0" spacing="2.0" styleClass="jfx-container">
+                  <HBox alignment="CENTER">
                      <children>
-                        <ImageView fitHeight="200.0" fitWidth="125.0" pickOnBounds="true">
-                           <image>
-                              <Image url="@../resources/assets/pfpAlex.jpg" />
-                           </image>
-                        </ImageView>
-                        <Label text="ALEX" />
-                        <Label styleClass="jfx-description" text="El hijueputa que hizo la base de datos en 3,7 meses" textAlignment="CENTER" wrapText="true" />
+                        <VBox alignment="TOP_CENTER" maxWidth="200.0" spacing="2.0" styleClass="jfx-container">
+                           <children>
+                              <ImageView fitHeight="200.0" fitWidth="125.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../resources/assets/pfpAlex.jpg" />
+                                 </image>
+                              </ImageView>
+                              <Label minHeight="-Infinity" text="ALEX" wrapText="true" />
+                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El hijueputa que hizo la base de datos en 3,7 meses" textAlignment="CENTER" wrapText="true" />
+                           </children>
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </VBox>
+                        <VBox alignment="TOP_CENTER" maxWidth="200.0" spacing="2.0" styleClass="jfx-container">
+                           <children>
+                              <ImageView fitHeight="200.0" fitWidth="125.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../resources/assets/pfpKendal.jpg" />
+                                 </image>
+                              </ImageView>
+                              <Label minHeight="-Infinity" text="KENDAL" wrapText="true" />
+                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El mae mas negro de Perez Zeledon que hizo dos clases de java con 900 lineas cada una" textAlignment="CENTER" wrapText="true" />
+                           </children>
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </VBox>
+                        <VBox alignment="TOP_CENTER" maxWidth="200.0" spacing="2.0" styleClass="jfx-container">
+                           <children>
+                              <ImageView fitHeight="200.0" fitWidth="125.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../resources/assets/pfpMatteo.jpg" />
+                                 </image>
+                              </ImageView>
+                              <Label minHeight="-Infinity" text="MATTEO" wrapText="true" />
+                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El que hizo todo el proyecto" textAlignment="CENTER" wrapText="true" />
+                           </children>
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </VBox>
                      </children>
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </padding>
-                  </VBox>
-                  <VBox alignment="TOP_CENTER" maxWidth="200.0" spacing="2.0" styleClass="jfx-container">
-                     <children>
-                        <ImageView fitHeight="200.0" fitWidth="125.0" pickOnBounds="true">
-                           <image>
-                              <Image url="@../resources/assets/pfpKendal.jpg" />
-                           </image>
-                        </ImageView>
-                        <Label text="KENDAL" />
-                        <Label styleClass="jfx-description" text="El mae mas negro de Perez Zeledon que hizo dos clases de java con 900 lineas cada una" textAlignment="CENTER" wrapText="true" />
-                     </children>
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </padding>
-                  </VBox>
-                  <VBox alignment="TOP_CENTER" maxWidth="200.0" spacing="2.0" styleClass="jfx-container">
-                     <children>
-                        <ImageView fitHeight="200.0" fitWidth="125.0" pickOnBounds="true">
-                           <image>
-                              <Image url="@../resources/assets/pfpMatteo.jpg" />
-                           </image>
-                        </ImageView>
-                        <Label text="MATTEO" />
-                        <Label styleClass="jfx-description" text="El que hizo todo el proyecto" textAlignment="CENTER" wrapText="true" />
-                     </children>
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </padding>
-                  </VBox>
+                  </HBox>
+                  <MFXButton fx:id="btnVolver" onAction="#onActionBtnVolver" prefWidth="250.0" text="VOLVER" />
                </children>
-            </HBox>
-            <MFXButton fx:id="btnVolver" onAction="#onActionBtnVolver" prefWidth="250.0" text="VOLVER" />
+            </VBox>
          </children>
       </VBox>
    </children>

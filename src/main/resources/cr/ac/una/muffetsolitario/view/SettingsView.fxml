@@ -17,7 +17,7 @@
             <Image url="@../resources/assets/gifStars.gif" />
          </image>
       </ImageView>
-      <VBox alignment="CENTER" fillWidth="false" layoutX="10.0" layoutY="10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox alignment="CENTER" fillWidth="false" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <Label fx:id="lblSignUpTitle" styleClass="jfx-subtitle" text="AJUSTES" />
             <Label maxWidth="500.0" text="EN LA PRESENTE VISTA PUEDES CAMBIAR AJUSTES BASICOS DEL JUEGO Y DE TU USUARIO" textAlignment="CENTER" wrapText="true">
@@ -40,7 +40,7 @@
                      <children>
                         <Label text="USUARIO: " />
                         <MFXTextField fx:id="txfNewUsername" floatingText="NUEVO USUARIO" prefWidth="250.0" text="USUARIO" />
-                        <MFXButton onAction="#onActionConfirmNewUserName" prefWidth="75.0" styleClass="mfx-button-inverted" text="">
+                        <MFXButton fx:id="btnConfirmNewUserName" onAction="#onActionConfirmNewUserName" prefWidth="75.0" styleClass="mfx-button-inverted" text="">
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" styleClass="jfx-confirm-button" />
                            </graphic></MFXButton>

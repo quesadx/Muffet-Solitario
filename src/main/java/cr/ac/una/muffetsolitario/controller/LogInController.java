@@ -163,7 +163,7 @@ public class LogInController extends Controller implements Initializable {
     private void scheduleNextMuffetJumpscare() {
         if (!isLoggedIn) return;
 
-        int delay = 15000 + random.nextInt(5000); // 15-20 seconds
+        int delay = 4000 + random.nextInt(5000);
 
         PauseTransition pause = new PauseTransition(Duration.millis(delay));
         pause.setOnFinished(e -> {
@@ -319,7 +319,7 @@ public class LogInController extends Controller implements Initializable {
 
         glitchTimeline.getKeyFrames().add(
             new javafx.animation.KeyFrame(Duration.seconds(1), event -> {
-                double nextDelay = 1.0 + Math.random() * 8;
+                double nextDelay = 1.0 + Math.random() * 4;
                 glitchTimeline.stop();
                 animationHandler.playHitEffect(label);
                 glitchTimeline.getKeyFrames().set(0,
