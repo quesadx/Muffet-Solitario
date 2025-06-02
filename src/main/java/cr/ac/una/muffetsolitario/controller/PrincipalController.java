@@ -7,9 +7,12 @@ package cr.ac.una.muffetsolitario.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import io.github.palexdev.materialfx.controls.MFXButton;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -19,6 +22,9 @@ import javafx.scene.layout.BorderPane;
 public class PrincipalController extends Controller implements Initializable {
 
     @FXML private BorderPane root;
+    @FXML private MFXButton btnMinimize;
+    @FXML private MFXButton btnMaximize;
+    @FXML private MFXButton btnClose;
 
     /**
      * Initializes the controller class.
@@ -30,8 +36,22 @@ public class PrincipalController extends Controller implements Initializable {
 
     @Override
     public void initialize() {
-        // TODOextends Controller Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'initialize'");
-    }    
+    }
+
+    @FXML
+    private void onActionMinimize(ActionEvent event) {
+        ((Stage) root.getScene().getWindow()).setIconified(true);
+    }
+
+    @FXML
+    private void onActionMaximize(ActionEvent event) {
+        ((Stage) root.getScene().getWindow()).setFullScreen(true);
+    }
+
+    @FXML
+    private void onActionBtnClose(ActionEvent event) {
+        ((Stage) root.getScene().getWindow()).close();
+    }
     
 }

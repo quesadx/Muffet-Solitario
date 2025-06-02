@@ -1,0 +1,351 @@
+/* Undertale Black-White Inspired Base Theme
+   Uses PressStart2P pixel font (loaded in App.java)
+   Designed for JavaFX with MaterialFX components
+   All colors and font families are explicit (no CSS variables).
+*/
+
+/* ========== FONT FACE ========== */
+@font-face {
+    font-family: 'Press Start 2P';
+    src: url('../resources/assets/fonts/PressStart2P.ttf');
+}
+
+/* ========== TITLES ========== */
+.jfx-title, .mfx-title {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-weight: bold;
+    -fx-font-size: 60px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.jfx-subtitle {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-weight: bold;
+    -fx-font-size: 35px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.jfx-subtitle-2 {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-weight: bold;
+    -fx-font-size: 25px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.jfx-description {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-weight: bold;
+    -fx-font-size: 10px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.jfx-container {
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 0;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
+.jfx-transparent-container {
+    -fx-background-color: rgba(0, 0, 0, 0.583);
+}
+
+.jfx-window-border {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 0;
+    -fx-cursor: hand;
+}
+
+/* ========== BASE COMPONENTS ========== */
+.root, .mfx-app-bar, .mfx-button, .mfx-text-field, .mfx-password-field, .mfx-checkbox, .mfx-radio-button, .mfx-list-view, .mfx-list-cell, .mfx-dialog, .mfx-tab, .mfx-tab-pane {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: #000000;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* ========== BUTTONS ========== */
+.mfx-button {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 8 24 8 24;
+    -fx-effect: dropshadow(gaussian, #FFFFFF22, 0, 0, 0, 1);
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    transition: all 1s;
+}
+.mfx-button:hover {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+    -fx-border-color: #FFFFFF;
+}
+
+.mfx-button:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+    -fx-border-color: #FFFFFF;
+}
+
+.jfx-cancel-button:hover {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+    -fx-border-color: #fe0000;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 8 24 8 24;
+    -fx-effect: dropshadow(gaussian, #FFFFFF22, 0, 0, 0, 1);
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    transition: all 1s;
+}
+
+.jfx-confirm-button {
+    -fx-image: url("../resources/assets/imgCheck.png");
+}
+
+.mfx-button-inverted {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+    -fx-border-color: #000000;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 8 24 8 24;
+    -fx-effect: dropshadow(gaussian, #FFFFFF22, 0, 0, 0, 1);
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    transition: all 1s;
+}
+
+/* ========== TEXT FIELDS & PASSWORD FIELDS ========== */
+.mfx-text-field, .mfx-password-field {
+    -fx-font-family: 'Press Start 2P', monospace !important;
+    -fx-font-size: 13px !important;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #FFFFFF !important;
+    -fx-border-color: #FFFFFF !important;
+    -fx-border-width: 2px !important;
+    -fx-border-radius: 0 !important;
+    -fx-background-radius: 0 !important;
+    -fx-prompt-text-fill: #AAAAAA !important;
+    -fx-highlight-fill: #FFFFFF !important;
+    -fx-highlight-text-fill: #000000 !important;
+    -fx-focus-color: #FFFFFF !important;
+    -fx-faint-focus-color: transparent !important;
+    -fx-cursor: text;
+    box-shadow: none !important;
+}
+
+/* Focused State */
+.mfx-text-field:focused,
+.mfx-password-field:focused,
+.mfx-text-field:focused:filled,
+.mfx-password-field:focused:filled,
+.mfx-text-field:focus-within,
+.mfx-password-field:focus-within {
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #FFFFFF !important;
+    -fx-border-color: #FFFFFF !important;
+    -fx-border-width: 2px !important;
+    -fx-border-radius: 0 !important;
+    -fx-background-radius: 0 !important;
+    -fx-prompt-text-fill: #AAAAAA !important;
+    -fx-highlight-fill: #FFFFFF !important;
+    -fx-highlight-text-fill: #000000 !important;
+    -fx-focus-color: #FFFFFF !important;
+    -fx-faint-focus-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Readonly State */
+.mfx-text-field:readonly,
+.mfx-password-field:readonly,
+.mfx-text-field:readonly .text-field,
+.mfx-password-field:readonly .text-field {
+    -fx-cursor: default !important;
+    -fx-background-color: #111111 !important;
+    -fx-text-fill: #AAAAAA !important;
+    -fx-border-color: #AAAAAA !important;
+}
+
+/* Disabled State */
+.mfx-text-field:disabled,
+.mfx-password-field:disabled {
+    -fx-background-color: #222222 !important;
+    -fx-text-fill: #666666 !important;
+    -fx-border-color: #444444 !important;
+}
+
+/* Inner Text Field */
+.mfx-text-field .text-field,
+.mfx-password-field .text-field {
+    -fx-font-family: 'Press Start 2P', monospace !important;
+    -fx-font-size: 13px !important;
+    -fx-background-color: transparent !important;
+    -fx-text-fill: #FFFFFF !important;
+    -fx-prompt-text-fill: #AAAAAA !important;
+    -fx-highlight-fill: #FFFFFF !important;
+    -fx-highlight-text-fill: #000000 !important;
+    -fx-text-box-border: transparent !important;
+    -fx-padding: 0 4 0 4 !important;
+}
+
+/* Caret (text cursor) color */
+.mfx-text-field .caret,
+.mfx-password-field .caret {
+    -fx-stroke: #FFFFFF !important;
+}
+
+/* Selection color (when selecting text inside the field) */
+.mfx-text-field .selection,
+.mfx-password-field .selection {
+    -fx-background-color: #FFFFFF !important;
+    -fx-fill: #FFFFFF !important;
+}
+
+/* Floating label text */
+.mfx-text-field .floating-text,
+.mfx-password-field .floating-text {
+    -fx-font-family: 'Press Start 2P', monospace !important;
+    -fx-text-fill: #AAAAAA !important;
+    -fx-background-color: transparent !important;
+}
+
+/* Floating label when focused */
+.mfx-text-field:focus-within .floating-text,
+.mfx-password-field:focus-within .floating-text {
+    -fx-text-fill: #FFFFFF !important;
+}
+
+/* Remove rounded corners everywhere for pixel look */
+.mfx-text-field, .mfx-password-field,
+.mfx-text-field .text-field, .mfx-password-field .text-field,
+.mfx-text-field .floating-text, .mfx-password-field .floating-text {
+    -fx-background-radius: 0 !important;
+    -fx-border-radius: 0 !important;
+}
+
+/* Remove MaterialFX box-shadow/focus ring */
+.mfx-text-field, .mfx-password-field {
+    box-shadow: none !important;
+}
+
+/* Optional: Remove underline if present */
+.mfx-text-field .input-line,
+.mfx-password-field .input-line {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent !important;
+}
+
+/* ========== PASSWORD FIELD EYE ICON ========== */
+.mfx-password-field .mfx-eye,
+.mfx-password-field .mfx-eye .mfx-ripple-generator,
+.mfx-password-field .mfx-eye .mfx-svg-icon {
+    -fx-fill: #FFFFFF !important;
+    -fx-stroke: #FFFFFF !important;
+    -fx-background-color: transparent !important;
+    -fx-color: #FFFFFF !important;
+}
+
+/* ========== CHECKBOXES AND RADIO BUTTONS ========== */
+.mfx-checkbox, .mfx-radio-button {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-text-fill: #FFFFFF;
+    -fx-mark-color: #FFFFFF;
+    -fx-box-border-color: #FFFFFF;
+    -fx-background-color: #000000;
+}
+
+/* ========== LISTVIEW AND CELLS ========== */
+.mfx-list-view, .mfx-list-cell {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+.mfx-list-cell:selected, .mfx-list-cell:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+}
+
+/* ========== DIALOGS ========== */
+.mfx-dialog {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+}
+
+/* ========== TABS ========== */
+.mfx-tab-pane {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+}
+.mfx-tab {
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px 2px 0 2px;
+}
+.mfx-tab:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+    -fx-border-color: #FFFFFF;
+}
+
+/* ========== SCROLLBARS ========== */
+.scroll-bar, .mfx-scroll-bar {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+}
+.scroll-bar .thumb, .mfx-scroll-bar .thumb {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 0;
+}
+
+/* ========== MISC ========== */
+.label {
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+.separator {
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 1px;
+}
+
+.tooltip {
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: 'Press Start 2P', monospace;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+}
+
+
+
+/* Remove rounded corners everywhere for pixel look */
+* {
+    -fx-background-radius: 0 !important;
+    -fx-border-radius: 0 !important;
+}

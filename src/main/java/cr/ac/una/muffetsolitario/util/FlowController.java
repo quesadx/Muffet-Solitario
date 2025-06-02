@@ -1,9 +1,6 @@
 package cr.ac.una.muffetsolitario.util;
 
 import cr.ac.una.muffetsolitario.App;
-import cr.ac.una.muffetsolitario.controller.Controller;
-import io.github.palexdev.materialfx.css.themes.MFXThemeManager;
-import io.github.palexdev.materialfx.css.themes.Themes;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ResourceBundle;
@@ -13,12 +10,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import cr.ac.una.muffetsolitario.controller.Controller;
+import io.github.palexdev.materialfx.css.themes.MFXThemeManager;
+import io.github.palexdev.materialfx.css.themes.Themes;
 
 public class FlowController {
 
@@ -27,7 +27,8 @@ public class FlowController {
     private static ResourceBundle idioma;
     private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
 
-    private FlowController() {}
+    private FlowController() {
+    }
 
     private static void createInstance() {
         if (INSTANCE == null) {
@@ -63,21 +64,12 @@ public class FlowController {
             synchronized (FlowController.class) {
                 if (loader == null) {
                     try {
-                        loader = new FXMLLoader(
-                            App.class.getResource("view/" + name + ".fxml"),
-                            this.idioma
-                        );
+                        loader = new FXMLLoader(App.class.getResource("view/" + name + ".fxml"), this.idioma);
                         loader.load();
                         loaders.put(name, loader);
                     } catch (Exception ex) {
                         loader = null;
-                        java.util.logging.Logger.getLogger(
-                            FlowController.class.getName()
-                        ).log(
-                            Level.SEVERE,
-                            "Creando loader [" + name + "].",
-                            ex
-                        );
+                        java.util.logging.Logger.getLogger(FlowController.class.getName()).log(Level.SEVERE, "Creando loader [" + name + "].", ex);
                     }
                 }
             }
@@ -87,24 +79,11 @@ public class FlowController {
 
     public void goMain() {
         try {
-            this.mainStage.setScene(
-                    new Scene(
-                        FXMLLoader.load(
-                            App.class.getResource("view/PrincipalView.fxml"),
-                            this.idioma
-                        )
-                    )
-                );
-            MFXThemeManager.addOn(
-                this.mainStage.getScene(),
-                Themes.DEFAULT,
-                Themes.LEGACY
-            );
+            this.mainStage.setScene(new Scene(FXMLLoader.load(App.class.getResource("view/PrincipalView.fxml"), this.idioma)));
+            MFXThemeManager.addOn(this.mainStage.getScene(), Themes.DEFAULT, Themes.LEGACY);
             this.mainStage.show();
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(
-                FlowController.class.getName()
-            ).log(Level.SEVERE, "Error inicializando la vista base.", ex);
+            java.util.logging.Logger.getLogger(FlowController.class.getName()).log(Level.SEVERE, "Error inicializando la vista base.", ex);
         }
     }
 
@@ -129,19 +108,18 @@ public class FlowController {
         switch (location) {
             case "Center":
                 BorderPane borderPane = (BorderPane) stage.getScene().getRoot();
-                VBox vBox = (VBox) borderPane.getCenter();
-                vBox.getChildren().clear();
-                vBox.getChildren().add(loader.getRoot());
-
+                //VBox vBox = (VBox)borderPane.getCenter();
+                //vBox.getChildren().clear();
+                //vBox.getChildren().add(loader.getRoot());
+                
                 /*VBox vBox = ((VBox) ((BorderPane) stage.getScene().getRoot()).getCenter());
                 vBox.getChildren().clear();
                 vBox.getChildren().add(loader.getRoot());*/
+                borderPane.setCenter(loader.getRoot());
                 break;
             case "Top":
-                BorderPane borderPane2 = (BorderPane) stage
-                    .getScene()
-                    .getRoot();
-                HBox hbox = (HBox) borderPane2.getTop();
+                BorderPane borderPane2 = (BorderPane) stage.getScene().getRoot();
+                HBox hbox = (HBox)borderPane2.getTop();
                 hbox.getChildren().clear();
                 hbox.getChildren().add(loader.getRoot());
                 break;
@@ -162,6 +140,7 @@ public class FlowController {
         controller.setStage(stage);
         stage.getScene().setRoot(loader.getRoot());
         MFXThemeManager.addOn(stage.getScene(), Themes.DEFAULT, Themes.LEGACY);
+        
     }
 
     public void goViewInWindow(String viewName) {
@@ -169,10 +148,8 @@ public class FlowController {
         Controller controller = loader.getController();
         controller.initialize();
         Stage stage = new Stage();
-        stage.setTitle("Muffet Solitario");
-        // TODO: Add the proper app logo
-        //stage.getIcons().add(new Image("cr/ac/una/matchmaker/resources/logo.png"));
-        //stage.setTitle(controller.getNombreVista());
+        //stage.getIcons().add(new Image("cr/ac/una/unaplanillal2024/resources/LogoUNArojo.png"));
+        stage.setTitle(controller.getNombreVista());
         stage.setOnHidden((WindowEvent event) -> {
             controller.getStage().getScene().setRoot(new Pane());
             controller.setStage(null);
@@ -186,25 +163,12 @@ public class FlowController {
         stage.show();
     }
 
-    public void goViewInWindowModal(
-        String viewName,
-        Stage parentStage,
-        Boolean resizable
-    ) {
+    public void goViewInWindowModal(String viewName, Stage parentStage, Boolean resizable) {
         FXMLLoader loader = getLoader(viewName);
         Controller controller = loader.getController();
         controller.initialize();
         Stage stage = new Stage();
-        stage.setTitle("Muffet Solitario");
-
-        // TODO: Add the proper app logo
-//        stage
-//        .getIcons()
-//        .add(
-//        new Image(
-//        "cr/ac/una/unaplanillal2024/resources/logo.png"
-//        )
-//        );
+        stage.getIcons().add(new Image("cr/ac/una/unaplanilla/resources/LogoUNArojo.png"));
         stage.setTitle(controller.getNombreVista());
         stage.setResizable(resizable);
         stage.setOnHidden((WindowEvent event) -> {
@@ -220,18 +184,21 @@ public class FlowController {
         stage.initOwner(parentStage);
         stage.centerOnScreen();
         stage.showAndWait();
+
     }
 
-    public Controller getController(String viewName) { return getLoader(viewName).getController(); }
-
-    public void limpiarLoader(String view) {
+    public Controller getController(String viewName) {
+        return getLoader(viewName).getController();
+    }
+    
+    public void limpiarLoader(String view){
         this.loaders.remove(view);
     }
 
     public static void setIdioma(ResourceBundle idioma) {
         FlowController.idioma = idioma;
     }
-
+    
     public void initialize() {
         this.loaders.clear();
     }
@@ -239,4 +206,5 @@ public class FlowController {
     public void salir() {
         this.mainStage.close();
     }
+
 }
