@@ -56,11 +56,13 @@ public class CompletedSequence implements Serializable {
     public void update(CompletedSequenceDto completedSequenceDto) {
         cseqId = completedSequenceDto.getCseqId();
         cseqOrder = completedSequenceDto.getCseqOrder();
-        //cseqVersion = completedSequenceDto.getCseqVersion();
+        cseqVersion = completedSequenceDto.getCseqVersion();
     }
 
     public void update(CompletedSequenceDto completedSequenceDto, EntityManager em) {
-        this.cseqOrder = completedSequenceDto.getCseqOrder();
+        cseqId = completedSequenceDto.getCseqId();
+        cseqOrder = completedSequenceDto.getCseqOrder();
+        cseqVersion = completedSequenceDto.getCseqVersion();
 
         if (completedSequenceDto.getCseqGameFk() != null) {
             cseqGameFk = em.getReference(Game.class, completedSequenceDto.getCseqGameFk());

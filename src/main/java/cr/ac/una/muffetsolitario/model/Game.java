@@ -114,7 +114,7 @@ public class Game implements Serializable {
         this.gameStatus = gameDto.getGameStatus();
         this.gameCreatedDate = gameDto.getGameCreatedDate();
         this.gameLastPlayed = gameDto.getGameLastPlayed();
-        //gameVersion = gameDto.getGameVersion();
+        gameVersion = gameDto.getGameVersion();
 }
 
     public Long getGameId() {

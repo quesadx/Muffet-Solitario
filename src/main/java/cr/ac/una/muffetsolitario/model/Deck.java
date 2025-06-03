@@ -45,7 +45,7 @@ public class Deck implements Serializable {
 
     public Deck(DeckDto deckDto, EntityManager em) {
         deckId = deckDto.getDeckId();
-        //deckVersion = deckDto.getDeckVersion();
+        deckVersion = deckDto.getDeckVersion();
 
         if (deckDto.getDeckGameId() != null) {
             deckGameFk = em.getReference(Game.class, deckDto.getDeckGameId());
@@ -54,6 +54,8 @@ public class Deck implements Serializable {
 
     public void update(DeckDto deckDto, EntityManager em) {
         deckId = deckDto.getDeckId();
+        deckVersion = deckDto.getDeckVersion();
+
         if (deckDto.getDeckGameId() != null) {
             deckGameFk = em.getReference(Game.class, deckDto.getDeckGameId());
         }

@@ -102,7 +102,7 @@ public class UserAccount implements Serializable {
         userWonGames = userDto.getUserWonGames();
         userTotalScore = userDto.getUserTotalScore();
         userBestScore = userDto.getUserBestScore();
-        //userVersion = userDto.getUserVersion();
+        userVersion = userDto.getUserVersion();
     }
 
     public Long getUserId() {

@@ -96,7 +96,7 @@ public class Card implements Serializable {
         cardSuit = cardDto.getCardSuit();
         cardValue = cardDto.getCardValue();
         cardPositionInContainer = cardDto.getCardPositionInContainer();
-        //cardVersion = cardDto.getCardVersion();
+        cardVersion = cardDto.getCardVersion();
     }
 
     public Long getCardId() {

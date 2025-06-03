@@ -54,7 +54,7 @@ public class BoardColumn implements Serializable {
     public BoardColumn(BoardColumnDto boardColumnDto) {
         bcolmnId = boardColumnDto.getBcolmnId();
         bcolmnIndex = boardColumnDto.getBcolmnIndex();
-        //add version set
+        bcolmnVersion = boardColumnDto.getBcolmnVersion();
     }
 
     public BoardColumn(BoardColumnDto boardColumnDto, EntityManager em) {
@@ -67,13 +67,13 @@ public class BoardColumn implements Serializable {
     public void update(BoardColumnDto boardColumnDto) {
         bcolmnId = boardColumnDto.getBcolmnId();
         bcolmnIndex = boardColumnDto.getBcolmnIndex();
-        //bcolmVersion = boardColumnDto.getVersion();
+        bcolmnVersion = boardColumnDto.getBcolmnVersion();
     }
 
     public void update(BoardColumnDto boardColumnDto, EntityManager em) {
         bcolmnId = boardColumnDto.getBcolmnId();
         bcolmnIndex = boardColumnDto.getBcolmnIndex();
-        //bcolmnVersion = boardColumnDto.getBcolmnVersion();
+        bcolmnVersion = boardColumnDto.getBcolmnVersion();
 
         if (boardColumnDto.getBcolmnGameFk() != null) {
             this.bcolmnGameFk = em.getReference(Game.class, boardColumnDto.getBcolmnGameFk());
