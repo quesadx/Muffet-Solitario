@@ -23,16 +23,12 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author Al3xz
- */
 @Entity
 @Table(name = "GAME")
 @NamedQueries({
     @NamedQuery(name = "Game.findAll", query = "SELECT g FROM Game g"),
     @NamedQuery(name = "Game.findByGameId", query = "SELECT g FROM Game g WHERE g.gameId = :gameId"),
-    @NamedQuery(name = "Game.findByGameCompletedSecuences", query = "SELECT g FROM Game g WHERE g.gameCompletedSecuences = :gameCompletedSecuences"),
+    @NamedQuery(name = "Game.findByGameCompletedSequences", query = "SELECT g FROM Game g WHERE g.gameCompletedSequences = :gameCompletedSequences"),
     @NamedQuery(name = "Game.findByGameDealsRemaining", query = "SELECT g FROM Game g WHERE g.gameDealsRemaining = :gameDealsRemaining"),
     @NamedQuery(name = "Game.findByGameMoveCount", query = "SELECT g FROM Game g WHERE g.gameMoveCount = :gameMoveCount"),
     @NamedQuery(name = "Game.findByGameDifficulty", query = "SELECT g FROM Game g WHERE g.gameDifficulty = :gameDifficulty"),
@@ -49,8 +45,8 @@ public class Game implements Serializable {
     @Basic(optional = false)
     @Column(name = "GAME_ID")
     private Long gameId;
-    @Column(name = "GAME_COMPLETED_SECUENCES")
-    private Integer gameCompletedSecuences; //CHANGE LATER IN PL/SQL TABLE, GRAMMAR ERROR -> SEQUENCES*
+    @Column(name = "GAME_COMPLETED_SEQUENCES")
+    private Integer gameCompletedSequences;
     @Column(name = "GAME_DEALS_REMAINING")
     private Integer gameDealsRemaining;
     @Basic(optional = false)
@@ -74,10 +70,13 @@ public class Game implements Serializable {
     @Column(name = "GAME_LAST_PLAYED")
     @Temporal(TemporalType.DATE)
     private LocalDate gameLastPlayed;
+    @Basic(optional = false)
+    @Column(name = "GAME_VERSION")
+    private Long gameVersion;
     @JoinColumn(name = "GAME_USER_FK", referencedColumnName = "USER_ID")
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     private UserAccount gameUserFk;
-    @OneToOne(mappedBy = "deckGameId", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "deckGameFk", fetch = FetchType.LAZY)
     private Deck deck;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cseqGameFk", fetch = FetchType.LAZY)
     private List<CompletedSequence> completedSequenceList;
@@ -101,22 +100,21 @@ public class Game implements Serializable {
     }
     
     public Game(GameDto gameDto){
-        this.gameId = gameDto.getGameId();
         update(gameDto);
     }
     
     public void update(GameDto gameDto) {
-        if (gameDto != null) {
-            this.gameCompletedSecuences = gameDto.getGameCompletedSequences();
-            this.gameDealsRemaining = gameDto.getGameDealsRemaining();
-            this.gameMoveCount = gameDto.getGameMoveCount();
-            this.gameDifficulty = gameDto.getGameDifficulty();
-            this.gameDurationSeconds = gameDto.getGameDurationSeconds();
-            this.gameTotalPoints = gameDto.getGameTotalPoints();
-            this.gameStatus = gameDto.getGameStatus();
-            this.gameCreatedDate = gameDto.getGameCreatedDate();
-            this.gameLastPlayed = gameDto.getGameLastPlayed();
-        }
+        this.gameId = gameDto.getGameId();
+        this.gameCompletedSequences = gameDto.getGameCompletedSequences();
+        this.gameDealsRemaining = gameDto.getGameDealsRemaining();
+        this.gameMoveCount = gameDto.getGameMoveCount();
+        this.gameDifficulty = gameDto.getGameDifficulty();
+        this.gameDurationSeconds = gameDto.getGameDurationSeconds();
+        this.gameTotalPoints = gameDto.getGameTotalPoints();
+        this.gameStatus = gameDto.getGameStatus();
+        this.gameCreatedDate = gameDto.getGameCreatedDate();
+        this.gameLastPlayed = gameDto.getGameLastPlayed();
+        //gameVersion = gameDto.getGameVersion();
 }
 
     public Long getGameId() {
@@ -128,11 +126,11 @@ public class Game implements Serializable {
     }
 
     public Integer getGameCompletedSequences() {
-        return gameCompletedSecuences;
+        return gameCompletedSequences;
     }
 
     public void setGameCompletedSequences(Integer gameCompletedSequences) {
-        this.gameCompletedSecuences = gameCompletedSequences;
+        this.gameCompletedSequences = gameCompletedSequences;
     }
 
     public Integer getGameDealsRemaining() {
@@ -199,6 +197,14 @@ public class Game implements Serializable {
         this.gameLastPlayed = gameLastPlayed;
     }
 
+    public Long getGameVersion() {
+        return gameVersion;
+    }
+
+    public void setGameVersion(Long gameVersion) {
+        this.gameVersion = gameVersion;
+    }
+
     public UserAccount getGameUserFk() {
         return gameUserFk;
     }
@@ -255,5 +261,4 @@ public class Game implements Serializable {
     public String toString() {
         return "cr.ac.una.muffetsolitario.model.Game[ gameId=" + gameId + " ]";
     }
-    
 }

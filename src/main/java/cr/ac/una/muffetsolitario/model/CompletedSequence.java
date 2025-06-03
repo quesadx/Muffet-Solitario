@@ -29,10 +29,13 @@ public class CompletedSequence implements Serializable {
     private Long cseqId;
     @Column(name = "CSEQ_ORDER")
     private Integer cseqOrder;
+    @Basic(optional = false)
+    @Column(name = "CSEQ_VERSION")
+    private Long cseqVersion;
     @JoinColumn(name = "CSEQ_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game cseqGameFk;
-    @OneToMany(mappedBy = "cardCseqId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cardCseqFk", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public CompletedSequence() {
@@ -43,12 +46,17 @@ public class CompletedSequence implements Serializable {
     }
 
     public CompletedSequence(CompletedSequenceDto completedSequenceDto, EntityManager em) {
-        cseqId = completedSequenceDto.getCseqId();
-        cseqOrder = completedSequenceDto.getCseqOrder();
+        update(completedSequenceDto);
 
         if (completedSequenceDto.getCseqGameFk() != null) {
             cseqGameFk = em.getReference(Game.class, completedSequenceDto.getCseqGameFk());
         }
+    }
+
+    public void update(CompletedSequenceDto completedSequenceDto) {
+        cseqId = completedSequenceDto.getCseqId();
+        cseqOrder = completedSequenceDto.getCseqOrder();
+        //cseqVersion = completedSequenceDto.getCseqVersion();
     }
 
     public void update(CompletedSequenceDto completedSequenceDto, EntityManager em) {
@@ -73,6 +81,14 @@ public class CompletedSequence implements Serializable {
 
     public void setCseqOrder(Integer cseqOrder) {
         this.cseqOrder = cseqOrder;
+    }
+
+    public Long getCseqVersion() {
+        return cseqVersion;
+    }
+
+    public void setCseqVersion(Long cseqVersion) {
+        this.cseqVersion = cseqVersion;
     }
 
     public Game getCseqGameFk() {
@@ -115,5 +131,4 @@ public class CompletedSequence implements Serializable {
     public String toString() {
         return "cr.ac.una.muffetsolitario.model.CompletedSequence[ cseqId=" + cseqId + " ]";
     }
-    
 }

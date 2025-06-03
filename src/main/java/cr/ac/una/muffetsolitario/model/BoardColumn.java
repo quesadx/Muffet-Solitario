@@ -30,10 +30,13 @@ public class BoardColumn implements Serializable {
     @Basic(optional = false)
     @Column(name = "BCOLMN_INDEX")
     private Integer bcolmnIndex;
+    @Basic(optional = false)
+    @Column(name = "BCOLMN_VERSION")
+    private Long bcolmnVersion;
     @JoinColumn(name = "BCOLMN_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game bcolmnGameFk;
-    @OneToMany(mappedBy = "cardBcolmnId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cardBcolmnFk", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public BoardColumn() {
@@ -51,12 +54,11 @@ public class BoardColumn implements Serializable {
     public BoardColumn(BoardColumnDto boardColumnDto) {
         bcolmnId = boardColumnDto.getBcolmnId();
         bcolmnIndex = boardColumnDto.getBcolmnIndex();
+        //add version set
     }
 
     public BoardColumn(BoardColumnDto boardColumnDto, EntityManager em) {
-        bcolmnId = boardColumnDto.getBcolmnId();
-        bcolmnIndex = boardColumnDto.getBcolmnIndex();
-
+        update(boardColumnDto);
         if (boardColumnDto.getBcolmnGameFk() != null) {
             bcolmnGameFk = em.getReference(Game.class, boardColumnDto.getBcolmnGameFk());
         }
@@ -65,11 +67,13 @@ public class BoardColumn implements Serializable {
     public void update(BoardColumnDto boardColumnDto) {
         bcolmnId = boardColumnDto.getBcolmnId();
         bcolmnIndex = boardColumnDto.getBcolmnIndex();
+        //bcolmVersion = boardColumnDto.getVersion();
     }
 
     public void update(BoardColumnDto boardColumnDto, EntityManager em) {
         bcolmnId = boardColumnDto.getBcolmnId();
         bcolmnIndex = boardColumnDto.getBcolmnIndex();
+        //bcolmnVersion = boardColumnDto.getBcolmnVersion();
 
         if (boardColumnDto.getBcolmnGameFk() != null) {
             this.bcolmnGameFk = em.getReference(Game.class, boardColumnDto.getBcolmnGameFk());
@@ -90,6 +94,14 @@ public class BoardColumn implements Serializable {
 
     public void setBcolmnIndex(Integer bcolmnIndex) {
         this.bcolmnIndex = bcolmnIndex;
+    }
+
+    public Long getBcolmnVersion() {
+        return bcolmnVersion;
+    }
+
+    public void setBcolmnVersion(Long bcolmnVersion) {
+        this.bcolmnVersion = bcolmnVersion;
     }
 
     public Game getBcolmnGameFk() {
@@ -132,5 +144,4 @@ public class BoardColumn implements Serializable {
     public String toString() {
         return "cr.ac.una.muffetsolitario.model.BoardColumn[ bcolmnId=" + bcolmnId + " ]";
     }
-    
 }

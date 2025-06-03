@@ -62,6 +62,15 @@ public class UserAccount implements Serializable {
     private Integer userTotalScore;
     @Column(name = "USER_BEST_SCORE")
     private Integer userBestScore;
+    @Basic(optional = false)
+    @Column(name = "USER_FAV_WORD")
+    private String userFavWord;
+    @Basic(optional = false)
+    @Column(name = "USER_IS_MUSIC_ACTIVE")
+    private boolean userIsMusicActive;
+    @Basic(optional = false)
+    @Column(name = "USER_VERSION")
+    private Long userVersion;
     @OneToOne(mappedBy = "gameUserFk", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Game game;
 
@@ -80,30 +89,20 @@ public class UserAccount implements Serializable {
     }
     
     public UserAccount(UserAccountDto userDto) {
-        if (userDto != null) {
-            userId = userDto.getUserId();
-            userNickname = userDto.getUserNickname();
-            userPassword = userDto.getUserPassword();
-            userCardImage = userDto.getUserCardImage();
-            userCardDesign = userDto.getUserCardDesign();
-            userTotalGames = userDto.getUserTotalGames();
-            userWonGames = userDto.getUserWonGames();
-            userTotalScore = userDto.getUserTotalScore();
-            userBestScore = userDto.getUserBestScore();
-        }
+        update(userDto);
     }
 
     public void update(UserAccountDto userDto) {
-        if (userDto != null) {
-            userNickname = userDto.getUserNickname();
-            userPassword = userDto.getUserPassword();
-            userCardImage = userDto.getUserCardImage();
-            userCardDesign = userDto.getUserCardDesign();
-            userTotalGames = userDto.getUserTotalGames();
-            userWonGames = userDto.getUserWonGames();
-            userTotalScore = userDto.getUserTotalScore();
-            userBestScore = userDto.getUserBestScore();
-        }
+        userId = userDto.getUserId();
+        userNickname = userDto.getUserNickname();
+        userPassword = userDto.getUserPassword();
+        userCardImage = userDto.getUserCardImage();
+        userCardDesign = userDto.getUserCardDesign();
+        userTotalGames = userDto.getUserTotalGames();
+        userWonGames = userDto.getUserWonGames();
+        userTotalScore = userDto.getUserTotalScore();
+        userBestScore = userDto.getUserBestScore();
+        //userVersion = userDto.getUserVersion();
     }
 
     public Long getUserId() {
@@ -178,6 +177,31 @@ public class UserAccount implements Serializable {
         this.userBestScore = userBestScore;
     }
 
+
+    public boolean isMusicActive() {
+        return userIsMusicActive;
+    }
+
+    public void setUserIsMusicActive(boolean userIsMusicActive) {
+        this.userIsMusicActive = userIsMusicActive;
+    }
+
+    public String getUserFavWord() {
+        return userFavWord;
+    }
+
+    public void setUserFavWord(String userFavWord) {
+        this.userFavWord = userFavWord;
+    }
+
+    public Long getUserVersion() {
+        return userVersion;
+    }
+
+    public void setUserVersion(Long userVersion) {
+        this.userVersion = userVersion;
+    }
+
     public Game getGame() {
         return game;
     }
@@ -210,5 +234,5 @@ public class UserAccount implements Serializable {
     public String toString() {
         return "cr.ac.una.muffetsolitario.model.UserAccount[ userId=" + userId + " ]";
     }
-    
+
 }

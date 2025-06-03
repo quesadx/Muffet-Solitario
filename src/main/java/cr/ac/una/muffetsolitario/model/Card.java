@@ -50,15 +50,18 @@ public class Card implements Serializable {
     @Basic(optional = false)
     @Column(name = "CARD_POSITION_IN_CONTAINER")
     private Integer cardPositionInContainer;
-    @JoinColumn(name = "CARD_BCOLMN_ID", referencedColumnName = "BCOLMN_ID")
+    @Basic(optional = false)
+    @Column(name = "CARD_VERSION")
+    private Long cardVersion;
+    @JoinColumn(name = "CARD_BCOLMN_FK", referencedColumnName = "BCOLMN_ID")
     @ManyToOne(fetch = FetchType.LAZY)
-    private BoardColumn cardBcolmnId;
-    @JoinColumn(name = "CARD_CSEQ_ID", referencedColumnName = "CSEQ_ID")
+    private BoardColumn cardBcolmnFk;
+    @JoinColumn(name = "CARD_CSEQ_FK", referencedColumnName = "CSEQ_ID")
     @ManyToOne(fetch = FetchType.LAZY)
-    private CompletedSequence cardCseqId;
-    @JoinColumn(name = "CARD_DECK_ID", referencedColumnName = "DECK_ID")
+    private CompletedSequence cardCseqFk;
+    @JoinColumn(name = "CARD_DECK_FK", referencedColumnName = "DECK_ID")
     @ManyToOne(fetch = FetchType.LAZY)
-    private Deck cardDeckId;
+    private Deck cardDeckFk;
     
     public Card() {
     }
@@ -76,19 +79,24 @@ public class Card implements Serializable {
     }
     
     public Card(CardDto cardDto, EntityManager em) {
+        update(cardDto);
+
+        if (cardDto.getCardBcolmnId() != null) {
+            this.cardBcolmnFk = em.getReference(BoardColumn.class, cardDto.getCardBcolmnId());
+        } else if (cardDto.getCardCseqId() != null) {
+            this.cardCseqFk = em.getReference(CompletedSequence.class, cardDto.getCardCseqId());
+        } else if (cardDto.getCardDeckId() != null) {
+            this.cardDeckFk = em.getReference(Deck.class, cardDto.getCardDeckId());
+        }
+    }
+
+    public void update(CardDto cardDto){
         cardId = cardDto.getCardId();
         cardFaceUp = cardDto.isCardFaceUp();
         cardSuit = cardDto.getCardSuit();
         cardValue = cardDto.getCardValue();
         cardPositionInContainer = cardDto.getCardPositionInContainer();
-    
-        if (cardDto.getCardBcolmnId() != null) {
-            this.cardBcolmnId = em.getReference(BoardColumn.class, cardDto.getCardBcolmnId());
-        } else if (cardDto.getCardCseqId() != null) {
-            this.cardCseqId = em.getReference(CompletedSequence.class, cardDto.getCardCseqId());
-        } else if (cardDto.getCardDeckId() != null) {
-            this.cardDeckId = em.getReference(Deck.class, cardDto.getCardDeckId());
-        }
+        //cardVersion = cardDto.getCardVersion();
     }
 
     public Long getCardId() {
@@ -131,28 +139,36 @@ public class Card implements Serializable {
         this.cardPositionInContainer = cardPositionInContainer;
     }
 
-    public BoardColumn getCardBcolmnId() {
-        return cardBcolmnId;
+    public Long getCardVersion() {
+        return cardVersion;
     }
 
-    public void setCardBcolmnId(BoardColumn cardBcolmnId) {
-        this.cardBcolmnId = cardBcolmnId;
+    public void setCardVersion(Long cardVersion) {
+        this.cardVersion = cardVersion;
     }
 
-    public CompletedSequence getCardCseqId() {
-        return cardCseqId;
+    public BoardColumn getCardBcolmnFk() {
+        return cardBcolmnFk;
     }
 
-    public void setCardCseqId(CompletedSequence cardCseqId) {
-        this.cardCseqId = cardCseqId;
+    public void setCardBcolmnFk(BoardColumn cardBcolmnFk) {
+        this.cardBcolmnFk = cardBcolmnFk;
     }
 
-    public Deck getCardDeckId() {
-        return cardDeckId;
+    public CompletedSequence getCardCseqFk() {
+        return cardCseqFk;
     }
 
-    public void setCardDeckId(Deck cardDeckId) {
-        this.cardDeckId = cardDeckId;
+    public void setCardCseqFk(CompletedSequence cardCseqFk) {
+        this.cardCseqFk = cardCseqFk;
+    }
+
+    public Deck getCardDeckFk() {
+        return cardDeckFk;
+    }
+
+    public void setCardDeckFk(Deck cardDeckFk) {
+        this.cardDeckFk = cardDeckFk;
     }
 
 
@@ -180,5 +196,4 @@ public class Card implements Serializable {
     public String toString() {
         return "cr.ac.una.muffetsolitario.model.Card[ cardId=" + cardId + "cardFaceUp=" + cardFaceUp + " ]";
     }
-    
 }

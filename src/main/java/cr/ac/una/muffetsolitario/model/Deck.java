@@ -26,9 +26,12 @@ public class Deck implements Serializable {
     @Basic(optional = false)
     @Column(name = "DECK_ID")
     private Long deckId;
-    @JoinColumn(name = "DECK_GAME_ID", referencedColumnName = "GAME_ID", unique = true)
+    @Basic(optional = false)
+    @Column(name = "DECK_VERSION")
+    private Integer deckVersion;
+    @JoinColumn(name = "DECK_GAME_FK", referencedColumnName = "GAME_ID", unique = true)
     @OneToOne(fetch = FetchType.LAZY)
-    private Game deckGameId;
+    private Game deckGameFk;
 
     @OneToMany(mappedBy = "cardDeckId", fetch = FetchType.LAZY)
     private List<Card> cardList;
@@ -42,16 +45,17 @@ public class Deck implements Serializable {
 
     public Deck(DeckDto deckDto, EntityManager em) {
         deckId = deckDto.getDeckId();
+        //deckVersion = deckDto.getDeckVersion();
 
         if (deckDto.getDeckGameId() != null) {
-            deckGameId = em.getReference(Game.class, deckDto.getDeckGameId());
+            deckGameFk = em.getReference(Game.class, deckDto.getDeckGameId());
         }
     }
 
     public void update(DeckDto deckDto, EntityManager em) {
         deckId = deckDto.getDeckId();
         if (deckDto.getDeckGameId() != null) {
-            deckGameId = em.getReference(Game.class, deckDto.getDeckGameId());
+            deckGameFk = em.getReference(Game.class, deckDto.getDeckGameId());
         }
     }
 
@@ -63,12 +67,20 @@ public class Deck implements Serializable {
         this.deckId = deckId;
     }
 
-    public Game getDeckGameId() {
-        return deckGameId;
+    public Integer getDeckVersion() {
+        return deckVersion;
     }
 
-    public void setDeckGameId(Game deckGameId) {
-        this.deckGameId = deckGameId;
+    public void setDeckVersion(Integer deckVersion) {
+        this.deckVersion = deckVersion;
+    }
+
+    public Game getDeckGameFk() {
+        return deckGameFk;
+    }
+
+    public void setDeckGameFk(Game deckGameFk) {
+        this.deckGameFk = deckGameFk;
     }
 
     public List<Card> getCardList() {
@@ -103,5 +115,5 @@ public class Deck implements Serializable {
     public String toString() {
         return "cr.ac.una.muffetsolitario.model.Deck[ deckId=" + deckId + " ]";
     }
-    
+
 }
