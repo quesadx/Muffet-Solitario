@@ -17,6 +17,7 @@ public class GameDto {
     private StringProperty gameStatus;
     private ObjectProperty<LocalDate> gameCreatedDate;
     private ObjectProperty<LocalDate> gameLastPlayed;
+    private Long gameVersion;
     private DeckDto deckDto;
     private ObservableList<BoardColumnDto> boardColumnList;
     private ObservableList<CompletedSequenceDto> completedSequenceList;
@@ -52,36 +53,35 @@ public class GameDto {
     
     public GameDto(Game game) {
         this();
-    
-        if (game != null) {
-            setGameId(game.getGameId());
-            setGameCompletedSequences(game.getGameCompletedSequences());
-            setGameDealsRemaining(game.getGameDealsRemaining());
-            setGameMoveCount(game.getGameMoveCount());
-            setGameDifficulty(game.getGameDifficulty());
-            setGameDurationSeconds(game.getGameDurationSeconds());
-            setGameTotalPoints(game.getGameTotalPoints());
-            setGameStatus(game.getGameStatus());
-            setGameCreatedDate(game.getGameCreatedDate());
-            setGameLastPlayed(game.getGameLastPlayed());
-            setGameUserFk(game.getGameUserFk().getUserId());
+
+        setGameId(game.getGameId());
+        setGameCompletedSequences(game.getGameCompletedSequences());
+        setGameDealsRemaining(game.getGameDealsRemaining());
+        setGameMoveCount(game.getGameMoveCount());
+        setGameDifficulty(game.getGameDifficulty());
+        setGameDurationSeconds(game.getGameDurationSeconds());
+        setGameTotalPoints(game.getGameTotalPoints());
+        setGameStatus(game.getGameStatus());
+        setGameCreatedDate(game.getGameCreatedDate());
+        setGameLastPlayed(game.getGameLastPlayed());
+        gameVersion = game.getGameVersion();
+        setGameUserFk(game.getGameUserFk().getUserId());
         
-            if (game.getDeck() != null) {
-                this.deckDto = new DeckDto(game.getDeck());
-            }
+        if (game.getDeck() != null) {
+            this.deckDto = new DeckDto(game.getDeck());
+        }
         
-            if (game.getBoardColumnList() != null && !game.getBoardColumnList().isEmpty()) {
-                boardColumnList.clear();
-                for (BoardColumn boardColumn : game.getBoardColumnList()) {
-                    boardColumnList.add(new BoardColumnDto(boardColumn));
-                }
+        if (game.getBoardColumnList() != null && !game.getBoardColumnList().isEmpty()) {
+            boardColumnList.clear();
+            for (BoardColumn boardColumn : game.getBoardColumnList()) {
+                boardColumnList.add(new BoardColumnDto(boardColumn));
             }
+        }
          
-            if (game.getCompletedSequenceList() != null && !game.getCompletedSequenceList().isEmpty()) {
-                this.completedSequenceList.clear();
-                for (CompletedSequence completedSequence : game.getCompletedSequenceList()) {
-                    this.completedSequenceList.add(new CompletedSequenceDto(completedSequence));
-                }
+        if (game.getCompletedSequenceList() != null && !game.getCompletedSequenceList().isEmpty()) {
+            this.completedSequenceList.clear();
+            for (CompletedSequence completedSequence : game.getCompletedSequenceList()) {
+                this.completedSequenceList.add(new CompletedSequenceDto(completedSequence));
             }
         }
     }
@@ -204,6 +204,14 @@ public class GameDto {
     
     public void setGameLastPlayed(LocalDate gameLastPlayed) {
         this.gameLastPlayed.set(gameLastPlayed);
+    }
+
+    public Long getGameVersion() {
+        return gameVersion;
+    }
+
+    public void setGameVersion(Long gameVersion) {
+        this.gameVersion = gameVersion;
     }
     
     public DeckDto getDeckDto(){
@@ -361,4 +369,5 @@ public class GameDto {
                ", moves=" + gameMoveCount + ", points=" + gameTotalPoints + 
                ", duration=" + getFormattedDuration() + "}";
     }
+
 }

@@ -28,7 +28,7 @@ public class Deck implements Serializable {
     private Long deckId;
     @Basic(optional = false)
     @Column(name = "DECK_VERSION")
-    private Integer deckVersion;
+    private Long deckVersion;
     @JoinColumn(name = "DECK_GAME_FK", referencedColumnName = "GAME_ID", unique = true)
     @OneToOne(fetch = FetchType.LAZY)
     private Game deckGameFk;
@@ -67,11 +67,11 @@ public class Deck implements Serializable {
         this.deckId = deckId;
     }
 
-    public Integer getDeckVersion() {
+    public Long getDeckVersion() {
         return deckVersion;
     }
 
-    public void setDeckVersion(Integer deckVersion) {
+    public void setDeckVersion(Long deckVersion) {
         this.deckVersion = deckVersion;
     }
 

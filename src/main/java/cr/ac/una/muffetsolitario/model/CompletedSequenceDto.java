@@ -12,6 +12,7 @@ public class CompletedSequenceDto {
     
     private LongProperty cseqId;
     private IntegerProperty cseqOrder;
+    private Long cseqVersion;
     private Long cseqGameFk;
     private ObservableList<CardContainer> cardList;
     
@@ -35,19 +36,19 @@ public class CompletedSequenceDto {
     
     public CompletedSequenceDto(CompletedSequence completedSequence) {
         this();
-        if (completedSequence != null) {
-            setCseqId(completedSequence.getCseqId());
-            setCseqOrder(completedSequence.getCseqOrder());
-            if (completedSequence.getCseqGameFk() != null) {
-                setCseqGameFk(completedSequence.getCseqGameFk().getGameId());
-            }
-            if (completedSequence.getCardList() != null) {
-                for (Card card : completedSequence.getCardList()) {
-                    CardDto cardDto = new CardDto(card);
-                    CardContainer container = new CardContainer();
-                    container.setCardDto(cardDto);
-                    this.cardList.add(container);
-                }
+        setCseqId(completedSequence.getCseqId());
+        setCseqOrder(completedSequence.getCseqOrder());
+        cseqVersion = completedSequence.getCseqVersion();
+
+        if (completedSequence.getCseqGameFk() != null) {
+            setCseqGameFk(completedSequence.getCseqGameFk().getGameId());
+        }
+        if (completedSequence.getCardList() != null) {
+            for (Card card : completedSequence.getCardList()) {
+                CardDto cardDto = new CardDto(card);
+                CardContainer container = new CardContainer();
+                container.setCardDto(cardDto);
+                this.cardList.add(container);
             }
         }
     }
@@ -74,6 +75,14 @@ public class CompletedSequenceDto {
     
     public void setCseqOrder(Integer cseqOrder) {
         this.cseqOrder.set(cseqOrder);
+    }
+
+    public Long getCseqVersion() {
+        return cseqVersion;
+    }
+
+    public void setCseqVersion(Long cseqVersion) {
+        this.cseqVersion = cseqVersion;
     }
     
     public Long getCseqGameFk() {

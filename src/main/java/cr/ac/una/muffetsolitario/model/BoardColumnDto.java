@@ -11,7 +11,8 @@ import javafx.collections.ObservableList;
 public class BoardColumnDto {
    
     private LongProperty bcolmnId;
-    private IntegerProperty bcolmnIndex; 
+    private IntegerProperty bcolmnIndex;
+    private Long bcolmnVersion;
     private Long bcolmnGameFk;
     private ObservableList<CardContainer> cardList;
     
@@ -29,24 +30,21 @@ public class BoardColumnDto {
     
     public BoardColumnDto(BoardColumn boardColumn) {
         this();
-        if (boardColumn != null) {
-            setBcolmnId(boardColumn.getBcolmnId());
-            setBcolmnIndex(boardColumn.getBcolmnIndex());
-            this.bcolmnGameFk = boardColumn.getBcolmnGameFk().getGameId();
+        setBcolmnId(boardColumn.getBcolmnId());
+        setBcolmnIndex(boardColumn.getBcolmnIndex());
+        bcolmnVersion = boardColumn.getBcolmnVersion();
+        bcolmnGameFk = boardColumn.getBcolmnGameFk().getGameId();
 
-            if (boardColumn.getCardList() != null) {
-                for(Card card: boardColumn.getCardList()){
-                    CardDto cardDto = new CardDto(card);
-                    CardContainer container = new CardContainer();
-                    container.setCardDto(cardDto);
-                    this.cardList.add(container);
-                }
+        if (boardColumn.getCardList() != null) {
+            for(Card card: boardColumn.getCardList()){
+                CardDto cardDto = new CardDto(card);
+                CardContainer container = new CardContainer();
+                container.setCardDto(cardDto);
+                this.cardList.add(container);
             }
         }
     }
 
-    
-    // Getters y Setters para Properties
     public LongProperty bcolmnIdProperty() {
         return bcolmnId;
     }
@@ -66,12 +64,19 @@ public class BoardColumnDto {
     public Integer getBcolmnIndex() {
         return bcolmnIndex.get();
     }
-    
+
+    public Long getBcolmnVersion() {
+        return bcolmnVersion;
+    }
+
+    public void setBcolmnVersion(Long bcolmnVersion) {
+        this.bcolmnVersion = bcolmnVersion;
+    }
+
     public void setBcolmnIndex(Integer bcolmnIndex) {
         this.bcolmnIndex.set(bcolmnIndex);
     }
-    
-    // Getter y Setter simple para ID de relación
+
     public Long getBcolmnGameFk() {
         return bcolmnGameFk;
     }
@@ -80,7 +85,7 @@ public class BoardColumnDto {
         this.bcolmnGameFk = bcolmnGameFk;
     }
     
-    // Getter y Setter para lista observable de cartas
+    // Getter y Setter for ObservableList
     public ObservableList<CardContainer> getCardList() {
         return cardList;
     }
@@ -136,4 +141,5 @@ public class BoardColumnDto {
         return "BoardColumnDTO{" + "id=" + getBcolmnId() + ", index=" + getBcolmnIndex() + 
                ", cardCount=" + getCardCount() + "}";
     }
+
 }

@@ -9,6 +9,7 @@ public class CardDto {
     private StringProperty cardSuit;
     private IntegerProperty cardValue;
     private IntegerProperty cardPositionInContainer;
+    private Long cardVersion;
     
     private Long cardBcolmnId;
     private Long cardCseqId;
@@ -36,6 +37,7 @@ public class CardDto {
        setCardSuit(card.getCardSuit());
        setCardValue(card.getCardValue());
        setCardPositionInContainer(card.getCardPositionInContainer());
+       cardVersion = card.getCardVersion();
     }
 
     public LongProperty cardIdProperty() {
@@ -96,6 +98,14 @@ public class CardDto {
     
     public void setCardPositionInContainer(Integer cardPositionInContainer) {
         this.cardPositionInContainer.set(cardPositionInContainer);
+    }
+
+    public Long getCardVersion() {
+        return cardVersion;
+    }
+
+    public void setCardVersion(Long cardVersion) {
+        this.cardVersion = cardVersion;
     }
     
     // Properties only for UI
@@ -163,4 +173,5 @@ public class CardDto {
     public String toString() {
         return "CardDto{" + "id=" + cardId + "value=" + cardValue + "suit=" + cardSuit + "}";
     }
+
 }

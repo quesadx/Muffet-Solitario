@@ -18,6 +18,9 @@ public class UserAccountDto {
     private IntegerProperty userWonGames;
     private IntegerProperty userTotalScore;
     private IntegerProperty userBestScore;
+    private StringProperty userFavWord;
+    private BooleanProperty userIsMusicActive;
+    private Long userVersion;
     
     private Long gameId;
     
@@ -30,6 +33,8 @@ public class UserAccountDto {
         this.userWonGames = new SimpleIntegerProperty();
         this.userTotalScore = new SimpleIntegerProperty();
         this.userBestScore = new SimpleIntegerProperty();
+        this.userFavWord = new SimpleStringProperty();
+        this.userIsMusicActive = new SimpleBooleanProperty();
     }
     
     public UserAccountDto(Long userId) {
@@ -47,20 +52,22 @@ public class UserAccountDto {
     
     public UserAccountDto(UserAccount userAccount) {
         this();
-        if (userAccount != null) {
-            setUserId(userAccount.getUserId());
-            setUserNickname(userAccount.getUserNickname());
-            setUserPassword(userAccount.getUserPassword());
-            setUserCardImage(userAccount.getUserCardImage());
-            setUserCardDesign(userAccount.getUserCardDesign());
-            setUserTotalGames(userAccount.getUserTotalGames() != null ? userAccount.getUserTotalGames() : 0);
-            setUserWonGames(userAccount.getUserWonGames() != null ? userAccount.getUserWonGames() : 0);
-            setUserTotalScore(userAccount.getUserTotalScore() != null ? userAccount.getUserTotalScore() : 0);
-            setUserBestScore(userAccount.getUserBestScore() != null ? userAccount.getUserBestScore() : 0);
+
+        setUserId(userAccount.getUserId());
+        setUserNickname(userAccount.getUserNickname());
+        setUserPassword(userAccount.getUserPassword());
+        setUserCardImage(userAccount.getUserCardImage());
+        setUserCardDesign(userAccount.getUserCardDesign());
+        setUserTotalGames(userAccount.getUserTotalGames() != null ? userAccount.getUserTotalGames() : 0);
+        setUserWonGames(userAccount.getUserWonGames() != null ? userAccount.getUserWonGames() : 0);
+        setUserTotalScore(userAccount.getUserTotalScore() != null ? userAccount.getUserTotalScore() : 0);
+        setUserBestScore(userAccount.getUserBestScore() != null ? userAccount.getUserBestScore() : 0);
+        setUserFavWord(userAccount.getUserFavWord());
+        setUserIsMusicActive(userAccount.isMusicActive());
+        userVersion = userAccount.getUserVersion();
         
-            if (userAccount.getGame() != null) {
-                setGameId(userAccount.getGame().getGameId());
-            }
+        if (userAccount.getGame() != null) {
+            setGameId(userAccount.getGame().getGameId());
         }
     }
     
@@ -166,6 +173,38 @@ public class UserAccountDto {
     
     public void setUserBestScore(Integer userBestScore) {
         this.userBestScore.set(userBestScore);
+    }
+
+    public StringProperty userFavWordProperty() {
+        return userFavWord;
+    }
+
+    public String getUserFavWord() {
+        return userFavWord.get();
+    }
+
+    public void setUserFavWord(String userFavWord) {
+        this.userFavWord.set(userFavWord);
+    }
+
+    public BooleanProperty userIsMusicActiveProperty() {
+        return userIsMusicActive;
+    }
+
+    public boolean isUserIsMusicActive() {
+        return userIsMusicActive.get();
+    }
+
+    public void setUserIsMusicActive(boolean userIsMusicActive) {
+        this.userIsMusicActive.set(userIsMusicActive);
+    }
+
+    public Long getUserVersion() {
+        return userVersion;
+    }
+
+    public void setUserVersion(Long userVersion) {
+        this.userVersion = userVersion;
     }
     
     public Long getGameId() {
