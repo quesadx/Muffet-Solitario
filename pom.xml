@@ -107,6 +107,40 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Only the relevant <plugin> section for jlink is shown; replace your current maven-jlink-plugin section with this one -->
+            <!-- Only the corrected maven-jlink-plugin section is shown; replace your current maven-jlink-plugin section with this one -->
+<!-- Replace ONLY the maven-jlink-plugin section in your pom.xml with this corrected version -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.2</version>
+                <executions>
+                    <!--  Run shade goal on package phase  -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>cr.ac.una.muffetsolitario.AppLauncher</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
