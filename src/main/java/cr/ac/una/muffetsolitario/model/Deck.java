@@ -33,7 +33,7 @@ public class Deck implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     private Game deckGameFk;
 
-    @OneToMany(mappedBy = "cardDeckId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cardDeckFk", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public Deck() {

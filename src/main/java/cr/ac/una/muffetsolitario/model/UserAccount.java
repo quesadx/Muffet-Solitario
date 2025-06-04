@@ -4,17 +4,8 @@
  */
 package cr.ac.una.muffetsolitario.model;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -39,6 +30,8 @@ public class UserAccount implements Serializable {
     private static final long serialVersionUID = 1L;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Id
+    @SequenceGenerator(name = "USER_ACCOUNT_ID_GENERATOR", sequenceName = "USER_ACCOUNT_SQ01", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_ACCOUNT_ID_GENERATOR")
     @Basic(optional = false)
     @Column(name = "USER_ID")
     private Long userId;
@@ -102,6 +95,8 @@ public class UserAccount implements Serializable {
         userWonGames = userDto.getUserWonGames();
         userTotalScore = userDto.getUserTotalScore();
         userBestScore = userDto.getUserBestScore();
+        userFavWord = userDto.getUserFavWord();
+        userIsMusicActive = userDto.isUserIsMusicActive();
         userVersion = userDto.getUserVersion();
     }
 

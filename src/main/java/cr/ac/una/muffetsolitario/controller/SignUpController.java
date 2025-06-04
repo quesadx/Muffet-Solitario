@@ -3,8 +3,13 @@ package cr.ac.una.muffetsolitario.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import cr.ac.una.muffetsolitario.model.UserAccount;
+import cr.ac.una.muffetsolitario.model.UserAccountDto;
+import cr.ac.una.muffetsolitario.service.UserAccountService;
 import cr.ac.una.muffetsolitario.util.AnimationHandler;
 import cr.ac.una.muffetsolitario.util.FlowController;
+import cr.ac.una.muffetsolitario.util.Formato;
+import cr.ac.una.muffetsolitario.util.Respuesta;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
@@ -34,6 +39,7 @@ public class SignUpController extends Controller implements Initializable {
     @FXML private VBox vboxUserAlreadyExists;
     @FXML private ImageView imgBackground;
 
+    private UserAccountDto userDto;
     private Timeline lblSignUpTitleGlitchTimeline;
     private Timeline btnConfirmSignUpGlitchTimeline;
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
@@ -41,6 +47,10 @@ public class SignUpController extends Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Bind the background ImageView to the root pane
+        userDto = new UserAccountDto();
+        bindUserDto();
+        applyFormatters();
+        //call bind method for UserDto to UI fields
         imgBackground.fitHeightProperty().bind(root.heightProperty());
         imgBackground.fitWidthProperty().bind(root.widthProperty());
         
@@ -66,11 +76,24 @@ public class SignUpController extends Controller implements Initializable {
             vboxMissingFieldsAlert.setVisible(true);
             return;
         }
-        if(userExists(txfNewUser.getText())){
-            vboxUserAlreadyExists.setManaged(true);
-            vboxUserAlreadyExists.setVisible(true);
-            return;
+//        if(userExists(txfNewUser.getText())){
+//            vboxUserAlreadyExists.setManaged(true);
+//            vboxUserAlreadyExists.setVisible(true);
+//            return;
+//        }
+
+//        UserAccount user = new UserAccount();
+//        UserAccountDto userDto = new UserAccountDto(user);
+        UserAccountService userAccountService = new UserAccountService();
+        Respuesta answer = userAccountService.saveUserAccount(this.userDto);
+        if(answer.getEstado()){
+            this.userDto = (UserAccountDto) answer.getResultado("UserAccount");
+            //TODO: MUST USE AppContext to send userDto to GameController
+            
+        } else if(!answer.getEstado()){
+            System.out.println(answer.getMensajeInterno());
         }
+
     }
 
     @FXML
@@ -79,6 +102,28 @@ public class SignUpController extends Controller implements Initializable {
         vboxMissingFieldsAlert.setVisible(false);
         vboxUserAlreadyExists.setManaged(false);
         vboxUserAlreadyExists.setVisible(false);
+    }
+
+    private void applyFormatters() {
+        txfNewUser.delegateSetTextFormatter(Formato.getInstance().letrasFormat(10));
+        txfNewFavoriteWord.delegateSetTextFormatter(Formato.getInstance().letrasFormat(30));
+        psfNewPassword.delegateSetTextFormatter(Formato.getInstance().maxLengthFormat(15));
+    }
+
+    private void bindUserDto() {
+        try {
+            txfNewUser.textProperty().unbindBidirectional(userDto.userNicknameProperty());
+            txfNewFavoriteWord.textProperty().unbindBidirectional(userDto.userFavWordProperty());
+            psfNewPassword.textProperty().unbindBidirectional(userDto.userPasswordProperty());
+
+            txfNewUser.textProperty().bindBidirectional(userDto.userNicknameProperty());
+            txfNewFavoriteWord.textProperty().bindBidirectional(userDto.userFavWordProperty());
+            psfNewPassword.textProperty().bindBidirectional(userDto.userPasswordProperty());
+
+        } catch (Exception ex) {
+            System.err.println("Error al realizar el bindeo: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     private void clearTextFields(){

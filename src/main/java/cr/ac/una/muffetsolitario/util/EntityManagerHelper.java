@@ -17,7 +17,7 @@ public class EntityManagerHelper {
 
     static {
         try {
-            emf = Persistence.createEntityManagerFactory("UnaPlanillaPU");
+            emf = Persistence.createEntityManagerFactory("MuffetSolitarioPU");
             em = emf.createEntityManager();
         } catch (ExceptionInInitializerError e) {
             throw e;

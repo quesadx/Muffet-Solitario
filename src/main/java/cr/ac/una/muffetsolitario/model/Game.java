@@ -66,17 +66,17 @@ public class Game implements Serializable {
     private String gameStatus;
     @Column(name = "GAME_CREATED_DATE")
     @Temporal(TemporalType.DATE)
-    private LocalDate gameCreatedDate;
+    private Date gameCreatedDate;
     @Column(name = "GAME_LAST_PLAYED")
     @Temporal(TemporalType.DATE)
-    private LocalDate gameLastPlayed;
+    private Date gameLastPlayed;
     @Basic(optional = false)
     @Column(name = "GAME_VERSION")
     private Long gameVersion;
     @JoinColumn(name = "GAME_USER_FK", referencedColumnName = "USER_ID")
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     private UserAccount gameUserFk;
-    @OneToOne(mappedBy = "deckGameFk", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "deckGameFk", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private Deck deck;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cseqGameFk", fetch = FetchType.LAZY)
     private List<CompletedSequence> completedSequenceList;
@@ -181,19 +181,19 @@ public class Game implements Serializable {
         this.gameStatus = gameStatus;
     }
 
-    public LocalDate getGameCreatedDate() {
+    public Date getGameCreatedDate() {
         return gameCreatedDate;
     }
 
-    public void setGameCreatedDate(LocalDate gameCreatedDate) {
+    public void setGameCreatedDate(Date gameCreatedDate) {
         this.gameCreatedDate = gameCreatedDate;
     }
 
-    public LocalDate getGameLastPlayed() {
+    public Date getGameLastPlayed() {
         return gameLastPlayed;
     }
 
-    public void setGameLastPlayed(LocalDate gameLastPlayed) {
+    public void setGameLastPlayed(Date gameLastPlayed) {
         this.gameLastPlayed = gameLastPlayed;
     }
 

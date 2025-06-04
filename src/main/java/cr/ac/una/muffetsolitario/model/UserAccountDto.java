@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 public class UserAccountDto {
     
-    private LongProperty userId;
+    private Long userId;
     private StringProperty userNickname;
     private StringProperty userPassword;
     private Serializable userCardImage;
@@ -25,7 +25,6 @@ public class UserAccountDto {
     private Long gameId;
     
     public UserAccountDto() {
-        this.userId = new SimpleLongProperty();
         this.userNickname = new SimpleStringProperty();
         this.userPassword = new SimpleStringProperty();
         this.userCardDesign = new SimpleIntegerProperty();
@@ -35,6 +34,7 @@ public class UserAccountDto {
         this.userBestScore = new SimpleIntegerProperty();
         this.userFavWord = new SimpleStringProperty();
         this.userIsMusicActive = new SimpleBooleanProperty();
+        this.userVersion = 1L;
     }
     
     public UserAccountDto(Long userId) {
@@ -62,25 +62,21 @@ public class UserAccountDto {
         setUserWonGames(userAccount.getUserWonGames() != null ? userAccount.getUserWonGames() : 0);
         setUserTotalScore(userAccount.getUserTotalScore() != null ? userAccount.getUserTotalScore() : 0);
         setUserBestScore(userAccount.getUserBestScore() != null ? userAccount.getUserBestScore() : 0);
-        setUserFavWord(userAccount.getUserFavWord());
+        setUserFavWord(userAccount.getUserFavWord() != null ? userAccount.getUserFavWord() : "-" );
         setUserIsMusicActive(userAccount.isMusicActive());
-        userVersion = userAccount.getUserVersion();
+        userVersion = userAccount.getUserVersion() != null ? userAccount.getUserVersion() : 1 ;
         
         if (userAccount.getGame() != null) {
             setGameId(userAccount.getGame().getGameId());
         }
     }
     
-    public LongProperty userIdProperty() {
+    public Long getUserId() {
         return userId;
     }
     
-    public Long getUserId() {
-        return userId.get();
-    }
-    
     public void setUserId(Long userId) {
-        this.userId.set(userId);
+        this.userId = userId;
     }
     
     public StringProperty userNicknameProperty() {
