@@ -2,6 +2,8 @@ package cr.ac.una.muffetsolitario.model;
 
 import javafx.beans.property.*;
 import java.time.LocalDate;
+import java.util.Date;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -15,8 +17,8 @@ public class GameDto {
     private IntegerProperty gameDurationSeconds;
     private IntegerProperty gameTotalPoints;
     private StringProperty gameStatus;
-    private ObjectProperty<LocalDate> gameCreatedDate;
-    private ObjectProperty<LocalDate> gameLastPlayed;
+    private ObjectProperty<Date> gameCreatedDate;
+    private ObjectProperty<Date> gameLastPlayed;
     private Long gameVersion;
     private DeckDto deckDto;
     private ObservableList<BoardColumnDto> boardColumnList;
@@ -182,27 +184,27 @@ public class GameDto {
         this.gameStatus.set(gameStatus);
     }
     
-    public ObjectProperty<LocalDate> gameCreatedDateProperty() {
+    public ObjectProperty<Date> gameCreatedDateProperty() {
         return gameCreatedDate;
     }
     
-    public LocalDate getGameCreatedDate() {
+    public Date getGameCreatedDate() {
         return gameCreatedDate.get();
     }
     
-    public void setGameCreatedDate(LocalDate gameCreatedDate) {
+    public void setGameCreatedDate(Date gameCreatedDate) {
         this.gameCreatedDate.set(gameCreatedDate);
     }
     
-    public ObjectProperty<LocalDate> gameLastPlayedProperty() {
+    public ObjectProperty<Date> gameLastPlayedProperty() {
         return gameLastPlayed;
     }
     
-    public LocalDate getGameLastPlayed() {
+    public Date getGameLastPlayed() {
         return gameLastPlayed.get();
     }
     
-    public void setGameLastPlayed(LocalDate gameLastPlayed) {
+    public void setGameLastPlayed(Date gameLastPlayed) {
         this.gameLastPlayed.set(gameLastPlayed);
     }
 
