@@ -5,7 +5,9 @@ import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.*;
@@ -289,120 +291,143 @@ public class AnimationHandler {
         fade.play();
     }
 
-      /**
-     * Performs a multi-stage "crazy" exit animation on the center card:
+    /**
+     * Enhanced "crazy" exit animation on the center card with improved effects:
      * 1. Earthquake (shake)
-     * 2. Spin
-     * 3. Zoom in
-     * 4. Rip apart (split into left/right halves and move away)
-     * After the animation, runs the provided callback (e.g., to show login).
+     * 2. Smooth morphing spin with scale pulsing
+     * 3. Particle explosion effect
+     * 4. Rip apart with enhanced visual effects
      */
-    
     public void animateCenterCardCrazyExit(ImageView centerCard, Runnable onFinished, Pane parentPane) {
-    // 1. Earthquake (shake)
-    Timeline earthquake = new Timeline();
-    int shakes = 18;
-    double shakeAmplitude = 10;
-    int interval = 30;
-    for (int i = 0; i < shakes; i++) {
-        double offset = (i % 2 == 0 ? shakeAmplitude : -shakeAmplitude);
+        // Play attack sound
+        cr.ac.una.muffetsolitario.util.SoundUtils.getInstance().playAttackSound();
+        
+        // 1. Enhanced earthquake with varying intensity
+        Timeline earthquake = new Timeline();
+        int shakes = 24;
+        double maxShakeAmplitude = 15;
+        int interval = 25;
+        
+        for (int i = 0; i < shakes; i++) {
+            double intensity = Math.sin((double) i / shakes * Math.PI); // Sine wave intensity
+            double offset = (i % 2 == 0 ? intensity * maxShakeAmplitude : -intensity * maxShakeAmplitude);
+            earthquake.getKeyFrames().add(
+                new KeyFrame(Duration.millis(i * interval),
+                    new KeyValue(centerCard.translateXProperty(), offset),
+                    new KeyValue(centerCard.translateYProperty(), offset * 0.3)
+                )
+            );
+        }
         earthquake.getKeyFrames().add(
-            new KeyFrame(Duration.millis(i * interval),
-                new KeyValue(centerCard.translateXProperty(), offset)
+            new KeyFrame(Duration.millis(shakes * interval),
+                new KeyValue(centerCard.translateXProperty(), 0),
+                new KeyValue(centerCard.translateYProperty(), 0)
             )
         );
-    }
-    earthquake.getKeyFrames().add(
-        new KeyFrame(Duration.millis(shakes * interval),
-            new KeyValue(centerCard.translateXProperty(), 0)
-        )
-    );
 
-    // 2. Slow double spin (720°)
-    Timeline slowSpin = new Timeline(
-        new KeyFrame(Duration.ZERO,
-            new KeyValue(centerCard.rotateProperty(), 0)
-        ),
-        new KeyFrame(Duration.millis(500), 
-            new KeyValue(centerCard.rotateProperty(), 720)
-        )
-    );
+        // 2. Pixel-art style tilting animation
+        Timeline pixelTilt = new Timeline();
+        int tiltFrames = 20;
+        double tiltDuration = 800;
+        
+        // Create a stepped/pixelated effect by using fewer frames
+        for (int i = 0; i <= tiltFrames; i++) {
+            double progress = (double) i / tiltFrames;
+            
+            // Tilt back and forth instead of spinning
+            double tiltAngle = Math.sin(progress * Math.PI * 3) * 25; // Tilt ±25 degrees
+            
+            // Stepped scaling for pixel-art feel
+            double scaleProgress = Math.floor(progress * 4) / 4.0; // Steps of 0.25
+            double scale = 1.0 + Math.sin(scaleProgress * Math.PI * 2) * 0.2; // Smaller scale range
+            
+            // Pixelated opacity changes
+            double opacityProgress = Math.floor(progress * 5) / 5.0; // Steps of 0.2
+            double opacity = 1.0 - Math.sin(opacityProgress * Math.PI) * 0.15; // Subtle opacity
+            
+            pixelTilt.getKeyFrames().add(
+                new KeyFrame(Duration.millis(progress * tiltDuration),
+                    new KeyValue(centerCard.rotateProperty(), tiltAngle, Interpolator.DISCRETE),
+                    new KeyValue(centerCard.scaleXProperty(), scale, Interpolator.DISCRETE),
+                    new KeyValue(centerCard.scaleYProperty(), scale, Interpolator.DISCRETE),
+                    new KeyValue(centerCard.opacityProperty(), opacity, Interpolator.DISCRETE)
+                )
+            );
+        }
 
-    // 3. Spin + Zoom (as before)
-    Timeline spinZoom = new Timeline(
-        new KeyFrame(Duration.ZERO,
-            new KeyValue(centerCard.rotateProperty(), 0),
-            new KeyValue(centerCard.scaleXProperty(), 1.0),
-            new KeyValue(centerCard.scaleYProperty(), 1.0)
-        ),
-        new KeyFrame(Duration.millis(800),
-            new KeyValue(centerCard.rotateProperty(), 1080), // 3 more spins (1080°)
-            new KeyValue(centerCard.scaleXProperty(), 2.5),
-            new KeyValue(centerCard.scaleYProperty(), 2.5)
-        )
-    );
-
-    // 4. Rip apart (split into left/right halves and move away)
-    spinZoom.setOnFinished(e -> {
-        double w = centerCard.getBoundsInParent().getWidth();
-        double h = centerCard.getBoundsInParent().getHeight();
-
-        // Create left and right halves
-        ImageView leftHalf = new ImageView(centerCard.getImage());
-        leftHalf.setFitWidth(centerCard.getFitWidth());
-        leftHalf.setFitHeight(centerCard.getFitHeight());
-        leftHalf.setPreserveRatio(centerCard.isPreserveRatio());
-        leftHalf.setSmooth(centerCard.isSmooth());
-        Rectangle leftClip = new Rectangle(0, 0, w / 2, h);
-        leftHalf.setClip(leftClip);
-
-        ImageView rightHalf = new ImageView(centerCard.getImage());
-        rightHalf.setFitWidth(centerCard.getFitWidth());
-        rightHalf.setFitHeight(centerCard.getFitHeight());
-        rightHalf.setPreserveRatio(centerCard.isPreserveRatio());
-        rightHalf.setSmooth(centerCard.isSmooth());
-        Rectangle rightClip = new Rectangle(w / 2, 0, w / 2, h);
-        rightHalf.setClip(rightClip);
-
-        // Position halves
-        leftHalf.setLayoutX(centerCard.getLayoutX());
-        leftHalf.setLayoutY(centerCard.getLayoutY());
-        rightHalf.setLayoutX(centerCard.getLayoutX());
-        rightHalf.setLayoutY(centerCard.getLayoutY());
-
-        // Add to parent
-        parentPane.getChildren().addAll(leftHalf, rightHalf);
-
-        // Hide original
-        centerCard.setVisible(false);
-
-        // Animate halves moving apart
-        Timeline rip = new Timeline(
-            new KeyFrame(Duration.ZERO,
-                new KeyValue(leftHalf.translateXProperty(), 0),
-                new KeyValue(rightHalf.translateXProperty(), 0),
-                new KeyValue(leftHalf.opacityProperty(), 1.0),
-                new KeyValue(rightHalf.opacityProperty(), 1.0)
-            ),
-            new KeyFrame(Duration.millis(600),
-                new KeyValue(leftHalf.translateXProperty(), -w * 1.2),
-                new KeyValue(rightHalf.translateXProperty(), w * 1.2),
-                new KeyValue(leftHalf.opacityProperty(), 0.0),
-                new KeyValue(rightHalf.opacityProperty(), 0.0)
-            )
-        );
-        rip.setOnFinished(ev -> {
-            parentPane.getChildren().removeAll(leftHalf, rightHalf);
-            if (onFinished != null) onFinished.run();
+        // 3. Final explosion and rip
+        pixelTilt.setOnFinished(e -> {
+            // Create particle explosion effect
+            createParticleExplosion(centerCard, parentPane);
+            
+            // Enhanced rip effect
+            Timeline finalExplosion = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(centerCard.scaleXProperty(), 2.5),
+                    new KeyValue(centerCard.scaleYProperty(), 2.5),
+                    new KeyValue(centerCard.opacityProperty(), 1.0)
+                ),
+                new KeyFrame(Duration.millis(200),
+                    new KeyValue(centerCard.scaleXProperty(), 4.0),
+                    new KeyValue(centerCard.scaleYProperty(), 4.0),
+                    new KeyValue(centerCard.opacityProperty(), 0.0)
+                )
+            );
+            
+            finalExplosion.setOnFinished(ev -> {
+                centerCard.setVisible(false);
+                if (onFinished != null) onFinished.run();
+            });
+            finalExplosion.play();
         });
-        rip.play();
-    });
 
-    // Play sequence: earthquake -> slowSpin -> spinZoom
-    earthquake.setOnFinished(e -> slowSpin.play());
-    slowSpin.setOnFinished(e -> spinZoom.play());
-    earthquake.play();
-}
+        // Play sequence
+        earthquake.setOnFinished(e -> pixelTilt.play());
+        earthquake.play();
+    }
+
+    /**
+     * Creates a particle explosion effect around the given node
+     */
+    private void createParticleExplosion(ImageView centerNode, Pane parentPane) {
+        double centerX = centerNode.getLayoutX() + centerNode.getFitWidth() / 2;
+        double centerY = centerNode.getLayoutY() + centerNode.getFitHeight() / 2;
+        
+        for (int i = 0; i < 12; i++) {
+            ImageView particle = new ImageView(centerNode.getImage());
+            particle.setFitWidth(20);
+            particle.setFitHeight(20);
+            particle.setLayoutX(centerX - 10);
+            particle.setLayoutY(centerY - 10);
+            
+            double angle = (2 * Math.PI * i) / 12;
+            double distance = 150 + random.nextDouble() * 100;
+            double targetX = centerX + Math.cos(angle) * distance;
+            double targetY = centerY + Math.sin(angle) * distance;
+            
+            parentPane.getChildren().add(particle);
+            
+            Timeline particleAnim = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(particle.layoutXProperty(), centerX - 10),
+                    new KeyValue(particle.layoutYProperty(), centerY - 10),
+                    new KeyValue(particle.opacityProperty(), 1.0),
+                    new KeyValue(particle.scaleXProperty(), 1.0),
+                    new KeyValue(particle.scaleYProperty(), 1.0)
+                ),
+                new KeyFrame(Duration.millis(600),
+                    new KeyValue(particle.layoutXProperty(), targetX - 10),
+                    new KeyValue(particle.layoutYProperty(), targetY - 10),
+                    new KeyValue(particle.opacityProperty(), 0.0),
+                    new KeyValue(particle.scaleXProperty(), 0.2),
+                    new KeyValue(particle.scaleYProperty(), 0.2)
+                )
+            );
+            
+            particleAnim.setOnFinished(ev -> parentPane.getChildren().remove(particle));
+            particleAnim.play();
+        }
+    }
       /**
      * Starts Undertale-style heart movement for the given hearts within the given area.
      * Hearts will move randomly, bounce off edges, and avoid overlapping each other.
@@ -524,30 +549,52 @@ public class AnimationHandler {
     }
 
         /**
-     * Makes a heart tremble and flash red as if hit, then returns to normal.
+     * Makes a heart tremble and flash red with two distinct hits for more visibility.
      * @param heart The ImageView representing the heart.
      */
     public void playHeartHitEffect(ImageView heart) {
-        // Tremble animation (quick shake)
-        Timeline tremble = new Timeline();
-        int shakes = 8;
-        double amplitude = 8;
-        int interval = 24;
+        // First hit animation
+        Timeline firstHit = new Timeline();
+        int shakes = 6;
+        double amplitude = 12; // Increased amplitude
+        int interval = 20; // Faster shaking
+        
+        // First hit shake
         for (int i = 0; i < shakes; i++) {
             double offset = (i % 2 == 0 ? amplitude : -amplitude);
-            tremble.getKeyFrames().add(
+            firstHit.getKeyFrames().add(
                 new KeyFrame(Duration.millis(i * interval),
-                    new KeyValue(heart.translateXProperty(), offset)
+                    new KeyValue(heart.translateXProperty(), offset),
+                    new KeyValue(heart.translateYProperty(), offset * 0.5) // Add vertical movement
                 )
             );
         }
-        tremble.getKeyFrames().add(
+        firstHit.getKeyFrames().add(
             new KeyFrame(Duration.millis(shakes * interval),
-                new KeyValue(heart.translateXProperty(), 0)
+                new KeyValue(heart.translateXProperty(), 0),
+                new KeyValue(heart.translateYProperty(), 0)
             )
         );
 
-        // Color effect: flash red using ColorAdjust and Blend
+        // Second hit animation (after a brief pause)
+        Timeline secondHit = new Timeline();
+        for (int i = 0; i < shakes; i++) {
+            double offset = (i % 2 == 0 ? amplitude * 0.8 : -amplitude * 0.8);
+            secondHit.getKeyFrames().add(
+                new KeyFrame(Duration.millis(i * interval),
+                    new KeyValue(heart.translateXProperty(), -offset), // Opposite direction
+                    new KeyValue(heart.translateYProperty(), offset * 0.5)
+                )
+            );
+        }
+        secondHit.getKeyFrames().add(
+            new KeyFrame(Duration.millis(shakes * interval),
+                new KeyValue(heart.translateXProperty(), 0),
+                new KeyValue(heart.translateYProperty(), 0)
+            )
+        );
+
+        // Enhanced color effect with two flashes
         javafx.scene.effect.ColorAdjust colorAdjust = new javafx.scene.effect.ColorAdjust();
         javafx.scene.effect.Blend blend = new javafx.scene.effect.Blend();
         blend.setTopInput(colorAdjust);
@@ -555,24 +602,38 @@ public class AnimationHandler {
         // Save previous effect to restore
         javafx.scene.effect.Effect prevEffect = heart.getEffect();
 
-        // Animate color to red and back
+        // Two color flashes
         Timeline colorFlash = new Timeline(
+            // First flash
             new KeyFrame(Duration.ZERO, evt -> {
-                colorAdjust.setHue(-0.5); // Red tint
+                colorAdjust.setHue(-0.5);
                 colorAdjust.setSaturation(1.0);
-                colorAdjust.setBrightness(0.2);
+                colorAdjust.setBrightness(0.3); // Brighter flash
                 heart.setEffect(blend);
             }),
-            new KeyFrame(Duration.millis(shakes * interval / 2), evt -> {
-                colorAdjust.setHue(0);
-                colorAdjust.setSaturation(0);
-                colorAdjust.setBrightness(0);
+            new KeyFrame(Duration.millis(shakes * interval), evt -> {
+                heart.setEffect(prevEffect);
+            }),
+            // Second flash
+            new KeyFrame(Duration.millis(shakes * interval + 100), evt -> {
+                colorAdjust.setHue(-0.5);
+                colorAdjust.setSaturation(1.0);
+                colorAdjust.setBrightness(0.3);
+                heart.setEffect(blend);
+            }),
+            new KeyFrame(Duration.millis(shakes * interval * 2 + 100), evt -> {
                 heart.setEffect(prevEffect);
             })
         );
 
-        // Play both animations
-        tremble.play();
+        // Play animations in sequence
+        firstHit.setOnFinished(e -> {
+            PauseTransition pause = new PauseTransition(Duration.millis(100));
+            pause.setOnFinished(p -> secondHit.play());
+            pause.play();
+        });
+        
+        firstHit.play();
         colorFlash.play();
     }
 
@@ -647,5 +708,153 @@ public class AnimationHandler {
         );
         tremble.play();
         colorFlash.play();
+    }
+
+    /**
+     * Creates a lightning flash effect on the background
+     * @param root The root AnchorPane containing the background
+     */
+    public void playLightningEffect(AnchorPane root) {
+        Rectangle flash = new Rectangle();
+        flash.setFill(Color.WHITE);
+        flash.widthProperty().bind(root.widthProperty());
+        flash.heightProperty().bind(root.heightProperty());
+        flash.setOpacity(0);
+        
+        root.getChildren().add(flash);
+        root.getChildren().get(root.getChildren().size()-1).toFront();
+
+        Timeline lightning = new Timeline(
+            // First quick flash
+            new KeyFrame(Duration.ZERO, new KeyValue(flash.opacityProperty(), 0)),
+            new KeyFrame(Duration.millis(50), new KeyValue(flash.opacityProperty(), 0.8)),
+            new KeyFrame(Duration.millis(100), new KeyValue(flash.opacityProperty(), 0.2)),
+            // Second stronger flash
+            new KeyFrame(Duration.millis(150), new KeyValue(flash.opacityProperty(), 0.9)),
+            new KeyFrame(Duration.millis(200), new KeyValue(flash.opacityProperty(), 0.3)),
+            // Final fade out
+            new KeyFrame(Duration.millis(250), new KeyValue(flash.opacityProperty(), 0.7)),
+            new KeyFrame(Duration.millis(300), new KeyValue(flash.opacityProperty(), 0))
+        );
+
+        lightning.setOnFinished(e -> root.getChildren().remove(flash));
+        lightning.play();
+    }
+
+    /**
+     * Animates a card being moved from one position to another with a glitchy effect
+     * @param card The ImageView representing the card
+     * @param targetX The target X coordinate
+     * @param targetY The target Y coordinate
+     * @param onFinished Callback to run when animation completes
+     */
+    public void animateCardMove(ImageView card, double targetX, double targetY, Runnable onFinished) {
+        double startX = card.getLayoutX();
+        double startY = card.getLayoutY();
+        double distance = Math.sqrt(Math.pow(targetX - startX, 2) + Math.pow(targetY - startY, 2));
+        double duration = Math.min(600, Math.max(300, distance * 2)); // Duration based on distance
+
+        // Create glitch effect during movement
+        Timeline glitchMove = new Timeline();
+        int steps = (int)(duration / 50); // One glitch every 50ms
+        
+        for (int i = 0; i <= steps; i++) {
+            double progress = (double) i / steps;
+            double currentX = startX + (targetX - startX) * progress;
+            double currentY = startY + (targetY - startY) * progress;
+            
+            // Add random offset for glitch effect
+            double glitchX = (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 5;
+            double glitchY = (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 5;
+            
+            glitchMove.getKeyFrames().add(
+                new KeyFrame(Duration.millis(progress * duration),
+                    new KeyValue(card.layoutXProperty(), currentX + glitchX),
+                    new KeyValue(card.layoutYProperty(), currentY + glitchY),
+                    new KeyValue(card.rotateProperty(), random.nextDouble() * 4 - 2) // Slight rotation
+                )
+            );
+        }
+
+        // Final position
+        glitchMove.getKeyFrames().add(
+            new KeyFrame(Duration.millis(duration),
+                new KeyValue(card.layoutXProperty(), targetX),
+                new KeyValue(card.layoutYProperty(), targetY),
+                new KeyValue(card.rotateProperty(), 0)
+            )
+        );
+
+        glitchMove.setOnFinished(e -> {
+            if (onFinished != null) onFinished.run();
+        });
+        glitchMove.play();
+    }
+
+    /**
+     * Animates dealing cards with a glitchy effect
+     * @param cards List of card ImageViews to animate
+     * @param targetPositions List of target positions (x,y coordinates)
+     * @param onFinished Callback to run when all cards are dealt
+     */
+    public void animateCardDeal(List<ImageView> cards, List<double[]> targetPositions, Runnable onFinished) {
+        if (cards.size() != targetPositions.size()) {
+            throw new IllegalArgumentException("Cards and positions lists must be the same size");
+        }
+
+        SequentialTransition dealSequence = new SequentialTransition();
+        
+        for (int i = 0; i < cards.size(); i++) {
+            ImageView card = cards.get(i);
+            double[] target = targetPositions.get(i);
+            
+            // Create parallel animation for each card (movement + effects)
+            ParallelTransition cardAnim = new ParallelTransition();
+            
+            // Movement with slight arc
+            double startX = card.getLayoutX();
+            double startY = card.getLayoutY();
+            double endX = target[0];
+            double endY = target[1];
+            
+            Timeline movement = new Timeline();
+            int steps = 10;
+            
+            for (int step = 0; step <= steps; step++) {
+                double progress = (double) step / steps;
+                double currentX = startX + (endX - startX) * progress;
+                double currentY = startY + (endY - startY) * progress;
+                
+                // Add arc effect and random glitch
+                double arcHeight = -50 * Math.sin(Math.PI * progress);
+                double glitchX = random.nextDouble() * 4 - 2;
+                double glitchY = random.nextDouble() * 4 - 2;
+                
+                movement.getKeyFrames().add(
+                    new KeyFrame(Duration.millis(progress * 300),
+                        new KeyValue(card.layoutXProperty(), currentX + glitchX),
+                        new KeyValue(card.layoutYProperty(), currentY + arcHeight + glitchY),
+                        new KeyValue(card.rotateProperty(), random.nextDouble() * 4 - 2)
+                    )
+                );
+            }
+            
+            // Final position
+            movement.getKeyFrames().add(
+                new KeyFrame(Duration.millis(300),
+                    new KeyValue(card.layoutXProperty(), endX),
+                    new KeyValue(card.layoutYProperty(), endY),
+                    new KeyValue(card.rotateProperty(), 0)
+                )
+            );
+            
+            cardAnim.getChildren().add(movement);
+            dealSequence.getChildren().add(cardAnim);
+        }
+        
+        dealSequence.setOnFinished(e -> {
+            if (onFinished != null) onFinished.run();
+        });
+        dealSequence.play();
     }
 }

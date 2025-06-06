@@ -37,6 +37,7 @@ public class SignUpController extends Controller implements Initializable {
     @FXML private MFXButton btnConfirmAlert;
     @FXML private VBox vboxMissingFieldsAlert;
     @FXML private VBox vboxUserAlreadyExists;
+    @FXML private VBox vboxUserCreated;
     @FXML private ImageView imgBackground;
 
     private UserAccountDto userDto;
@@ -88,7 +89,14 @@ public class SignUpController extends Controller implements Initializable {
         Respuesta answer = userAccountService.saveUserAccount(this.userDto);
         if(answer.getEstado()){
             this.userDto = (UserAccountDto) answer.getResultado("UserAccount");
-            //TODO: MUST USE AppContext to send userDto to GameController
+            // Show success message
+            vboxUserCreated.setVisible(true);
+            vboxUserCreated.setManaged(true);
+            // Crear text fields
+            txfNewFavoriteWord.clear();
+            psfNewConfirmPassword.clear();
+            psfNewPassword.clear();
+            txfNewUser.clear();
             
         } else if(!answer.getEstado()){
             System.out.println(answer.getMensajeInterno());
@@ -134,7 +142,15 @@ public class SignUpController extends Controller implements Initializable {
     }
 
     private Boolean confirmFields() {
-        if(txfNewUser.getText().isBlank() || txfNewFavoriteWord.getText().isBlank() || psfNewPassword.getText().isBlank() || psfNewConfirmPassword.getText().isBlank()){
+        String user = txfNewUser.getText();
+        String favWord = txfNewFavoriteWord.getText();
+        String password = psfNewPassword.getText();
+        String confirmPassword = psfNewConfirmPassword.getText();
+        
+        if(user == null || user.isBlank() || 
+           favWord == null || favWord.isBlank() || 
+           password == null || password.isBlank() || 
+           confirmPassword == null || confirmPassword.isBlank()){
             return false;
         }
         return true;
@@ -173,5 +189,20 @@ public class SignUpController extends Controller implements Initializable {
 
     private void handleGlitch(javafx.scene.Node node, Timeline glitchTimeline) {
         animationHandler.playHitEffect(node);
+    }
+
+    @FXML
+    private void onActionBtnConfirmUserCreated(ActionEvent event) {
+        // Play hit effect on the confirmation button
+        animationHandler.playHitEffect((javafx.scene.Node)event.getSource());
+        
+        // Hide the success message after a short delay
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(200), e -> {
+            vboxUserCreated.setVisible(false);
+            vboxUserCreated.setManaged(false);
+            // Return to login view
+            FlowController.getInstance().goView("LogInView");
+        }));
+        timeline.play();
     }
 }

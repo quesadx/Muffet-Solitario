@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import cr.ac.una.muffetsolitario.model.*;
+import cr.ac.una.muffetsolitario.util.AppContext;
 import cr.ac.una.muffetsolitario.util.GameLogic;
+import cr.ac.una.muffetsolitario.util.AnimationHandler;
+import cr.ac.una.muffetsolitario.util.SoundUtils;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,9 +17,18 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.geometry.Point2D;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.FadeTransition;
+import javafx.scene.layout.VBox;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 public class GameController extends Controller implements Initializable {
 
@@ -24,12 +36,17 @@ public class GameController extends Controller implements Initializable {
     private GameLogic gameLogic;
     private List<Pane> columns;
     private List<Pane> sequencePanes;
+    private final AnimationHandler animationHandler = AnimationHandler.getInstance();
+    private final SoundUtils soundUtils = SoundUtils.getInstance();
 
     // Drag & drop variables
     private List<CardContainer> draggedSequence = null;
     private double[] dragOffsetsX, dragOffsetsY;
     private int fromColIdx = -1, fromCardIdx = -1;
     private static final double CARD_OFFSET = 25;
+    
+    // Lightning effect timer
+    private Timeline lightningTimer;
 
     @FXML
     private Pane pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
@@ -43,6 +60,10 @@ public class GameController extends Controller implements Initializable {
     private Label lbDifficulty, lbUserPoints, lbTime;
     @FXML
     private MFXButton btnUndo;
+    @FXML
+    private VBox vboxAlert;
+    @FXML
+    private Label lblAlertMessage;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -52,13 +73,88 @@ public class GameController extends Controller implements Initializable {
                 pnSequence5, pnSequence6, pnSequence7, pnSequence8);
         pnDeck.setOnMouseClicked(event -> {
             try {
+                // Enhanced deck dealing animation with sequential card movement
+                soundUtils.playAttackSound();
+                
+                // Deal the cards first
                 gameLogic.dealFromDeck();
-                updateBoard();
+                
+                // Animate cards flying one by one to each column
+                List<BoardColumnDto> columns = currentGameDto.getBoardColumnList();
+                for (int i = 0; i < columns.size(); i++) {
+                    BoardColumnDto column = columns.get(i);
+                    if (!column.getCardList().isEmpty()) {
+                        CardContainer topCard = column.getCardList().get(column.getCardList().size() - 1);
+                        
+                        // Get deck and column positions using scene coordinates
+                        Point2D deckPos = pnDeck.localToScene(60, 80); // Center of deck
+                        Point2D columnPos = this.columns.get(i).localToScene(60, 400); // Target position
+                        Point2D rootDeckPos = root.sceneToLocal(deckPos);
+                        Point2D rootColumnPos = root.sceneToLocal(columnPos);
+                        
+                        // Add drop shadow effect
+                        DropShadow shadow = new DropShadow();
+                        shadow.setColor(Color.rgb(0, 0, 0, 0.50)); // Black with 35% opacity
+                        shadow.setRadius(20);
+                        shadow.setSpread(0.4);
+                        topCard.setEffect(shadow);
+                        
+                        // Start card at deck position
+                        topCard.setLayoutX(rootDeckPos.getX());
+                        topCard.setLayoutY(rootDeckPos.getY());
+                        topCard.setOpacity(1);
+                        topCard.setScaleX(0.8);
+                        topCard.setScaleY(0.8);
+                        
+                        // Move to root temporarily for animation with high z-index
+                        if (topCard.getParent() != null) {
+                            ((Pane) topCard.getParent()).getChildren().remove(topCard);
+                        }
+                        root.getChildren().add(topCard);
+                        topCard.toFront(); // Ensure card is on top of all UI elements
+                        topCard.setViewOrder(-1000); // Set very low view order for highest priority
+                        
+                        // Create flying animation with delay for each column
+                        final int columnIndex = i;
+                        Timeline flyAnimation = new Timeline(
+                            new KeyFrame(Duration.millis(columnIndex * 100), // Staggered start
+                                new KeyValue(topCard.layoutXProperty(), rootDeckPos.getX()),
+                                new KeyValue(topCard.layoutYProperty(), rootDeckPos.getY()),
+                                new KeyValue(topCard.scaleXProperty(), 0.8),
+                                new KeyValue(topCard.scaleYProperty(), 0.8)
+                            ),
+                            new KeyFrame(Duration.millis(columnIndex * 100 + 300), // Flight duration
+                                new KeyValue(topCard.layoutXProperty(), rootColumnPos.getX()),
+                                new KeyValue(topCard.layoutYProperty(), rootColumnPos.getY()),
+                                new KeyValue(topCard.scaleXProperty(), 1.1),
+                                new KeyValue(topCard.scaleYProperty(), 1.1)
+                            ),
+                            new KeyFrame(Duration.millis(columnIndex * 100 + 400), // Settle
+                                new KeyValue(topCard.scaleXProperty(), 1.0),
+                                new KeyValue(topCard.scaleYProperty(), 1.0)
+                            )
+                        );
+                        
+                        // When animation finishes, move card back to column
+                        flyAnimation.setOnFinished(e -> {
+                            root.getChildren().remove(topCard);
+                            // Reset card properties
+                            topCard.setViewOrder(0);
+                            topCard.setScaleX(1.0);
+                            topCard.setScaleY(1.0);
+                            updateBoard(); // This will place the card in the correct column position
+                        });
+                        
+                        flyAnimation.play();
+                    }
+                }
+                
             } catch (Exception e) {
                 showAlert("No se puede repartir", e.getMessage());
             }
         });
         startNewGame();
+        startRandomLightning();
     }
 
     @Override
@@ -74,10 +170,99 @@ public class GameController extends Controller implements Initializable {
         gameLogic.loadCardsToColumn();
         for (BoardColumnDto col : currentGameDto.getBoardColumnList()) {
             List<CardContainer> cardList = col.getCardList();
-            if (!cardList.isEmpty())
-                cardList.get(cardList.size() - 1).getCardDto().setCardFaceUp(true);
+            if (!cardList.isEmpty()) {
+                CardContainer topCard = cardList.get(cardList.size() - 1);
+                topCard.getCardDto().setCardFaceUp(true);
+                animateCardFlip(topCard);
+            }
         }
+        
+        // Add epic game start effects
+        animationHandler.playLightningEffect(root);
+        soundUtils.playAttackSound();
+        
         updateBoard();
+        animateGameStart();
+    }
+    
+    /**
+     * Starts random lightning effects in the background
+     */
+    private void startRandomLightning() {
+        if (lightningTimer != null) {
+            lightningTimer.stop();
+        }
+        
+        lightningTimer = new Timeline();
+        lightningTimer.setCycleCount(Timeline.INDEFINITE);
+        
+        lightningTimer.getKeyFrames().add(
+            new KeyFrame(Duration.seconds(1), e -> {
+                // Much lower chance for lightning (about 0.5% chance every second)
+                if (Math.random() < 0.005) {
+                    animationHandler.playLightningEffect(root);
+                }
+                
+                // Schedule next check with much longer random interval
+                double nextDelay = 20.0 + Math.random() * 40.0; // 20-60 seconds
+                lightningTimer.stop();
+                lightningTimer.getKeyFrames().set(0,
+                    new KeyFrame(Duration.seconds(nextDelay), ev -> {
+                        if (Math.random() < 0.02) { // 2% chance
+                            animationHandler.playLightningEffect(root);
+                        }
+                    })
+                );
+                lightningTimer.playFromStart();
+            })
+        );
+        lightningTimer.play();
+    }
+
+    /**
+     * Animates the initial card dealing with enhanced effects
+     */
+    private void animateGameStart() {
+        // Simple animation for all cards
+        List<CardContainer> allCards = new ArrayList<>();
+        
+        // Collect all cards from columns
+        for (int i = 0; i < columns.size(); i++) {
+            BoardColumnDto boardColumn = currentGameDto.getBoardColumnList().get(i);
+            if (boardColumn != null && boardColumn.getCardList() != null) {
+                allCards.addAll(boardColumn.getCardList());
+            }
+        }
+        
+        // Animate each card
+        for (CardContainer card : allCards) {
+            // Set initial position
+            card.setOpacity(0);
+            card.setScaleX(0.8);
+            card.setScaleY(0.8);
+            
+            // Create quick fade-in and scale animation
+            javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.ZERO,
+                    new javafx.animation.KeyValue(card.opacityProperty(), 0),
+                    new javafx.animation.KeyValue(card.scaleXProperty(), 0.8),
+                    new javafx.animation.KeyValue(card.scaleYProperty(), 0.8)
+                ),
+                new javafx.animation.KeyFrame(Duration.millis(200),
+                    new javafx.animation.KeyValue(card.opacityProperty(), 1),
+                    new javafx.animation.KeyValue(card.scaleXProperty(), 1.1),
+                    new javafx.animation.KeyValue(card.scaleYProperty(), 1.1)
+                ),
+                new javafx.animation.KeyFrame(Duration.millis(300),
+                    new javafx.animation.KeyValue(card.scaleXProperty(), 1.0),
+                    new javafx.animation.KeyValue(card.scaleYProperty(), 1.0)
+                )
+            );
+            timeline.play();
+        }
+        
+        // Play sound effect
+        soundUtils.playAttackSound();
     }
 
     private void updateCardImage(CardContainer cardContainer) {
@@ -104,48 +289,90 @@ public class GameController extends Controller implements Initializable {
             Point2D scenePos = card.localToScene(0, 0);
             Point2D rootPos = root.sceneToLocal(scenePos);
 
-            // Remueve de su padre actual
+            // Remove from current parent
             if (card.getParent() != null) {
                 ((Pane) card.getParent()).getChildren().remove(card);
             }
-            // Añade al root y coloca en la posición absoluta
+            // Add to root with glitch effect
             root.getChildren().add(card);
             card.setLayoutX(rootPos.getX());
             card.setLayoutY(rootPos.getY());
             card.toFront();
+            
+            // Add glitch effect when moving
+            animationHandler.playHitEffect(card);
         }
+        // Play sound effect
+        soundUtils.playAttackSound();
     }
 
     private void moveSequenceToColumn(List<CardContainer> sequence, Pane columnPane) {
-        double baseY = columnPane.getChildren().size() * CARD_OFFSET;
+        // Calculate correct base position based on existing cards in column
+        double baseY = 0;
+        for (javafx.scene.Node node : columnPane.getChildren()) {
+            if (node instanceof CardContainer) {
+                baseY += CARD_OFFSET;
+            }
+        }
+        
         for (int k = 0; k < sequence.size(); k++) {
             CardContainer card = sequence.get(k);
             if (card.getParent() != null) {
                 ((Pane) card.getParent()).getChildren().remove(card);
             }
             root.getChildren().remove(card);
+            
+            // Set correct position immediately
+            double targetX = 0;
+            double targetY = baseY + k * CARD_OFFSET;
+            card.setLayoutX(targetX);
+            card.setLayoutY(targetY);
+            
+            // Add to column if not already there
             if (!columnPane.getChildren().contains(card)) {
-                card.setLayoutX(0);
-                card.setLayoutY(baseY + k * CARD_OFFSET);
                 columnPane.getChildren().add(card);
             }
+        }
+        
+        // Remove excessive lightning effects
+        // Only very rarely add lightning
+        if (Math.random() < 0.02) { // 2% chance
+            animationHandler.playLightningEffect(root);
         }
     }
 
     private void renderBoard() {
         List<BoardColumnDto> boardColumns = currentGameDto.getBoardColumnList();
-        if (boardColumns == null || boardColumns.size() < columns.size()) {
-            showAlert("Error de renderizado", "No hay suficientes columnas para renderizar el tablero.");
+        if (boardColumns == null) {
+            System.err.println("Error: BoardColumnList is null");
             return;
         }
-        for (int i = 0; i < columns.size(); i++) {
+        
+        // Adjust columns to match available board columns
+        int columnsToRender = Math.min(boardColumns.size(), columns.size());
+        
+        // Clear all columns first to prevent duplicate children
+        columns.forEach(pane -> pane.getChildren().clear());
+        
+        for (int i = 0; i < columnsToRender; i++) {
             final int columnIdx = i;
             Pane pane = columns.get(i);
-            pane.getChildren().clear();
             BoardColumnDto boardColumn = boardColumns.get(i);
             List<CardContainer> cards = boardColumn.getCardList();
+            
+            // Skip if no cards in this column
+            if (cards == null || cards.isEmpty()) {
+                continue;
+            }
+            
+            // Create new card containers for each card
             for (int j = 0; j < cards.size(); j++) {
                 CardContainer cardContainer = cards.get(j);
+                
+                // Ensure card is not already in a parent
+                if (cardContainer.getParent() != null) {
+                    ((Pane) cardContainer.getParent()).getChildren().remove(cardContainer);
+                }
                 updateCardImage(cardContainer);
                 cardContainer.setFitWidth(120);
                 cardContainer.setFitHeight(160);
@@ -155,9 +382,18 @@ public class GameController extends Controller implements Initializable {
                 cardContainer.setOnMousePressed(event -> {
                     if (!cardContainer.getCardDto().isCardFaceUp())
                         return;
+                    
                     List<CardContainer> cardsInColumn = boardColumn.getCardList();
                     int idx = cardsInColumn.indexOf(cardContainer);
-                    draggedSequence = new ArrayList<>(cardsInColumn.subList(idx, cardsInColumn.size()));
+                    
+                    // Check if we can pick up this sequence (Spider Solitaire rules)
+                    List<CardContainer> potentialSequence = cardsInColumn.subList(idx, cardsInColumn.size());
+                    if (!isValidSequenceToPickUp(potentialSequence)) {
+                        showAlert("Secuencia inválida", "Solo puedes mover secuencias descendentes del mismo palo.");
+                        return;
+                    }
+                    
+                    draggedSequence = new ArrayList<>(potentialSequence);
                     dragOffsetsX = new double[draggedSequence.size()];
                     dragOffsetsY = new double[draggedSequence.size()];
                     Point2D mouseScene = new Point2D(event.getSceneX(), event.getSceneY());
@@ -175,23 +411,55 @@ public class GameController extends Controller implements Initializable {
                 cardContainer.setOnMouseDragged(event -> {
                     if (draggedSequence != null) {
                         double mouseX = event.getSceneX(), mouseY = event.getSceneY();
+                        
+                        // Simple column highlighting
+                        int potentialTargetCol = getTargetColumnIndex(mouseX, mouseY);
+                        columns.forEach(col -> col.setStyle(""));
+                        if (potentialTargetCol != -1) {
+                            columns.get(potentialTargetCol).setStyle("-fx-border-color: #ff0000; -fx-border-width: 2; -fx-border-style: dashed;");
+                        }
+                        
+                        // Animate dragged cards
                         for (int k = 0; k < draggedSequence.size(); k++) {
                             CardContainer c = draggedSequence.get(k);
-                            c.setLayoutX(mouseX - dragOffsetsX[k]);
-                            c.setLayoutY(mouseY - dragOffsetsY[k] + k * CARD_OFFSET);
+                            
+                            // Simple wiggle effect
+                            double wiggleAmount = Math.min((k + 1) * 2.0, 8.0); // Cap maximum wiggle
+                            double wiggleX = Math.sin(System.currentTimeMillis() * 0.01) * wiggleAmount;
+                            double wiggleY = Math.cos(System.currentTimeMillis() * 0.008) * (wiggleAmount * 0.5);
+                            
+                            // Update card position with reduced vertical spacing
+                            double reducedOffset = CARD_OFFSET * 0.6; // Reduce spacing by 40%
+                            c.setLayoutX(mouseX - dragOffsetsX[k] + wiggleX);
+                            c.setLayoutY(mouseY - dragOffsetsY[k] + k * reducedOffset + wiggleY);
+                            
+                            // Gentle rotation
+                            double rotation = Math.sin(System.currentTimeMillis() * 0.005) * wiggleAmount;
+                            c.setRotate(rotation);
+                            
                             c.toFront();
                         }
                     }
                 });
 
-                cardContainer.setOnMouseReleased(event -> {
+                cardContainer.setOnMouseReleased(mouseEvent -> {
                     if (draggedSequence != null) {
-                        int targetColIdx = getTargetColumnIndex(event.getSceneX(), event.getSceneY());
+                        // Clear all column highlighting
+                        columns.forEach(col -> col.setStyle(""));
+                        
+                        // Reset rotation for all cards in sequence
+                        for (CardContainer card : draggedSequence) {
+                            card.setRotate(0);
+                        }
+                        
+                        int targetColIdx = getTargetColumnIndex(mouseEvent.getSceneX(), mouseEvent.getSceneY());
                         boolean moved = false;
                         if (targetColIdx != -1) {
                             try {
                                 handleMoveCards(fromColIdx, targetColIdx, draggedSequence.get(0));
                                 moved = true;
+                                // Add glitch effect to target column on successful move
+                                addColumnGlitchEffect(targetColIdx);
                             } catch (Exception e) {
                                 showAlert("Movimiento inválido", e.getMessage());
                             }
@@ -233,8 +501,36 @@ public class GameController extends Controller implements Initializable {
 
     public void handleMoveCards(int fromCol, int toCol, CardContainer cardContainer) {
         try {
+            // Store the source column before the move
+            BoardColumnDto sourceColumn = currentGameDto.getBoardColumnList().get(fromCol);
+            List<CardContainer> sourceCards = new ArrayList<>(sourceColumn.getCardList());
+            
+            // Perform the move
             gameLogic.moveCardsBetweenColumns(fromCol, toCol, cardContainer);
-            updateBoard();
+            
+            // Check if we need to flip a card in the source column
+            if (!sourceCards.isEmpty() && sourceCards.size() > 1) {
+                CardContainer cardToFlip = sourceCards.get(sourceCards.size() - 2); // Card that was under the moved card
+                if (!cardToFlip.getCardDto().isCardFaceUp()) {
+                    cardToFlip.getCardDto().setCardFaceUp(true);
+                    
+                    // Delay the flip animation slightly for dramatic effect
+                    Timeline flipDelay = new Timeline(
+                        new KeyFrame(Duration.millis(300), e -> {
+                            animateCardFlip(cardToFlip);
+                        })
+                    );
+                    flipDelay.play();
+                }
+            }
+            
+            // Update board after a short delay to ensure animations complete
+            Timeline updateDelay = new Timeline(
+                new KeyFrame(Duration.millis(500), e -> {
+                    updateBoard();
+                })
+            );
+            updateDelay.play();
             gameLogic.suggestPossibleMoves(currentGameDto);
         } catch (IllegalArgumentException e) {
             showAlert("Movimiento inválido", e.getMessage());
@@ -242,11 +538,65 @@ public class GameController extends Controller implements Initializable {
     }
 
     private void showAlert(String titulo, String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+        // Use Platform.runLater to avoid issues during animation processing
+        javafx.application.Platform.runLater(() -> {
+            // Set message and make vbox visible
+            lblAlertMessage.setText(mensaje);
+            vboxAlert.setVisible(true);
+            vboxAlert.setOpacity(0);
+            vboxAlert.setScaleY(0.7);
+            
+            // Create pop-in animation
+            Timeline popInTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(vboxAlert.opacityProperty(), 0),
+                    new KeyValue(vboxAlert.scaleYProperty(), 0.7)
+                ),
+                new KeyFrame(Duration.millis(200),
+                    new KeyValue(vboxAlert.opacityProperty(), 1),
+                    new KeyValue(vboxAlert.scaleYProperty(), 1.1)
+                ),
+                new KeyFrame(Duration.millis(300),
+                    new KeyValue(vboxAlert.scaleYProperty(), 1.0)
+                )
+            );
+            
+            // Play glitch effect and sound
+            animationHandler.playHitEffect(vboxAlert);
+            
+            // Small delay before playing sound
+            Timeline soundDelay = new Timeline(new KeyFrame(Duration.millis(10), e -> {
+                soundUtils.playDialogSound();
+            }));
+            
+            // Create pop-out animation
+            Timeline popOutTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(vboxAlert.opacityProperty(), 1),
+                    new KeyValue(vboxAlert.scaleYProperty(), 1)
+                ),
+                new KeyFrame(Duration.millis(200),
+                    new KeyValue(vboxAlert.opacityProperty(), 0),
+                    new KeyValue(vboxAlert.scaleYProperty(), 0.7)
+                )
+            );
+            
+            // Schedule pop-out after 1.5 seconds
+            Timeline hideDelay = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
+                animationHandler.playHitEffect(vboxAlert);
+                popOutTimeline.play();
+            }));
+            
+            // Chain the animations
+            popInTimeline.play();
+            soundDelay.play();
+            hideDelay.play();
+            
+            // Clean up
+            popOutTimeline.setOnFinished(e -> {
+                vboxAlert.setVisible(false);
+            });
+        });
     }
 
     private void renderDeck() {
@@ -280,18 +630,48 @@ public class GameController extends Controller implements Initializable {
     }
 
     private void renderCompletedSequences() {
-        for (Pane pane : sequencePanes)
-            pane.getChildren().clear();
-        List<CompletedSequenceDto> completedSequences = currentGameDto.getCompletedSequenceList();
-        if (completedSequences == null)
+        // Safety check for sequence panes
+        if (sequencePanes == null) {
+            System.err.println("Warning: sequencePanes is null");
             return;
+        }
+
+        // Clear all sequence panes first
+        sequencePanes.forEach(pane -> {
+            if (pane != null) {
+                pane.getChildren().clear();
+            }
+        });
+
+        // Get completed sequences
+        List<CompletedSequenceDto> completedSequences = currentGameDto.getCompletedSequenceList();
+        if (completedSequences == null || completedSequences.isEmpty()) {
+            return;
+        }
+
         double cardOffset = 30;
         int maxCardsToShow = 3;
-        for (int i = 0; i < completedSequences.size() && i < sequencePanes.size(); i++) {
+
+        // Render only up to available sequence panes
+        int maxSequences = Math.min(completedSequences.size(), sequencePanes.size());
+        for (int i = 0; i < maxSequences; i++) {
             Pane pane = sequencePanes.get(i);
+            if (pane == null) continue;
+
             List<CardContainer> cards = completedSequences.get(i).getCardList();
-            for (int j = 0; j < Math.min(maxCardsToShow, cards.size()); j++) {
+            if (cards == null || cards.isEmpty()) continue;
+
+            // Show only up to maxCardsToShow cards per sequence
+            int cardsToShow = Math.min(maxCardsToShow, cards.size());
+            for (int j = 0; j < cardsToShow; j++) {
                 CardContainer card = cards.get(j);
+                if (card == null) continue;
+
+                // Remove from previous parent if needed
+                if (card.getParent() != null) {
+                    ((Pane) card.getParent()).getChildren().remove(card);
+                }
+
                 card.getCardDto().setCardFaceUp(true);
                 updateCardImage(card);
                 card.setFitWidth(120);
@@ -307,8 +687,105 @@ public class GameController extends Controller implements Initializable {
     @FXML
     private void onActionBtnUndo(ActionEvent event) {        
         System.out.println("Mae si me estoy presionando");
+        // Add sound effect for undo action (no lightning)
+        soundUtils.playAttackSound();
         gameLogic.undoLastMove();
         updateBoard();
+    }
 
+    @FXML
+    private void onActionBtnExit(ActionEvent event) {
+    }
+
+    /**
+     * Animates a card flipping from face down to face up
+     */
+    private void animateCardFlip(CardContainer card) {
+        // Simple scale flip animation
+        Timeline flipAnimation = new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(card.scaleXProperty(), 1.0)
+            ),
+            new KeyFrame(Duration.millis(150),
+                new KeyValue(card.scaleXProperty(), 0.0)
+            )
+        );
+        
+        // When card is fully scaled down, update the image and scale back up
+        flipAnimation.setOnFinished(e -> {
+            updateCardImage(card);
+            
+            Timeline completeFlip = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(card.scaleXProperty(), 0.0)
+                ),
+                new KeyFrame(Duration.millis(150),
+                    new KeyValue(card.scaleXProperty(), 1.0)
+                )
+            );
+            completeFlip.play();
+        });
+        
+        flipAnimation.play();
+    }
+
+    /**
+     * Adds glitch effect to a column when a card is successfully placed
+     */
+    private void addColumnGlitchEffect(int columnIndex) {
+        if (columnIndex >= 0 && columnIndex < columns.size()) {
+            Pane column = columns.get(columnIndex);
+            animationHandler.playHitEffect(column);
+            
+            // Add temporary glow effect
+            DropShadow glow = new DropShadow();
+            glow.setColor(Color.CYAN);
+            glow.setRadius(15);
+            glow.setSpread(0.6);
+            column.setEffect(glow);
+            
+            // Remove glow after short time
+            Timeline removeGlow = new Timeline(
+                new KeyFrame(Duration.millis(500), e -> {
+                    column.setEffect(null);
+                })
+            );
+            removeGlow.play();
+        }
+    }
+
+    /**
+     * Checks if a sequence of cards is valid to pick up according to Spider Solitaire rules.
+     * Cards must be in descending order and of the same suit.
+     */
+    private boolean isValidSequenceToPickUp(List<CardContainer> sequence) {
+        if (sequence == null || sequence.isEmpty()) {
+            return false;
+        }
+        
+        // Single card is always valid
+        if (sequence.size() == 1) {
+            return true;
+        }
+        
+        // Check descending order and same suit
+        String suit = sequence.get(0).getCardDto().getCardSuit();
+        int prevValue = sequence.get(0).getCardDto().getCardValue();
+        
+        for (int i = 1; i < sequence.size(); i++) {
+            CardDto currentCard = sequence.get(i).getCardDto();
+            // Must be same suit and value must be exactly one less than previous
+            if (!currentCard.getCardSuit().equals(suit) || 
+                currentCard.getCardValue() != prevValue - 1) {
+                return false;
+            }
+            prevValue = currentCard.getCardValue();
+        }
+        
+        return true;
+    }
+
+    @FXML
+    private void onActionBtnHint(ActionEvent event) {
     }
 }

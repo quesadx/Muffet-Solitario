@@ -21,33 +21,6 @@
       </ImageView>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox fx:id="vboxMissingFieldsAlert" alignment="CENTER" styleClass="jfx-transparent-container" visible="false">
-               <children>
-                  <VBox alignment="TOP_CENTER" maxHeight="250.0" maxWidth="500.0" prefHeight="250.0" prefWidth="500.0" styleClass="jfx-container">
-                     <children>
-                        <Label maxHeight="1.7976931348623157E308" styleClass="jfx-subtitle-2" text="CAMPOS FALTANTES" />
-                        <Label maxHeight="1.7976931348623157E308" text="VERIFICA QUE TODOS LOS CAMPOS DE INFORMACION ESTEN COMPLETOS ANTES DE CONTINUAR." textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
-                        <MFXButton fx:id="btnConfirmAlert" maxWidth="250.0" onAction="#onActionBtnConfirmAlert" text="ACEPTAR" />
-                     </children>
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="10.0" />
-                     </padding>
-                  </VBox>
-               </children></VBox>
-            <VBox fx:id="vboxUserAlreadyExists" alignment="CENTER" styleClass="jfx-transparent-container" visible="false">
-               <children>
-                  <VBox alignment="TOP_CENTER" maxHeight="250.0" maxWidth="500.0" prefHeight="250.0" prefWidth="500.0" styleClass="jfx-container">
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="10.0" />
-                     </padding>
-                     <children>
-                        <Label maxHeight="1.7976931348623157E308" styleClass="jfx-subtitle-2" text="CAMPOS FALTANTES" />
-                        <Label maxHeight="1.7976931348623157E308" text="EL USUARIO PROPORCIONADO YA EXISTE. INTENTA CON OTRAS VARIANTES!" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
-                        <MFXButton maxWidth="250.0" onAction="#onActionBtnConfirmAlert" text="ACEPTAR" />
-                     </children>
-                  </VBox>
-               </children>
-            </VBox>
             <VBox alignment="CENTER" fillWidth="false" spacing="10.0">
                <children>
                   <Label fx:id="lblSignUpTitle" styleClass="jfx-subtitle" text="REGISTRO DE USUARIO" />
@@ -76,6 +49,47 @@
                      <padding>
                         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                      </padding>
+                  </VBox>
+               </children>
+            </VBox>
+            <VBox fx:id="vboxMissingFieldsAlert" alignment="CENTER" styleClass="jfx-transparent-container" visible="false">
+               <children>
+                  <VBox alignment="TOP_CENTER" maxHeight="250.0" maxWidth="500.0" prefHeight="250.0" prefWidth="500.0" styleClass="jfx-container">
+                     <children>
+                        <Label maxHeight="1.7976931348623157E308" styleClass="jfx-subtitle-2" text="CAMPOS FALTANTES" />
+                        <Label maxHeight="1.7976931348623157E308" text="VERIFICA QUE TODOS LOS CAMPOS DE INFORMACION ESTEN COMPLETOS ANTES DE CONTINUAR." textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
+                        <MFXButton fx:id="btnConfirmAlert" maxWidth="250.0" onAction="#onActionBtnConfirmAlert" text="ACEPTAR" />
+                     </children>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="10.0" />
+                     </padding>
+                  </VBox>
+               </children></VBox>
+            <VBox fx:id="vboxUserAlreadyExists" alignment="CENTER" styleClass="jfx-transparent-container" visible="false">
+               <children>
+                  <VBox alignment="TOP_CENTER" maxHeight="250.0" maxWidth="500.0" prefHeight="250.0" prefWidth="500.0" styleClass="jfx-container">
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label maxHeight="1.7976931348623157E308" styleClass="jfx-subtitle-2" text="CAMPOS FALTANTES" />
+                        <Label maxHeight="1.7976931348623157E308" text="EL USUARIO PROPORCIONADO YA EXISTE. INTENTA CON OTRAS VARIANTES!" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
+                        <MFXButton maxWidth="250.0" onAction="#onActionBtnConfirmAlert" text="ACEPTAR" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            <VBox fx:id="vboxUserCreated" alignment="CENTER" styleClass="jfx-transparent-container" visible="false">
+               <children>
+                  <VBox alignment="TOP_CENTER" maxHeight="250.0" maxWidth="500.0" prefHeight="250.0" prefWidth="500.0" styleClass="jfx-container">
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label maxHeight="1.7976931348623157E308" styleClass="jfx-subtitle-2" text="USUARIO REGISTRADO" />
+                        <Label maxHeight="1.7976931348623157E308" text="USUARIO CREATO CORRECTAMENTE! HORA DE COGERME A ALEX SEXO VAGINA PENE CACA123" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
+                        <MFXButton maxWidth="250.0" onAction="#onActionBtnConfirmUserCreated" text="ACEPTAR" />
+                     </children>
                   </VBox>
                </children>
             </VBox>

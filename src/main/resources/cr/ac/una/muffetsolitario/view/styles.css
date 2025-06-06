@@ -49,6 +49,15 @@
     -fx-background-radius: 0;
 }
 
+.jfx-container-transparent {
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 0;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
 .jfx-transparent-container {
     -fx-background-color: rgba(0, 0, 0, 0.583);
 }
@@ -487,6 +496,35 @@
     -fx-border-radius: 0 !important;
 }
 
+
+/* ========== PROGRESS BAR ========== */
+.mfx-progress-bar-styled {
+    -fx-background-color: #000000;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-padding: 2px;
+}
+
+.mfx-progress-bar-styled .bar {
+    -fx-background-color: #FFFFFF;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 4px;
+}
+
+.mfx-progress-bar-styled .track {
+    -fx-background-color: #000000;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+/* ========== SELECTED BUTTON STATE ========== */
+.mfx-button-selected {
+    -fx-background-color: #FFFFFF !important;
+    -fx-text-fill: #000000 !important;
+    -fx-border-color: #FFFFFF !important;
+    -fx-effect: dropshadow(gaussian, #FFFFFF55, 10, 0.5, 0, 0) !important;
+}
 
 /* Remove rounded corners everywhere for pixel look */
 * {

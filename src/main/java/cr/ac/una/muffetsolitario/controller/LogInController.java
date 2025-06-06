@@ -2,6 +2,11 @@ package cr.ac.una.muffetsolitario.controller;
 
 import cr.ac.una.muffetsolitario.util.AnimationHandler;
 import cr.ac.una.muffetsolitario.util.FlowController;
+import cr.ac.una.muffetsolitario.util.SoundUtils;
+import cr.ac.una.muffetsolitario.util.AppContext;
+import cr.ac.una.muffetsolitario.service.UserAccountService;
+import cr.ac.una.muffetsolitario.model.UserAccountDto;
+import cr.ac.una.muffetsolitario.util.Respuesta;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
@@ -77,6 +82,7 @@ public class LogInController extends Controller implements Initializable {
     @FXML private VBox vboxContinueOrDeleteGame;
 
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
+    private final SoundUtils soundUtils = SoundUtils.getInstance();
 
     private javafx.animation.Timeline lblTitleGlitchTimeline;
     private javafx.animation.Timeline lblPlayGlitchTimeline;
@@ -94,6 +100,15 @@ public class LogInController extends Controller implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // Initialize database service with error handling
+        try {
+            userService = new UserAccountService();
+            databaseAvailable = true;
+        } catch (Exception e) {
+            System.err.println("Database connection failed, running in offline mode: " + e.getMessage());
+            databaseAvailable = false;
+        }
+
         imgBackground.fitHeightProperty().bind(root.heightProperty());
         imgBackground.fitWidthProperty().bind(root.widthProperty());
 
@@ -122,13 +137,31 @@ public class LogInController extends Controller implements Initializable {
         animationHandler.startLevitationWithGlitch(imgCenterCard, 120);
         animationHandler.startLevitationWithGlitch(imgRightCard, 0);
 
-        imgHeart0.setOnMouseClicked(e -> animationHandler.playHeartHitEffect(imgHeart0));
-        imgHeart1.setOnMouseClicked(e -> animationHandler.playHeartHitEffect(imgHeart1));
-        imgHeart2.setOnMouseClicked(e -> animationHandler.playHeartHitEffect(imgHeart2));
+        imgHeart0.setOnMouseClicked(e -> {
+            animationHandler.playHeartHitEffect(imgHeart0);
+            animationHandler.playLightningEffect(root);
+        });
+        imgHeart1.setOnMouseClicked(e -> {
+            animationHandler.playHeartHitEffect(imgHeart1);
+            animationHandler.playLightningEffect(root);
+        });
+        imgHeart2.setOnMouseClicked(e -> {
+            animationHandler.playHeartHitEffect(imgHeart2);
+            animationHandler.playLightningEffect(root);
+        });
 
-        imgLeftCard.setOnMouseClicked(e -> animationHandler.playHitEffect(imgLeftCard));
-        imgCenterCard.setOnMouseClicked(e -> animationHandler.playHitEffect(imgCenterCard));
-        imgRightCard.setOnMouseClicked(e -> animationHandler.playHitEffect(imgRightCard));
+        imgLeftCard.setOnMouseClicked(e -> {
+            animationHandler.playHitEffect(imgLeftCard);
+            animationHandler.playLightningEffect(root);
+        });
+        imgCenterCard.setOnMouseClicked(e -> {
+            animationHandler.playHitEffect(imgCenterCard);
+            animationHandler.playLightningEffect(root);
+        });
+        imgRightCard.setOnMouseClicked(e -> {
+            animationHandler.playHitEffect(imgRightCard);
+            animationHandler.playLightningEffect(root);
+        });
 
         startLabelGlitch(lblTitle);
         startLabelGlitch(lblPlay);
@@ -144,6 +177,7 @@ public class LogInController extends Controller implements Initializable {
         }
 
         startMuffetJumpscareLoop();
+        startRandomLightning();
     }
 
      /**
@@ -258,12 +292,42 @@ public class LogInController extends Controller implements Initializable {
         imgMuffetJumpscare1.setManaged(false);
     }
 
+    /**
+     * Starts random lightning effects in the background (much less frequent)
+     */
+    private void startRandomLightning() {
+        Timeline lightningScheduler = new Timeline();
+        lightningScheduler.setCycleCount(Timeline.INDEFINITE);
+        
+        lightningScheduler.getKeyFrames().add(
+            new KeyFrame(Duration.seconds(1), e -> {
+                // Much lower chance for lightning (about 0.5% chance every second)
+                if (random.nextDouble() < 0.005) {
+                    animationHandler.playLightningEffect(root);
+                }
+                
+                // Schedule next check with longer random interval
+                double nextDelay = 15.0 + random.nextDouble() * 30.0; // 15-45 seconds
+                lightningScheduler.stop();
+                lightningScheduler.getKeyFrames().set(0,
+                    new KeyFrame(Duration.seconds(nextDelay), ev -> {
+                        if (random.nextDouble() < 0.03) { // 3% chance
+                            animationHandler.playLightningEffect(root);
+                        }
+                    })
+                );
+                lightningScheduler.playFromStart();
+            })
+        );
+        lightningScheduler.play();
+    }
+
     @Override
     public void initialize() {
         // Not used, but required by superclass
     }
 
-    @FXML 
+    @FXML
     void onMouseClickedLblPlay(MouseEvent event) {
         animationHandler.stopLevitationWithGlitch(imgLeftCard);
         animationHandler.stopLevitationWithGlitch(imgCenterCard);
@@ -278,6 +342,9 @@ public class LogInController extends Controller implements Initializable {
         animationHandler.animateCenterCardCrazyExit(imgCenterCard, () -> {
             imgSlash.setVisible(true);
             imgSlash.setImage(imgSlash.getImage());
+            
+            // Play attack sound when slash appears
+            soundUtils.playAttackSound();
 
             PauseTransition pause = new PauseTransition(Duration.millis(400));
             pause.setOnFinished(e -> {
@@ -308,9 +375,36 @@ public class LogInController extends Controller implements Initializable {
                     Arrays.asList(imgHeart0, imgHeart1, imgHeart2),
                     heartPane
                 );
+
+                // Start Undertale-inspired cinematic with hearts
+                playUndertaleHeartsCinematic(Arrays.asList(imgHeart0, imgHeart1, imgHeart2), heartPane);
+                
+                // Start background music 1.5 seconds after slash
+                PauseTransition musicDelay = new PauseTransition(Duration.millis(1500));
+                musicDelay.setOnFinished(musicEvent -> soundUtils.playBGM());
+                musicDelay.play();
             });
             pause.play();
         }, parentPane);
+    }
+
+    private void playUndertaleHeartsCinematic(List<ImageView> hearts, Pane heartPane) {
+        // Example cinematic: hearts pulse and move in a pattern inspired by Undertale
+        SequentialTransition cinematic = new SequentialTransition();
+
+        for (ImageView heart : hearts) {
+            // Pulse animation
+            Timeline pulse = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(heart.scaleXProperty(), 1.0), new KeyValue(heart.scaleYProperty(), 1.0)),
+                new KeyFrame(Duration.millis(300), new KeyValue(heart.scaleXProperty(), 1.3), new KeyValue(heart.scaleYProperty(), 1.3)),
+                new KeyFrame(Duration.millis(600), new KeyValue(heart.scaleXProperty(), 1.0), new KeyValue(heart.scaleYProperty(), 1.0))
+            );
+            cinematic.getChildren().add(pulse);
+        }
+
+        // Add some movement or other effects as desired here
+
+        cinematic.play();
     }
 
     private void startLabelGlitch(Label label) {
@@ -394,21 +488,82 @@ public class LogInController extends Controller implements Initializable {
     @FXML
     void onActionBtnLogIn(ActionEvent event) {
         if(!confirmFields()) {
-            vboxMissingFieldsAlert.setManaged(true);
             vboxMissingFieldsAlert.setVisible(true);
+            vboxMissingFieldsAlert.setManaged(true);
             return;
         }
-        if(!userExists(txfUser.getText())) {
-            vboxWrongCredentials.setManaged(true);
+
+        String nickname = txfUser.getText();
+        String password = psfPassword.getText();
+
+        if(!userExists(nickname)) {
             vboxWrongCredentials.setVisible(true);
+            vboxWrongCredentials.setManaged(true);
             return;
+        }
+
+        if(validateCredentials(nickname, password)) {
+            // Update UI for logged in state
+            isLoggedIn = true;
+            animateLoginToLoggedIn();
+            onUserLoggedIn();
+
+            // Update logged in display info
+            lblUsername.setText(loggedInUser.getUserNickname());
+            // TODO: Set date created and last played dates
         } else {
-            // TODO: Add login logic and toggle the isLoggedin
+            vboxWrongCredentials.setVisible(true);
+            vboxWrongCredentials.setManaged(true);
         }
     }
 
-    private boolean userExists(String text) {
-        return false; // TODO: Add service
+    private UserAccountService userService;
+    private UserAccountDto loggedInUser = null;
+    private boolean databaseAvailable = true;
+
+    private boolean userExists(String nickname) {
+        if (!databaseAvailable) {
+            // In offline mode, allow any non-empty username
+            return !nickname.trim().isEmpty();
+        }
+        try {
+            Respuesta respuesta = userService.getUserAccountByNickname(nickname);
+            return respuesta.getEstado();
+        } catch (Exception e) {
+            System.err.println("Database error checking user existence: " + e.getMessage());
+            return !nickname.trim().isEmpty(); // Fallback to simple validation
+        }
+    }
+
+    private boolean validateCredentials(String nickname, String password) {
+        if (!databaseAvailable) {
+            // In offline mode, create a temporary user
+            loggedInUser = new UserAccountDto();
+            loggedInUser.setUserNickname(nickname);
+            loggedInUser.setUserIsMusicActive(true);
+            AppContext.getInstance().set("LoggedInUser", loggedInUser);
+            return !nickname.trim().isEmpty() && !password.trim().isEmpty();
+        }
+        try {
+            Respuesta respuesta = userService.validateUserCredentials(nickname, password);
+            if (respuesta.getEstado()) {
+                loggedInUser = (UserAccountDto) respuesta.getResultado("UserAccount");
+                // Store logged in user in AppContext
+                AppContext.getInstance().set("LoggedInUser", loggedInUser);
+                // Set music state based on user preference
+                soundUtils.setMuted(!loggedInUser.isUserIsMusicActive());
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("Database error validating credentials: " + e.getMessage());
+            // Create temporary user in case of database error
+            loggedInUser = new UserAccountDto();
+            loggedInUser.setUserNickname(nickname);
+            loggedInUser.setUserIsMusicActive(true);
+            AppContext.getInstance().set("LoggedInUser", loggedInUser);
+            return !nickname.trim().isEmpty() && !password.trim().isEmpty();
+        }
     }
 
     @FXML
@@ -418,13 +573,18 @@ public class LogInController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnLogOut(ActionEvent event) {
-    
-    // == LOGOUT LOGIC GOES HERE ==
-    // (e.g., remove current logged user, clear session, etc.)
+        // Clear logged in user from AppContext
+        AppContext.getInstance().delete("LoggedInUser");
+        loggedInUser = null;
+        isLoggedIn = false;
 
-    // Reset login fields
-    txfUser.clear();
-    psfPassword.clear();
+        // Restart background music
+        soundUtils.stopBGM();
+        soundUtils.playBGM();
+        
+        // Reset login fields
+        txfUser.clear();
+        psfPassword.clear();
 
     // Hide logged-in display
     vboxLoggedIn.setVisible(false);
@@ -511,7 +671,7 @@ public class LogInController extends Controller implements Initializable {
         // vboxContinueOrDeleteGame.setVisible(true);
         // if not, then start a game with its service, but
         // for now just start it by going into its view:
-        FlowController.getInstance().goView("GameView");
+        FlowController.getInstance().goView("PreGameView");
     }
 
     @FXML
@@ -531,10 +691,51 @@ public class LogInController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnConfirmAlert(ActionEvent event) {
-        vboxMissingFieldsAlert.setManaged(false);
-        vboxMissingFieldsAlert.setVisible(false);
-        vboxWrongCredentials.setManaged(false);
-        vboxWrongCredentials.setVisible(false);
+        // Get the alert box that's currently visible
+        final VBox alertToHide;
+        if (vboxMissingFieldsAlert.isVisible()) {
+            alertToHide = vboxMissingFieldsAlert;
+        } else if (vboxWrongCredentials.isVisible()) {
+            alertToHide = vboxWrongCredentials;
+        } else {
+            return;
+        }
+
+        // Create fade out animation with glitch
+        Timeline fadeOut = new Timeline();
+        int glitchSteps = 3;
+        double fadeDuration = 300;
+
+        for (int i = 0; i <= glitchSteps; i++) {
+            double progress = (double) i / glitchSteps;
+            double offset = (Math.random() - 0.5) * 15;
+            
+            fadeOut.getKeyFrames().add(
+                new KeyFrame(Duration.millis(progress * fadeDuration),
+                    new KeyValue(alertToHide.translateXProperty(), offset),
+                    new KeyValue(alertToHide.opacityProperty(), (1.0 - progress) * 0.8 + Math.random() * 0.2)
+                )
+            );
+        }
+
+        // Final state
+        fadeOut.getKeyFrames().add(
+            new KeyFrame(Duration.millis(fadeDuration),
+                new KeyValue(alertToHide.translateXProperty(), 0),
+                new KeyValue(alertToHide.opacityProperty(), 0)
+            )
+        );
+
+        // Hide alert when animation completes
+        fadeOut.setOnFinished(e -> {
+            alertToHide.setManaged(false);
+            alertToHide.setVisible(false);
+            alertToHide.setTranslateX(0); // Reset translation
+        });
+
+        // Play animation and sound effect
+        fadeOut.play();
+        soundUtils.playAttackSound();
     }
     @FXML
     void onActionBtnContinueGame(ActionEvent event){
