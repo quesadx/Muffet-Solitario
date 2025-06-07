@@ -316,14 +316,27 @@ public class GameController extends Controller implements Initializable {
 
     private void updateCardImage(CardContainer cardContainer) {
         CardDto cardDto = cardContainer.getCardDto();
-        String imagePath = cardDto.isCardFaceUp()
-                ? "/cr/ac/una/muffetsolitario/resources/assets/" +
-                        (cardDto.getCardSuit().equals("C") ? "Corazones"
-                                : cardDto.getCardSuit().equals("T") ? "Treboles"
-                                        : cardDto.getCardSuit().equals("P") ? "Picas" : "Diamantes")
-                        +
-                        "/" + cardDto.getCardSuit() + "_" + cardDto.getCardValue() + ".png"
-                : "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
+        // Obtener el usuario logueado desde el contexto
+        UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+        int userDesign = 1; // Valor por defecto
+        if (userAccountDto != null) {
+            userDesign = userAccountDto.getUserCardDesign(); // Asegúrate que este método retorna 1, 2 o 3
+        }
+        String versionFolder = "v" + (userDesign+1);
+
+        String imagePath;
+        if (cardDto.isCardFaceUp()) {
+            String suitFolder = cardDto.getCardSuit().equals("C") ? "Corazones"
+                    : cardDto.getCardSuit().equals("T") ? "Treboles"
+                    : cardDto.getCardSuit().equals("P") ? "Picas"
+                    : "Diamantes";
+            imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
+                    + versionFolder + "/" + suitFolder + "/"
+                    + cardDto.getCardSuit() + "_" + cardDto.getCardValue() + ".png";
+        } else {
+            imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
+                    + versionFolder + "/Card_Back1.png";
+        }
         try {
             URL resource = getClass().getResource(imagePath);
             cardContainer.setImagePath(resource != null ? resource.toExternalForm() : "");
@@ -332,7 +345,6 @@ public class GameController extends Controller implements Initializable {
             System.err.println("Error cargando imagen de carta: " + imagePath);
         }
     }
-
     private void moveSequenceToRoot(List<CardContainer> sequence) {
         for (CardContainer card : sequence) {
             Point2D scenePos = card.localToScene(0, 0);
