@@ -75,85 +75,64 @@ public class GameController extends Controller implements Initializable {
                 pnSequence5, pnSequence6, pnSequence7, pnSequence8);
         pnDeck.setOnMouseClicked(event -> {
             try {
-                // Enhanced deck dealing animation with sequential card movement
                 soundUtils.playAttackSound();
-
-                // Deal the cards first
                 gameLogic.dealFromDeck();
-
-                // Animate cards flying one by one to each column
                 List<BoardColumnDto> columns = currentGameDto.getBoardColumnList();
                 for (int i = 0; i < columns.size(); i++) {
                     BoardColumnDto column = columns.get(i);
                     if (!column.getCardList().isEmpty()) {
                         CardContainer topCard = column.getCardList().get(column.getCardList().size() - 1);
-
-                        // Get deck and column positions using scene coordinates
-                        Point2D deckPos = pnDeck.localToScene(60, 80); // Center of deck
-                        Point2D columnPos = this.columns.get(i).localToScene(60, 400); // Target position
+                        Point2D deckPos = pnDeck.localToScene(60, 80);
+                        Point2D columnPos = this.columns.get(i).localToScene(60, 400);
                         Point2D rootDeckPos = root.sceneToLocal(deckPos);
                         Point2D rootColumnPos = root.sceneToLocal(columnPos);
-
-                        // Add drop shadow effect
                         DropShadow shadow = new DropShadow();
-                        shadow.setColor(Color.rgb(0, 0, 0, 0.50)); // Black with 35% opacity
+                        shadow.setColor(Color.rgb(0, 0, 0, 0.50));
                         shadow.setRadius(20);
                         shadow.setSpread(0.4);
                         topCard.setEffect(shadow);
-
-                        // Start card at deck position
                         topCard.setLayoutX(rootDeckPos.getX());
                         topCard.setLayoutY(rootDeckPos.getY());
                         topCard.setOpacity(1);
                         topCard.setScaleX(0.8);
                         topCard.setScaleY(0.8);
-
-                        // Move to root temporarily for animation with high z-index
                         if (topCard.getParent() != null) {
                             ((Pane) topCard.getParent()).getChildren().remove(topCard);
                         }
                         root.getChildren().add(topCard);
-                        topCard.toFront(); // Ensure card is on top of all UI elements
-                        topCard.setViewOrder(-1000); // Set very low view order for highest priority
-
-                        // Create flying animation with delay for each column
+                        topCard.toFront();
+                        topCard.setViewOrder(-1000);
                         final int columnIndex = i;
                         Timeline flyAnimation = new Timeline(
-                                new KeyFrame(Duration.millis(columnIndex * 100), // Staggered start
+                                new KeyFrame(Duration.millis(columnIndex * 100),
                                         new KeyValue(topCard.layoutXProperty(), rootDeckPos.getX()),
                                         new KeyValue(topCard.layoutYProperty(), rootDeckPos.getY()),
                                         new KeyValue(topCard.scaleXProperty(), 0.8),
                                         new KeyValue(topCard.scaleYProperty(), 0.8)),
-                                new KeyFrame(Duration.millis(columnIndex * 100 + 300), // Flight duration
+                                new KeyFrame(Duration.millis(columnIndex * 100 + 300),
                                         new KeyValue(topCard.layoutXProperty(), rootColumnPos.getX()),
                                         new KeyValue(topCard.layoutYProperty(), rootColumnPos.getY()),
                                         new KeyValue(topCard.scaleXProperty(), 1.1),
                                         new KeyValue(topCard.scaleYProperty(), 1.1)),
-                                new KeyFrame(Duration.millis(columnIndex * 100 + 400), // Settle
+                                new KeyFrame(Duration.millis(columnIndex * 100 + 400),
                                         new KeyValue(topCard.scaleXProperty(), 1.0),
                                         new KeyValue(topCard.scaleYProperty(), 1.0)));
-
-                        // When animation finishes, move card back to column
                         flyAnimation.setOnFinished(e -> {
                             root.getChildren().remove(topCard);
-                            // Reset card properties
                             topCard.setViewOrder(0);
                             topCard.setScaleX(1.0);
                             topCard.setScaleY(1.0);
-                            updateBoard(); // This will place the card in the correct column position
+                            updateBoard();
                         });
-
                         flyAnimation.play();
                     }
                 }
-
             } catch (Exception e) {
                 showAlert("No se puede repartir", e.getMessage());
             }
         });
-        String dificultadSeleccionada = (String) AppContext.getInstance().get("GameDifficulty");
-        System.out.println("Estoy empezando a inicializar" + dificultadSeleccionada);
-        inicializarPartida(dificultadSeleccionada);
+        String difficultySelected = (String) AppContext.getInstance().get("GameDifficulty");
+        initializeGame(difficultySelected);
         if (currentGameDto != null) {
             startGame();
             startRandomLightning();
@@ -169,22 +148,21 @@ public class GameController extends Controller implements Initializable {
     }
 
     public void startGame() {
-        currentGameDto.initializeBoardColumns(10);
-        gameLogic.initializeDeck(currentGameDto);
-        gameLogic.loadCardsToColumn();
-        for (BoardColumnDto col : currentGameDto.getBoardColumnList()) {
-            List<CardContainer> cardList = col.getCardList();
-            if (!cardList.isEmpty()) {
-                CardContainer topCard = cardList.get(cardList.size() - 1);
-                topCard.getCardDto().setCardFaceUp(true);
-                animateCardFlip(topCard);
+        if (currentGameDto.getBoardColumnList() == null || currentGameDto.getBoardColumnList().isEmpty()) {
+            currentGameDto.initializeBoardColumns(10);
+            gameLogic.initializeDeck(currentGameDto);
+            gameLogic.loadCardsToColumn();
+            for (BoardColumnDto col : currentGameDto.getBoardColumnList()) {
+                List<CardContainer> cardList = col.getCardList();
+                if (!cardList.isEmpty()) {
+                    CardContainer topCard = cardList.get(cardList.size() - 1);
+                    topCard.getCardDto().setCardFaceUp(true);
+                    animateCardFlip(topCard);
+                }
             }
         }
-
-        // Add epic game start effects
         animationHandler.playLightningEffect(root);
         soundUtils.playAttackSound();
-
         updateBoard();
         animateGameStart();
     }
@@ -262,8 +240,7 @@ public class GameController extends Controller implements Initializable {
         // Play sound effect
         soundUtils.playAttackSound();
     }
-
-    private void inicializarPartida(String dificultadSeleccionada) {
+    private void initializeGame(String difficultySelected) {
         UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         if (userAccountDto == null) {
             showAlert("Error", "No hay usuario logueado.");
@@ -272,23 +249,22 @@ public class GameController extends Controller implements Initializable {
         }
         GameService gameService = new GameService();
         Respuesta respuesta = gameService.getGameByUserId(userAccountDto.getUserId());
-        System.out.println("Estoy apunto de entrar a getestado");
         if (respuesta.getEstado()) {
             currentGameDto = (GameDto) respuesta.getResultado("Game");
             if (currentGameDto == null) {
                 showAlert("Error", "No se pudo obtener la partida guardada.");
                 return;
             }
-            // aqui tengo que empezar a cargar los datos de la partida persistida
-            System.out.println("Partida cargada exitosamente.");
+            // Aquí SÍ hay partida guardada: NO inicialices de nuevo el tablero ni el deck
+            System.out.println("Partida cargada desde la base de datos.");
         } else {
-            System.out.println("Entre en el else de que gamedto no es nulo");
+            // No hay partida guardada: crea una nueva
+            System.out.println("No hay partida guardada, se crea una nueva.");
             currentGameDto = new GameDto();
-            currentGameDto.setGameUserFk(userAccountDto.getUserId());// si es invitado el getuserid seria nulo
+            currentGameDto.setGameUserFk(userAccountDto.getUserId());
             userAccountDto.setGameId(currentGameDto.getGameId()); //TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
-            currentGameDto.setGameDifficulty(dificultadSeleccionada);
+            currentGameDto.setGameDifficulty(difficultySelected);
             // Asigna aquí cualquier otro dato obligatorio
-            System.out.println("Nueva partida creada y guardada para el usuario.");
         }
         gameLogic = new GameLogic(currentGameDto);
     }
