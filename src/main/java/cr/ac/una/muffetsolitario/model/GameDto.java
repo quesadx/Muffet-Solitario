@@ -9,7 +9,7 @@ import javafx.collections.ObservableList;
 
 public class GameDto {
     
-    private LongProperty gameId;
+    private Long gameId;
     private IntegerProperty gameCompletedSequences;
     private IntegerProperty gameDealsRemaining;
     private IntegerProperty gameMoveCount;
@@ -26,7 +26,6 @@ public class GameDto {
     private Long gameUserFk;
     
     public GameDto() {
-        this.gameId = new SimpleLongProperty();
         this.gameCompletedSequences = new SimpleIntegerProperty(0);
         this.gameDealsRemaining = new SimpleIntegerProperty(0);
         this.gameMoveCount = new SimpleIntegerProperty(0);
@@ -88,16 +87,13 @@ public class GameDto {
         }
     }
     
-    public LongProperty gameIdProperty() {
+
+    public Long getGameId() {
         return gameId;
     }
     
-    public Long getGameId() {
-        return gameId.get();
-    }
-    
     public void setGameId(Long gameId) {
-        this.gameId.set(gameId);
+        this.gameId=gameId;
     }
     
     public IntegerProperty gameCompletedSequencesProperty() {

@@ -28,7 +28,7 @@ public class PreGameController extends Controller implements Initializable {
 
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
     private final SoundUtils soundUtils = SoundUtils.getInstance();
-    private String selectedDifficulty = "EASY";
+    private String selectedDifficulty = "F";
     private Timeline loadingTimeline;
 
     @Override
@@ -48,7 +48,7 @@ public class PreGameController extends Controller implements Initializable {
         startGlitchEffect(btnHard);
 
         // Set default selection
-        selectDifficulty("EASY");
+        selectDifficulty("F");
     }
 
     @Override
@@ -58,19 +58,19 @@ public class PreGameController extends Controller implements Initializable {
 
     @FXML
     private void onActionBtnEasy(ActionEvent event) {
-        selectDifficulty("EASY");
+        selectDifficulty("F");
         animationHandler.playHitEffect(btnEasy);
     }
 
     @FXML
     private void onActionBtnMed(ActionEvent event) {
-        selectDifficulty("MEDIUM");
+        selectDifficulty("N");
         animationHandler.playHitEffect(btnMed);
     }
 
     @FXML
     private void onActionBtnHard(ActionEvent event) {
-        selectDifficulty("HARD");
+        selectDifficulty("D");
         animationHandler.playHitEffect(btnHard);
     }
 
@@ -89,13 +89,13 @@ public class PreGameController extends Controller implements Initializable {
         
         // Highlight selected button
         switch (difficulty) {
-            case "EASY":
+            case "F":
                 btnEasy.getStyleClass().add("mfx-button-selected");
                 break;
-            case "MEDIUM":
+            case "N":
                 btnMed.getStyleClass().add("mfx-button-selected");
                 break;
-            case "HARD":
+            case "D":
                 btnHard.getStyleClass().add("mfx-button-selected");
                 break;
         }

@@ -482,6 +482,10 @@ public class LogInController extends Controller implements Initializable {
     void onActionBtnGuest(ActionEvent event) {
         isLoggedIn = true;
         animateLoginToLoggedIn();
+        loggedInUser = new UserAccountDto();
+        loggedInUser.setUserNickname("Invitado");
+        loggedInUser.setUserIsMusicActive(true);
+        AppContext.getInstance().set("LoggedInUser", loggedInUser);
         onUserLoggedIn(); 
     }
 
@@ -507,7 +511,6 @@ public class LogInController extends Controller implements Initializable {
             isLoggedIn = true;
             animateLoginToLoggedIn();
             onUserLoggedIn();
-
             // Update logged in display info
             lblUsername.setText(loggedInUser.getUserNickname());
             // TODO: Set date created and last played dates
@@ -538,6 +541,8 @@ public class LogInController extends Controller implements Initializable {
     private boolean validateCredentials(String nickname, String password) {
         if (!databaseAvailable) {
             // In offline mode, create a temporary user
+
+            //TODO: Set boolean to userAccount if is a temporaly user
             loggedInUser = new UserAccountDto();
             loggedInUser.setUserNickname(nickname);
             loggedInUser.setUserIsMusicActive(true);
@@ -581,6 +586,7 @@ public class LogInController extends Controller implements Initializable {
         // Restart background music
         soundUtils.stopBGM();
         soundUtils.playBGM();
+
         
         // Reset login fields
         txfUser.clear();
