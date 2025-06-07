@@ -10,14 +10,13 @@ import javafx.collections.ObservableList;
 
 public class CompletedSequenceDto {
     
-    private LongProperty cseqId;
+    private Long cseqId;
     private IntegerProperty cseqOrder;
     private Long cseqVersion;
     private Long cseqGameFk;
     private ObservableList<CardContainer> cardList;
     
     public CompletedSequenceDto() {
-        this.cseqId = new SimpleLongProperty();
         this.cseqOrder = new SimpleIntegerProperty();
         this.cardList = FXCollections.observableArrayList();
     }
@@ -52,17 +51,13 @@ public class CompletedSequenceDto {
             }
         }
     }
-    
-    public LongProperty cseqIdProperty() {
+
+    public Long getCseqId() {
         return cseqId;
     }
     
-    public Long getCseqId() {
-        return cseqId.get();
-    }
-    
     public void setCseqId(Long cseqId) {
-        this.cseqId.set(cseqId);
+        this.cseqId = cseqId;
     }
     
     public IntegerProperty cseqOrderProperty() {

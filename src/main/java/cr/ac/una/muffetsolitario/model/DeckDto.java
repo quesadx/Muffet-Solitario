@@ -10,14 +10,13 @@ import javafx.collections.ObservableList;
 
 public class DeckDto {
     
-    private LongProperty deckId;
+    private Long deckId;
     private Long deckVersion;
     private Long deckGameId;
     private ObservableList<CardContainer> cardList;
     
     
     public DeckDto() {
-        this.deckId = new SimpleLongProperty();
         this.cardList = FXCollections.observableArrayList();
     }
     
@@ -48,17 +47,13 @@ public class DeckDto {
             }
         }
     }
-
-    public LongProperty deckIdProperty() {
+    
+    public Long getDeckId() {
         return deckId;
     }
     
-    public Long getDeckId() {
-        return deckId.get();
-    }
-    
     public void setDeckId(Long deckId) {
-        this.deckId.set(deckId);
+        this.deckId = deckId;
     }
 
     public Long getDeckVersion() {

@@ -4,7 +4,7 @@ import javafx.beans.property.*;
 
 public class CardDto {
     
-    private LongProperty cardId;
+    private Long cardId;
     private BooleanProperty cardFaceUp;
     private StringProperty cardSuit;
     private IntegerProperty cardValue;
@@ -20,7 +20,6 @@ public class CardDto {
     private BooleanProperty highlighted;
     
     public CardDto() {
-        this.cardId = new SimpleLongProperty();
         this.cardFaceUp = new SimpleBooleanProperty();
         this.cardSuit = new SimpleStringProperty();
         this.cardValue = new SimpleIntegerProperty();
@@ -40,16 +39,12 @@ public class CardDto {
        cardVersion = card.getCardVersion();
     }
 
-    public LongProperty cardIdProperty() {
+    public Long getCardId() {
         return cardId;
     }
     
-    public Long getCardId() {
-        return cardId.get();
-    }
-    
     public void setCardId(Long cardId) {
-        this.cardId.set(cardId);
+        this.cardId = cardId;
     }
     
     public BooleanProperty cardFaceUpProperty() {

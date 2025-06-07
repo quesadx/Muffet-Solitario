@@ -10,14 +10,13 @@ import javafx.collections.ObservableList;
 
 public class BoardColumnDto {
    
-    private LongProperty bcolmnId;
+    private Long bcolmnId;
     private IntegerProperty bcolmnIndex;
     private Long bcolmnVersion;
     private Long bcolmnGameFk;
     private ObservableList<CardContainer> cardList;
     
     public BoardColumnDto() {
-        this.bcolmnId = new SimpleLongProperty();
         this.bcolmnIndex = new SimpleIntegerProperty();
         this.cardList = FXCollections.observableArrayList();
     }
@@ -44,17 +43,13 @@ public class BoardColumnDto {
             }
         }
     }
-
-    public LongProperty bcolmnIdProperty() {
+    
+    public Long getBcolmnId() {
         return bcolmnId;
     }
     
-    public Long getBcolmnId() {
-        return bcolmnId.get();
-    }
-    
     public void setBcolmnId(Long bcolmnId) {
-        this.bcolmnId.set(bcolmnId);
+        this.bcolmnId = bcolmnId;
     }
     
     public IntegerProperty bcolmnIndexProperty() {
