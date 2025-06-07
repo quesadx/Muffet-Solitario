@@ -19,12 +19,18 @@ import javafx.util.Duration;
 
 public class PreGameController extends Controller implements Initializable {
 
-    @FXML private AnchorPane root;
-    @FXML private ImageView imgBackground;
-    @FXML private MFXButton btnEasy;
-    @FXML private MFXButton btnMed;
-    @FXML private MFXButton btnHard;
-    @FXML private MFXProgressBar pbGamingLoadingBar;
+    @FXML
+    private AnchorPane root;
+    @FXML
+    private ImageView imgBackground;
+    @FXML
+    private MFXButton btnEasy;
+    @FXML
+    private MFXButton btnMed;
+    @FXML
+    private MFXButton btnHard;
+    @FXML
+    private MFXProgressBar pbGamingLoadingBar;
 
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
     private final SoundUtils soundUtils = SoundUtils.getInstance();
@@ -81,12 +87,12 @@ public class PreGameController extends Controller implements Initializable {
 
     private void selectDifficulty(String difficulty) {
         selectedDifficulty = difficulty;
-        
+
         // Reset all button styles
         btnEasy.getStyleClass().removeAll("mfx-button-selected");
         btnMed.getStyleClass().removeAll("mfx-button-selected");
         btnHard.getStyleClass().removeAll("mfx-button-selected");
-        
+
         // Highlight selected button
         switch (difficulty) {
             case "F":
@@ -105,42 +111,40 @@ public class PreGameController extends Controller implements Initializable {
         // Show loading progress bar
         pbGamingLoadingBar.setVisible(true);
         pbGamingLoadingBar.setProgress(0.0);
-        
+
         // Disable buttons during loading
         btnEasy.setDisable(true);
         btnMed.setDisable(true);
         btnHard.setDisable(true);
-        
+
         // Create loading timeline (3-4 seconds)
         loadingTimeline = new Timeline();
         double loadingDuration = 3500; // 3.5 seconds
         int steps = 100;
-        
+
         for (int i = 0; i <= steps; i++) {
             double progress = (double) i / steps;
             double time = progress * loadingDuration;
-            
+
             loadingTimeline.getKeyFrames().add(
-                new KeyFrame(Duration.millis(time), e -> {
-                    pbGamingLoadingBar.setProgress(progress);
-                    
-                    // Add glitch effect occasionally
-                    if (Math.random() < 0.1) {
-                        animationHandler.playHitEffect(pbGamingLoadingBar);
-                    }
-                })
-            );
+                    new KeyFrame(Duration.millis(time), e -> {
+                        pbGamingLoadingBar.setProgress(progress);
+
+                        // Add glitch effect occasionally
+                        if (Math.random() < 0.1) {
+                            animationHandler.playHitEffect(pbGamingLoadingBar);
+                        }
+                    }));
         }
-        
+
         // When loading completes, go to game view
         loadingTimeline.setOnFinished(e -> {
             // Store selected difficulty in AppContext
             AppContext.getInstance().set("GameDifficulty", selectedDifficulty);
-            
             // Transition to game view
             FlowController.getInstance().goView("GameView");
         });
-        
+
         loadingTimeline.play();
     }
 
@@ -149,17 +153,16 @@ public class PreGameController extends Controller implements Initializable {
         glitchTimeline.setCycleCount(Timeline.INDEFINITE);
 
         glitchTimeline.getKeyFrames().add(
-            new KeyFrame(Duration.seconds(1), event -> {
-                double nextDelay = 2.0 + Math.random() * 6;
-                glitchTimeline.stop();
-                animationHandler.playHitEffect(node);
-                glitchTimeline.getKeyFrames().set(0,
-                    new KeyFrame(Duration.seconds(nextDelay), ev -> {
-                        animationHandler.playHitEffect(node);
-                    }));
-                glitchTimeline.playFromStart();
-            })
-        );
+                new KeyFrame(Duration.seconds(1), event -> {
+                    double nextDelay = 2.0 + Math.random() * 6;
+                    glitchTimeline.stop();
+                    animationHandler.playHitEffect(node);
+                    glitchTimeline.getKeyFrames().set(0,
+                            new KeyFrame(Duration.seconds(nextDelay), ev -> {
+                                animationHandler.playHitEffect(node);
+                            }));
+                    glitchTimeline.playFromStart();
+                }));
         glitchTimeline.play();
     }
 }

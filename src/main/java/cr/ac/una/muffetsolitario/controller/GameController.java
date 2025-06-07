@@ -152,7 +152,7 @@ public class GameController extends Controller implements Initializable {
             }
         });
         String dificultadSeleccionada = (String) AppContext.getInstance().get("GameDifficulty");
-        System.out.println("Estoy empezando a inicializar");
+        System.out.println("Estoy empezando a inicializar" + dificultadSeleccionada);
         inicializarPartida(dificultadSeleccionada);
         if (currentGameDto != null) {
             startGame();

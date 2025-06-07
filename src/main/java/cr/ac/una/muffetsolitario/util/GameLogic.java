@@ -29,13 +29,12 @@ public class GameLogic {
         if (gameDto == null)
             throw new IllegalArgumentException("GameDto no puede ser null");
 
-        String difficultyStr = gameDto.getGameDifficulty();
         String[] suits;
 
-        if ("H".equalsIgnoreCase(difficultyStr)) {
+        if ("D".equalsIgnoreCase(gameDto.getGameDifficulty())) {
             suits = new String[] { "C", "D", "P", "T" };
             gameDto.setGameDealsRemaining(5);
-        } else if ("M".equalsIgnoreCase(difficultyStr)) {
+        } else if ("N".equalsIgnoreCase(gameDto.getGameDifficulty())) {
             suits = new String[] { "C", "D" };
             gameDto.setGameDealsRemaining(5);
         } else {
@@ -138,6 +137,7 @@ public class GameLogic {
 
 
         moveHistory.add(new Move(fromColumnIndex, toColumnIndex, sequence, lastCardFaceUpBeforeMove));
+
         gameDto.incrementMoveCount();
 
 
@@ -173,6 +173,7 @@ public class GameLogic {
 
                 columnsDealtTo.add(i);
                 dealtCards.add(card);
+
             }
         }
         gameDto.decrementDealsRemaining(); // Usar método del DTO si existe
