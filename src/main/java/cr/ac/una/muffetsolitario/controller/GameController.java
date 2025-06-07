@@ -1,7 +1,10 @@
 package cr.ac.una.muffetsolitario.controller;
 
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -46,9 +49,11 @@ public class GameController extends Controller implements Initializable {
     private double[] dragOffsetsX, dragOffsetsY;
     private int fromColIdx = -1, fromCardIdx = -1;
     private static final double CARD_OFFSET = 25;
+    private int elapsedSeconds = 0;
 
     // Lightning effect timer
     private Timeline lightningTimer;
+    private Timeline gameTimer;
 
     @FXML
     private Pane pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
@@ -164,7 +169,47 @@ public class GameController extends Controller implements Initializable {
         animationHandler.playLightningEffect(root);
         soundUtils.playAttackSound();
         updateBoard();
+        startGameTimer();
+        updateGameInfo();
         animateGameStart();
+    }
+
+    private void startGameTimer() {
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
+        elapsedSeconds = currentGameDto.getGameDurationSeconds(); // Recupera el tiempo guardado si existe
+        updateTimerLabel();
+        gameTimer = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> {
+                    elapsedSeconds++;
+                    currentGameDto.setGameDurationSeconds(elapsedSeconds); // <-- Sincroniza el modelo
+                    updateTimerLabel();
+                }));
+        gameTimer.setCycleCount(Timeline.INDEFINITE);
+        gameTimer.play();
+    }
+
+    private void updateTimerLabel() {
+        int minutes = elapsedSeconds / 60;
+        int seconds = elapsedSeconds % 60;
+        lbTime.setText(String.format("%02d:%02d", minutes, seconds));
+    }
+
+    private void updateGameInfo() {
+        // Mostrar dificultad
+        String dificultad = currentGameDto.getGameDifficulty();
+        if (dificultad == null) {
+            dificultad = "Desconocida";
+        }
+        lbDifficulty.setText("Dificultad: " + dificultad);
+
+        // Mostrar puntos
+        Integer puntos = currentGameDto.getGameTotalPoints();
+        if (puntos == null) {
+            puntos = 0;
+        }
+        lbUserPoints.setText("Puntos: " + puntos);
     }
 
     /**
@@ -240,11 +285,11 @@ public class GameController extends Controller implements Initializable {
         // Play sound effect
         soundUtils.playAttackSound();
     }
+
     private void initializeGame(String difficultySelected) {
         UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         if (userAccountDto == null) {
             showAlert("Error", "No hay usuario logueado.");
-            System.out.println("No hay usuario logueado.");
             return;
         }
         GameService gameService = new GameService();
@@ -255,16 +300,16 @@ public class GameController extends Controller implements Initializable {
                 showAlert("Error", "No se pudo obtener la partida guardada.");
                 return;
             }
-            // Aquí SÍ hay partida guardada: NO inicialices de nuevo el tablero ni el deck
             System.out.println("Partida cargada desde la base de datos.");
         } else {
-            // No hay partida guardada: crea una nueva
             System.out.println("No hay partida guardada, se crea una nueva.");
             currentGameDto = new GameDto();
             currentGameDto.setGameUserFk(userAccountDto.getUserId());
-            userAccountDto.setGameId(currentGameDto.getGameId()); //TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
+            userAccountDto.setGameId(currentGameDto.getGameId()); // TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
             currentGameDto.setGameDifficulty(difficultySelected);
-            // Asigna aquí cualquier otro dato obligatorio
+            currentGameDto.setGameCreatedDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            System.out.println("dia de creacion: " + currentGameDto.getGameCreatedDate());
+            currentGameDto.setGameTotalPoints(500);
         }
         gameLogic = new GameLogic(currentGameDto);
     }
@@ -512,7 +557,8 @@ public class GameController extends Controller implements Initializable {
 
             // Perform the move
             gameLogic.moveCardsBetweenColumns(fromCol, toCol, cardContainer);
-
+            currentGameDto.setGameTotalPoints(currentGameDto.getGameTotalPoints() - 1);
+            updateGameInfo();
             // Check if we need to flip a card in the source column
             if (!sourceCards.isEmpty() && sourceCards.size() > 1) {
                 CardContainer cardToFlip = sourceCards.get(sourceCards.size() - 2); // Card that was under the moved
@@ -535,7 +581,7 @@ public class GameController extends Controller implements Initializable {
                         updateBoard();
                     }));
             updateDelay.play();
-            gameLogic.suggestPossibleMoves(currentGameDto);
+            showAlert("Posible movimiento", gameLogic.suggestPossibleMoves(currentGameDto));
         } catch (IllegalArgumentException e) {
             showAlert("Movimiento inválido", e.getMessage());
         }
@@ -686,10 +732,10 @@ public class GameController extends Controller implements Initializable {
 
     @FXML
     private void onActionBtnUndo(ActionEvent event) {
-        System.out.println("Mae si me estoy presionando");
         // Add sound effect for undo action (no lightning)
         soundUtils.playAttackSound();
         gameLogic.undoLastMove();
+        updateGameInfo();
         updateBoard();
     }
 
@@ -781,5 +827,6 @@ public class GameController extends Controller implements Initializable {
 
     @FXML
     private void onActionBtnHint(ActionEvent event) {
+        showAlert("Posible movimiento", gameLogic.suggestPossibleMoves(currentGameDto));
     }
 }

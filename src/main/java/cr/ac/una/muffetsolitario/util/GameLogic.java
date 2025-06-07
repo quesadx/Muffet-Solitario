@@ -102,9 +102,6 @@ public class GameLogic {
         BoardColumnDto fromColumn = columns.get(fromColumnIndex);
         BoardColumnDto toColumn = columns.get(toColumnIndex);
 
-        if (fromColumnIndex == toColumnIndex)
-            throw new IllegalArgumentException("No se puede mover cartas a la misma columna.");
-
         List<CardContainer> fromCards = fromColumn.getCardList();
         List<CardContainer> toCards = toColumn.getCardList();
 
@@ -135,11 +132,9 @@ public class GameLogic {
         if (!fromCards.isEmpty())
             fromCards.get(fromCards.size() - 1).getCardDto().setCardFaceUp(true);
 
-
         moveHistory.add(new Move(fromColumnIndex, toColumnIndex, sequence, lastCardFaceUpBeforeMove));
 
         gameDto.incrementMoveCount();
-
 
         checkAndRemoveCompletedSequence(toColumn);
         checkGameFinished(gameDto);
@@ -154,7 +149,6 @@ public class GameLogic {
 
         List<Integer> columnsDealtTo = new ArrayList<>();
         List<CardContainer> dealtCards = new ArrayList<>();
-
 
         if (deckCardList == null || deckCardList.isEmpty())
             throw new IllegalStateException("No hay cartas en el mazo para repartir.");
@@ -202,7 +196,7 @@ public class GameLogic {
             gameDto.incrementCompletedSequences();
 
             cards.removeAll(last13Cards);
-
+            gameDto.setGameTotalPoints(gameDto.getGameTotalPoints()+100);
             if (!cards.isEmpty())
                 cards.get(cards.size() - 1).getCardDto().setCardFaceUp(true);
         }
@@ -252,7 +246,7 @@ public class GameLogic {
         return !getPossibleMoves(game).isEmpty();
     }
 
-    public void suggestPossibleMoves(GameDto game) {
+    public String suggestPossibleMoves(GameDto game) {
         List<BoardColumnDto> columns = game.getBoardColumnList();
         List<CardContainer> topFaceUpCards = new ArrayList<>();
         for (BoardColumnDto column : columns) {
@@ -269,27 +263,30 @@ public class GameLogic {
 
         List<int[]> moves = getPossibleMoves(game);
         if (moves.isEmpty()) {
-            // TODO:MATTEO DEBE MANDAR AQUI A UN MENSAJE EN PANTALLA
-
-            System.out.println("No hay movimientos posibles entre columnas.");
+            return "No hay movimientos posibles entre columnas.";
         } else {
-            for (int[] move : moves) {
-                CardContainer fromCard = topFaceUpCards.get(move[0]);
-                CardContainer toCard = topFaceUpCards.get(move[1]);
-                System.out.println("Sugerencia: Puedes mover la carta " +
-                        fromCard.getCardDto().getCardValue() + fromCard.getCardDto().getCardSuit() +
-                        " de la columna " + (move[0] + 1) + " a la columna " + (move[1] + 1) +
-                        " sobre la carta " + toCard.getCardDto().getCardValue() + toCard.getCardDto().getCardSuit());
+            // Sugerir el primer movimiento posible
+            int[] move = moves.get(0);
+            CardContainer fromCard = topFaceUpCards.get(move[0]);
+            CardContainer toCard = topFaceUpCards.get(move[1]);
+
+            // Manejar el caso de que alguna columna esté vacía (fromCard o toCard puede ser null)
+            if (fromCard == null || toCard == null) {
+                return "No hay movimientos posibles entre columnas.";
             }
+
+            return "Puedes mover la carta " +
+                    fromCard.getCardDto().getCardValue() + fromCard.getCardDto().getCardSuit() +
+                    " de la columna " + (move[0] + 1) + " a la columna " + (move[1] + 1) +
+                    " sobre la carta " + toCard.getCardDto().getCardValue() + toCard.getCardDto().getCardSuit();
         }
     }
 
-    public void checkGameFinished(GameDto game) {
+    public String checkGameFinished(GameDto game) {
         // WIN: todas las secuencias completas han sido formadas
         if (game.getCompletedSequenceList() != null && game.getCompletedSequenceList().size() == 8) {
             game.setGameStatus("WIN");
-            // TODO:MATTEO DEBE MANDAR AQUI A UNA VISTA DE GANADOR O A UNA ANIMACION
-            return;
+            return "WIN";
         }
 
         boolean isBoardEmpty = game.getBoardColumnList().stream()
@@ -298,51 +295,53 @@ public class GameLogic {
 
         if (isBoardEmpty && isDeckEmpty) {
             game.setGameStatus("WIN");
-            // TODO:MATTEO DEBE MANDAR AQUI A UNA VISTA DE GANADOR O A UNA ANIMACION
             System.out.println("¡Felicidades! Has ganado el juego (tablero y mazo vacíos).");
-            return;
+            return "WIN";
         }
         if (isDeckEmpty && !hasPossibleMoves(game)) {
             game.setGameStatus("LOST");
-            // TODO:MATTEO DEBE MANDAR AQUI A UNA VISTA DE PERDEDOR O A UNA ANIMACION
             System.out.println("¡Juego perdido! No hay más movimientos posibles y el mazo está vacío.");
+            return "LOST";
         }
+        return "";
     }
     public void undoLastMove() {
-        if (moveHistory.isEmpty()) return;
+        if (moveHistory.isEmpty())
+            return;
         Move lastMove = moveHistory.remove(moveHistory.size() - 1);
-    
+
         if (lastMove.getType() == Move.MoveType.COLUMN_TO_COLUMN) {
             // Deshacer movimiento entre columnas
             List<BoardColumnDto> columns = gameDto.getBoardColumnList();
             BoardColumnDto fromColumn = columns.get(lastMove.getFromColumnIndex());
             BoardColumnDto toColumn = columns.get(lastMove.getToColumnIndex());
-    
+
             // Quitar las cartas movidas de la columna destino
             List<CardContainer> toCards = toColumn.getCardList();
             int removeStart = toCards.size() - lastMove.getMovedSequence().size();
             toCards.subList(removeStart, toCards.size()).clear();
-    
+
             // Restaurar las cartas a la columna origen
             for (CardContainer card : lastMove.getMovedSequence()) {
                 card.getCardDto().setCardBcolmnId(fromColumn.getBcolmnId());
             }
             fromColumn.getCardList().addAll(lastMove.getMovedSequence());
-    
             // Restaurar el estado de la carta previa si aplica
             if (fromColumn.getCardList().size() > lastMove.getMovedSequence().size()) {
                 int idx = fromColumn.getCardList().size() - lastMove.getMovedSequence().size() - 1;
                 fromColumn.getCardList().get(idx).getCardDto().setCardFaceUp(lastMove.wasLastCardFaceUpBeforeMove());
-            }
+            }            
+            gameDto.setGameTotalPoints(gameDto.getGameTotalPoints()-1);
+
         } else if (lastMove.getType() == Move.MoveType.DEAL_FROM_DECK) {
             // Deshacer repartir del deck
             List<BoardColumnDto> columns = gameDto.getBoardColumnList();
             List<CardContainer> deckCardList = gameDto.getDeckDto().getCardList();
-    
+
             // Quitar las cartas repartidas de las columnas y devolverlas al deck
             List<Integer> columnsDealtTo = lastMove.getColumnsDealtTo();
             List<CardContainer> dealtCards = lastMove.getDealtCards();
-    
+
             for (int i = columnsDealtTo.size() - 1; i >= 0; i--) {
                 int colIdx = columnsDealtTo.get(i);
                 CardContainer card = dealtCards.get(i);
@@ -353,9 +352,11 @@ public class GameLogic {
                     deckCardList.add(0, card); // Devuelve al tope del deck
                 }
             }
-            gameDto.setGameDealsRemaining(gameDto.getGameDealsRemaining()+1);
+            gameDto.setGameTotalPoints(gameDto.getGameTotalPoints()-1);
+            gameDto.setGameDealsRemaining(gameDto.getGameDealsRemaining() + 1);
         }
     }
+
     private static class Move {
         enum MoveType {
             COLUMN_TO_COLUMN, DEAL_FROM_DECK
