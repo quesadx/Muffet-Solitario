@@ -18,6 +18,7 @@ public class DeckDto {
     
     public DeckDto() {
         this.cardList = FXCollections.observableArrayList();
+        this.deckVersion = 1L;
     }
     
     public DeckDto(Long deckId) {
@@ -36,7 +37,7 @@ public class DeckDto {
 
         setDeckId(deck.getDeckId());
         setDeckGameId(deck.getDeckGameFk().getGameId());
-        deckVersion = deck.getDeckVersion();
+        deckVersion = deck.getDeckVersion() != null ? deck.getDeckVersion() : 1L;
 
         if (deck.getCardList() != null) {
             for (Card card : deck.getCardList()) {

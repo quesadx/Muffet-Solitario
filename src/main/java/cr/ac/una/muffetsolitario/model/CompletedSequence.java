@@ -24,6 +24,8 @@ public class CompletedSequence implements Serializable {
     private static final long serialVersionUID = 1L;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Id
+    @SequenceGenerator(name = "SEQUENCE_COMPLETED_ID_GENERATOR", sequenceName = "COMPLETED_SEQUENCE_SQ01", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "COMPLETED_SEQUENCE_ID_GENERATOR")
     @Basic(optional = false)
     @Column(name = "CSEQ_ID")
     private Long cseqId;

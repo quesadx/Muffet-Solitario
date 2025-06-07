@@ -24,6 +24,7 @@ public class CardDto {
         this.cardSuit = new SimpleStringProperty();
         this.cardValue = new SimpleIntegerProperty();
         this.cardPositionInContainer = new SimpleIntegerProperty();
+        this.cardVersion = 1L;
         this.selected = new SimpleBooleanProperty(false);
         this.draggable = new SimpleBooleanProperty(true);
         this.highlighted = new SimpleBooleanProperty(false);
@@ -36,7 +37,7 @@ public class CardDto {
        setCardSuit(card.getCardSuit());
        setCardValue(card.getCardValue());
        setCardPositionInContainer(card.getCardPositionInContainer());
-       cardVersion = card.getCardVersion();
+       cardVersion = card.getCardVersion() != null ? card.getCardVersion() : 1L;
     }
 
     public Long getCardId() {

@@ -19,6 +19,7 @@ public class BoardColumnDto {
     public BoardColumnDto() {
         this.bcolmnIndex = new SimpleIntegerProperty();
         this.cardList = FXCollections.observableArrayList();
+        this.bcolmnId = 1L;
     }
     
     public BoardColumnDto(Long bcolmnId, Integer bcolmnIndex) {
@@ -31,7 +32,7 @@ public class BoardColumnDto {
         this();
         setBcolmnId(boardColumn.getBcolmnId());
         setBcolmnIndex(boardColumn.getBcolmnIndex());
-        bcolmnVersion = boardColumn.getBcolmnVersion();
+        bcolmnVersion = boardColumn.getBcolmnVersion() != null ? boardColumn.getBcolmnVersion() : 1L;
         bcolmnGameFk = boardColumn.getBcolmnGameFk().getGameId();
 
         if (boardColumn.getCardList() != null) {

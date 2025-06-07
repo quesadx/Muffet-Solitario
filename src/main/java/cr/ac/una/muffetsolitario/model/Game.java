@@ -4,20 +4,8 @@
  */
 package cr.ac.una.muffetsolitario.model;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
@@ -42,6 +30,8 @@ public class Game implements Serializable {
     private static final long serialVersionUID = 1L;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Id
+    @SequenceGenerator(name = "GAME_ID_GENERATOR", sequenceName = "GAME_SQ01", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GAME_ID_GENERATOR")
     @Basic(optional = false)
     @Column(name = "GAME_ID")
     private Long gameId;
@@ -115,6 +105,8 @@ public class Game implements Serializable {
         this.gameCreatedDate = gameDto.getGameCreatedDate();
         this.gameLastPlayed = gameDto.getGameLastPlayed();
         gameVersion = gameDto.getGameVersion();
+
+
 }
 
     public Long getGameId() {

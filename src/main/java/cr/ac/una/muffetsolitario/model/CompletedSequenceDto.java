@@ -19,6 +19,7 @@ public class CompletedSequenceDto {
     public CompletedSequenceDto() {
         this.cseqOrder = new SimpleIntegerProperty();
         this.cardList = FXCollections.observableArrayList();
+        this.cseqVersion = 1L;
     }
     
     public CompletedSequenceDto(Long cseqId) {
@@ -37,7 +38,7 @@ public class CompletedSequenceDto {
         this();
         setCseqId(completedSequence.getCseqId());
         setCseqOrder(completedSequence.getCseqOrder());
-        cseqVersion = completedSequence.getCseqVersion();
+        cseqVersion = completedSequence.getCseqVersion() != null ? completedSequence.getCseqVersion() : 1L;
 
         if (completedSequence.getCseqGameFk() != null) {
             setCseqGameFk(completedSequence.getCseqGameFk().getGameId());

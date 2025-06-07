@@ -24,6 +24,8 @@ public class BoardColumn implements Serializable {
     private static final long serialVersionUID = 1L;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Id
+    @SequenceGenerator(name = "BOARD_COLUMN_ID_GENERATOR", sequenceName = "BOARD_COLUMN_SQ01", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_COLUMN_ID_GENERATOR")
     @Basic(optional = false)
     @Column(name = "BCOLMN_ID")
     private Long bcolmnId;

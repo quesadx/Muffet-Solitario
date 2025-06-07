@@ -35,6 +35,7 @@ public class GameDto {
         this.gameStatus = new SimpleStringProperty();
         this.gameCreatedDate = new SimpleObjectProperty<>();
         this.gameLastPlayed = new SimpleObjectProperty<>();
+        this.gameVersion = 1L;
         this.deckDto = new DeckDto();
         this.boardColumnList = FXCollections.observableArrayList();
         this.completedSequenceList = FXCollections.observableArrayList();
@@ -65,7 +66,7 @@ public class GameDto {
         setGameStatus(game.getGameStatus());
         setGameCreatedDate(game.getGameCreatedDate());
         setGameLastPlayed(game.getGameLastPlayed());
-        gameVersion = game.getGameVersion();
+        gameVersion = game.getGameVersion() !=null ? game.getGameVersion() : 1L;
         setGameUserFk(game.getGameUserFk().getUserId());
         
         if (game.getDeck() != null) {

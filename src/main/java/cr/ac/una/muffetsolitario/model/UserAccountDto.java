@@ -66,7 +66,7 @@ public class UserAccountDto {
         setUserBestScore(userAccount.getUserBestScore() != null ? userAccount.getUserBestScore() : 0);
         setUserFavWord(userAccount.getUserFavWord() != null ? userAccount.getUserFavWord() : "-" );
         setUserIsMusicActive(userAccount.isMusicActive());
-        userVersion = userAccount.getUserVersion() != null ? userAccount.getUserVersion() : 1 ;
+        userVersion = userAccount.getUserVersion() != null ? userAccount.getUserVersion() : 1L;
         
         if (userAccount.getGame() != null) {
             setGameId(userAccount.getGame().getGameId());
