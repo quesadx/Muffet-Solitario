@@ -485,6 +485,7 @@ public class LogInController extends Controller implements Initializable {
         loggedInUser = new UserAccountDto();
         loggedInUser.setUserNickname("Invitado");
         loggedInUser.setUserIsMusicActive(true);
+        loggedInUser.setUserGuest(true);
         AppContext.getInstance().set("LoggedInUser", loggedInUser);
         onUserLoggedIn(); 
     }

@@ -21,7 +21,8 @@ public class UserAccountDto {
     private StringProperty userFavWord;
     private BooleanProperty userIsMusicActive;
     private Long userVersion;
-    
+
+    private boolean isUserGuest;
     private Long gameId;
     
     public UserAccountDto() {
@@ -34,6 +35,7 @@ public class UserAccountDto {
         this.userBestScore = new SimpleIntegerProperty();
         this.userFavWord = new SimpleStringProperty();
         this.userIsMusicActive = new SimpleBooleanProperty();
+        this.setUserGuest(false);
         this.userVersion = 1L;
     }
     
@@ -202,7 +204,15 @@ public class UserAccountDto {
     public void setUserVersion(Long userVersion) {
         this.userVersion = userVersion;
     }
-    
+
+    public boolean isUserGuest() {
+        return isUserGuest;
+    }
+
+    public void setUserGuest(boolean userGuest) {
+        isUserGuest = userGuest;
+    }
+
     public Long getGameId() {
         return gameId;
     }

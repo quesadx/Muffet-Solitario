@@ -285,6 +285,7 @@ public class GameController extends Controller implements Initializable {
             System.out.println("Entre en el else de que gamedto no es nulo");
             currentGameDto = new GameDto();
             currentGameDto.setGameUserFk(userAccountDto.getUserId());// si es invitado el getuserid seria nulo
+            userAccountDto.setGameId(currentGameDto.getGameId()); //TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
             currentGameDto.setGameDifficulty(dificultadSeleccionada);
             // Asigna aquí cualquier otro dato obligatorio
             System.out.println("Nueva partida creada y guardada para el usuario.");
