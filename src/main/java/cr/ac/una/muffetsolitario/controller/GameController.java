@@ -305,6 +305,7 @@ public class GameController extends Controller implements Initializable {
             System.out.println("No hay partida guardada, se crea una nueva.");
             currentGameDto = new GameDto();
             currentGameDto.setGameLoaded(false);
+            currentGameDto.setGameUserFk(userAccountDto.getUserId());
             userAccountDto.setGameId(currentGameDto.getGameId()); // TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
             currentGameDto.setGameDifficulty(difficultySelected);
             currentGameDto

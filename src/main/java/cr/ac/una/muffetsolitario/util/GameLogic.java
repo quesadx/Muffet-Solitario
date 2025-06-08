@@ -5,12 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import cr.ac.una.muffetsolitario.model.BoardColumnDto;
-import cr.ac.una.muffetsolitario.model.CompletedSequenceDto;
-import cr.ac.una.muffetsolitario.model.CardContainer;
-import cr.ac.una.muffetsolitario.model.CardDto;
-import cr.ac.una.muffetsolitario.model.DeckDto;
-import cr.ac.una.muffetsolitario.model.GameDto;
+import cr.ac.una.muffetsolitario.model.*;
 import javafx.collections.FXCollections;
 
 public class GameLogic {
@@ -330,10 +325,22 @@ public class GameLogic {
         }
     }
 
+    private void setUserStats(UserAccountDto user, GameDto game) {
+        if (user != null) {
+            user.setUserTotalGames(user.getUserTotalGames() + 1);
+            user.setUserTotalScore(user.getUserTotalScore() + game.getGameTotalPoints());
+            user.setUserWonGames(user.getUserWonGames() + 1);
+            user.setUserBestScore(game.getGameTotalPoints() > user.getUserBestScore() ? game.getGameTotalPoints() : 0);
+        }
+    }
+
     public String checkGameFinished(GameDto game) {
         // WIN: todas las secuencias completas han sido formadas
+        UserAccountDto user = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         if (game.getCompletedSequenceList() != null && game.getCompletedSequenceList().size() == 8) {
             game.setGameStatus("WIN");
+
+            setUserStats(user, game);
             return "WIN";
         }
 
@@ -343,11 +350,16 @@ public class GameLogic {
 
         if (isBoardEmpty && isDeckEmpty) {
             game.setGameStatus("WIN");
+            setUserStats(user, game);
             System.out.println("¡Felicidades! Has ganado el juego (tablero y mazo vacíos).");
             return "WIN";
         }
         if (isDeckEmpty && !hasPossibleMoves(game)) {
             game.setGameStatus("LOST");
+
+            if(user != null)
+                user.setUserTotalGames(user.getUserTotalGames() + 1);
+
             System.out.println("¡Juego perdido! No hay más movimientos posibles y el mazo está vacío.");
             return "LOST";
         }
