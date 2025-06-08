@@ -1,12 +1,15 @@
 package cr.ac.una.muffetsolitario.controller;
 
-import cr.ac.una.muffetsolitario.util.AnimationHandler;
-import cr.ac.una.muffetsolitario.util.FlowController;
-import cr.ac.una.muffetsolitario.util.SoundUtils;
-import cr.ac.una.muffetsolitario.util.AppContext;
+import cr.ac.una.muffetsolitario.model.GameDto;
+import cr.ac.una.muffetsolitario.model.UserAccountDto;
+import cr.ac.una.muffetsolitario.service.GameService;
+import cr.ac.una.muffetsolitario.util.*;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXProgressBar;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.ResourceBundle;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -36,9 +39,40 @@ public class PreGameController extends Controller implements Initializable {
     private final SoundUtils soundUtils = SoundUtils.getInstance();
     private String selectedDifficulty = "F";
     private Timeline loadingTimeline;
+    private GameDto gameDto;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        gameDto = null;
+
+        UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+
+        GameService gameService = new GameService();
+        Respuesta respuesta = gameService.getGameByUserId(userAccountDto.getUserId());
+        if (respuesta.getEstado()) {
+            gameDto = (GameDto) respuesta.getResultado("Game");
+            if (gameDto == null) {
+                System.out.println("No existe una PARTIDA");
+                return;
+            }
+            btnEasy.setDisable(true);
+            btnMed.setDisable(true);
+            btnHard.setDisable(true);
+            btnEasy.setVisible(false);
+            btnMed.setVisible(false);
+            btnHard.setVisible(false);
+            System.out.println("Partida cargada desde la base de datos.");
+            //TODO: aqui se puede cargar labels que reflejen la partida
+        } else {
+            System.out.println("No existe una PARTIDA. -Se procede a crear una PARTIDA.");
+            btnEasy.setDisable(false);
+            btnMed.setDisable(false);
+            btnHard.setDisable(false);
+            btnEasy.setVisible(true);
+        }
+
+        AppContext.getInstance().set("GameLoaded", gameDto);
+
         // Bind background
         imgBackground.fitHeightProperty().bind(root.heightProperty());
         imgBackground.fitWidthProperty().bind(root.widthProperty());

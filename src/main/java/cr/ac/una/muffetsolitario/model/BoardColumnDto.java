@@ -19,7 +19,7 @@ public class BoardColumnDto {
     public BoardColumnDto() {
         this.bcolmnIndex = new SimpleIntegerProperty();
         this.cardList = FXCollections.observableArrayList();
-        this.bcolmnId = 1L;
+        this.bcolmnVersion = 1L;
     }
     
     public BoardColumnDto(Long bcolmnId, Integer bcolmnIndex) {

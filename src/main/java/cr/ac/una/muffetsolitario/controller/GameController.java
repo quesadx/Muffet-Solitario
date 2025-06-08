@@ -10,11 +10,7 @@ import java.util.ResourceBundle;
 
 import cr.ac.una.muffetsolitario.model.*;
 import cr.ac.una.muffetsolitario.service.GameService;
-import cr.ac.una.muffetsolitario.util.AppContext;
-import cr.ac.una.muffetsolitario.util.GameLogic;
-import cr.ac.una.muffetsolitario.util.Respuesta;
-import cr.ac.una.muffetsolitario.util.AnimationHandler;
-import cr.ac.una.muffetsolitario.util.SoundUtils;
+import cr.ac.una.muffetsolitario.util.*;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -153,6 +149,14 @@ public class GameController extends Controller implements Initializable {
     }
 
     public void startGame() {
+
+        if (currentGameDto.isGameLoaded()) {
+            gameLogic.sortBoardColumnsByIndex(currentGameDto);
+            gameLogic.sortCardsInAllColumns(currentGameDto);
+            gameLogic.sortDeckCards(currentGameDto);
+            gameLogic.sortCompletedSequences(currentGameDto);
+        }
+
         if (currentGameDto.getBoardColumnList() == null || currentGameDto.getBoardColumnList().isEmpty()) {
             currentGameDto.initializeBoardColumns(10);
             gameLogic.initializeDeck(currentGameDto);
@@ -292,19 +296,15 @@ public class GameController extends Controller implements Initializable {
             showAlert("Error", "No hay usuario logueado.");
             return;
         }
-        GameService gameService = new GameService();
-        Respuesta respuesta = gameService.getGameByUserId(userAccountDto.getUserId());
-        if (respuesta.getEstado()) {
-            currentGameDto = (GameDto) respuesta.getResultado("Game");
-            if (currentGameDto == null) {
-                showAlert("Error", "No se pudo obtener la partida guardada.");
-                return;
-            }
+        currentGameDto = (GameDto) AppContext.getInstance().get("GameLoaded");
+
+        if (currentGameDto != null) {
+            currentGameDto.setGameLoaded(true);
             System.out.println("Partida cargada desde la base de datos.");
         } else {
             System.out.println("No hay partida guardada, se crea una nueva.");
             currentGameDto = new GameDto();
-            currentGameDto.setGameUserFk(userAccountDto.getUserId());
+            currentGameDto.setGameLoaded(false);
             userAccountDto.setGameId(currentGameDto.getGameId()); // TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
             currentGameDto.setGameDifficulty(difficultySelected);
             currentGameDto
@@ -768,6 +768,19 @@ public class GameController extends Controller implements Initializable {
 
     @FXML
     private void onActionBtnExit(ActionEvent event) {
+        UserAccountDto user = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+        GameService gameService = new GameService();
+
+        if(!user.isUserGuest()){
+            currentGameDto.setGameStatus("SAVED");
+            Respuesta respuesta = gameService.saveGameDto(currentGameDto);
+
+            if(respuesta.getEstado()){
+                System.out.println(respuesta.getMensaje());
+            }
+        }
+
+        //FlowController.getInstance().goView("LogInView");
     }
 
     /**

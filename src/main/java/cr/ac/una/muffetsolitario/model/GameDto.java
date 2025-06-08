@@ -19,6 +19,7 @@ public class GameDto {
     private StringProperty gameStatus;
     private ObjectProperty<Date> gameCreatedDate;
     private ObjectProperty<Date> gameLastPlayed;
+    private boolean isGameLoaded;
     private Long gameVersion;
     private DeckDto deckDto;
     private ObservableList<BoardColumnDto> boardColumnList;
@@ -220,7 +221,15 @@ public class GameDto {
     public void setDeckDto(DeckDto deckDto){
         this.deckDto = deckDto;
     }
-    
+
+    public boolean isGameLoaded() {
+        return isGameLoaded;
+    }
+
+    public void setGameLoaded(boolean gameLoaded) {
+        isGameLoaded = gameLoaded;
+    }
+
     public ObservableList<BoardColumnDto> getBoardColumnList(){
         return boardColumnList;
     }

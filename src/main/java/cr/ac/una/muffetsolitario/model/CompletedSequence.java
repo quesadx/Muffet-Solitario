@@ -37,7 +37,7 @@ public class CompletedSequence implements Serializable {
     @JoinColumn(name = "CSEQ_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game cseqGameFk;
-    @OneToMany(mappedBy = "cardCseqFk", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cardCseqFk", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public CompletedSequence() {

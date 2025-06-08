@@ -25,7 +25,7 @@ public class BoardColumn implements Serializable {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Id
     @SequenceGenerator(name = "BOARD_COLUMN_ID_GENERATOR", sequenceName = "BOARD_COLUMN_SQ01", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_COLUMN_ID_GENERATOR")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BOARD_COLUMN_ID_GENERATOR")
     @Basic(optional = false)
     @Column(name = "BCOLMN_ID")
     private Long bcolmnId;
@@ -38,7 +38,7 @@ public class BoardColumn implements Serializable {
     @JoinColumn(name = "BCOLMN_GAME_FK", referencedColumnName = "GAME_ID")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Game bcolmnGameFk;
-    @OneToMany(mappedBy = "cardBcolmnFk", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cardBcolmnFk", fetch = FetchType.LAZY)
     private List<Card> cardList;
 
     public BoardColumn() {

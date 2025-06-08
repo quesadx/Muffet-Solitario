@@ -4,8 +4,7 @@
  */
 package cr.ac.una.muffetsolitario.service;
 
-import cr.ac.una.muffetsolitario.model.Game;
-import cr.ac.una.muffetsolitario.model.GameDto;
+import cr.ac.una.muffetsolitario.model.*;
 import cr.ac.una.muffetsolitario.util.EntityManagerHelper;
 import cr.ac.una.muffetsolitario.util.Respuesta;
 import jakarta.persistence.EntityManager;
@@ -22,36 +21,184 @@ import java.util.logging.Logger;
 public class GameService {
     private EntityManager em = EntityManagerHelper.getInstance().getManager();
     private EntityTransaction et;
-    
-    public Respuesta saveGame(GameDto gameDto) {
+
+    private void mapGameRelationsFromDto(Game game, GameDto gameDto, EntityManager em) {
+        int totalCardsPersisted = 0;
+
+        // --- Deck ---
+        if (gameDto.getDeckDto() != null) {
+            Deck deck;
+            if (gameDto.getDeckDto().getDeckId() != null) {
+                deck = em.find(Deck.class, gameDto.getDeckDto().getDeckId());
+            } else {
+                deck = new Deck();
+                deck.setDeckVersion(gameDto.getDeckDto().getDeckVersion());
+            }
+            deck.setDeckGameFk(game);
+
+            // --- Cards from Deck ---
+            if (gameDto.getDeckDto().getCardList() != null) {
+                List<Card> deckCards = new ArrayList<>();
+                for (CardContainer cardContainer : gameDto.getDeckDto().getCardList()) {
+                    CardDto cardDto = cardContainer.getCardDto();
+                    Card card;
+                    if (cardDto.getCardId() != null) {
+                        card = em.find(Card.class, cardDto.getCardId());
+                    } else {
+                        card = new Card();
+                        card.setCardFaceUp(cardDto.isCardFaceUp());
+                        card.setCardSuit(cardDto.getCardSuit());
+                        card.setCardValue(cardDto.getCardValue());
+                        card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
+                        card.setCardVersion(cardDto.getCardVersion());
+                        // ...asigna otros campos si es necesario
+                    }
+                    card.setCardDeckFk(deck); // Relación inversa
+                    deckCards.add(card);
+                }
+                deck.setCardList(deckCards);
+                totalCardsPersisted += deckCards.size();
+            }
+            game.setDeck(deck);
+        }
+
+        // --- CompletedSequences ---
+        if (gameDto.getCompletedSequenceList() != null) {
+            List<CompletedSequence> completedSequences = new ArrayList<>();
+            for (CompletedSequenceDto csDto : gameDto.getCompletedSequenceList()) {
+                CompletedSequence cs;
+                if (csDto.getCseqId() != null) {
+                    cs = em.find(CompletedSequence.class, csDto.getCseqId());
+                } else {
+                    cs = new CompletedSequence();
+                    cs.setCseqOrder(csDto.getCseqOrder());
+                    cs.setCseqVersion(csDto.getCseqVersion());
+                }
+                cs.setCseqGameFk(game);
+
+                // --- Cards From Completed Sequence ---
+                if (csDto.getCardList() != null) {
+                    List<Card> csCards = new ArrayList<>();
+                    for (CardContainer cardContainer : csDto.getCardList()) {
+                        CardDto cardDto = cardContainer.getCardDto();
+                        Card card;
+                        if (cardDto.getCardId() != null) {
+                            card = em.find(Card.class, cardDto.getCardId());
+                        } else {
+                            card = new Card();
+                            card.setCardFaceUp(cardDto.isCardFaceUp());
+                            card.setCardSuit(cardDto.getCardSuit());
+                            card.setCardValue(cardDto.getCardValue());
+                            card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
+                            card.setCardVersion(cardDto.getCardVersion());
+                            // ...asigna otros campos si es necesario
+                        }
+                        card.setCardCseqFk(cs); // Relación inversa
+                        csCards.add(card);
+                    }
+                    cs.setCardList(csCards);
+                    totalCardsPersisted += csCards.size();
+                }
+                completedSequences.add(cs);
+            }
+            game.setCompletedSequenceList(completedSequences);
+        }
+
+        // --- BoardColumns ---
+        if (gameDto.getBoardColumnList() != null) {
+            List<BoardColumn> columns = new ArrayList<>();
+            for (BoardColumnDto colDto : gameDto.getBoardColumnList()) {
+                BoardColumn col;
+                if (colDto.getBcolmnId() != null) {
+                    col = em.find(BoardColumn.class, colDto.getBcolmnId());
+                } else {
+                    col = new BoardColumn();
+                    col.setBcolmnIndex(colDto.getBcolmnIndex());
+                    col.setBcolmnVersion(colDto.getBcolmnVersion());
+                }
+                col.setBcolmnGameFk(game); // Relación inversa
+
+                // --- Cards From BoardColumn ---
+                if (colDto.getCardList() != null) {
+                    List<Card> colCards = new ArrayList<>();
+                    for (CardContainer cardContainer : colDto.getCardList()) {
+                        CardDto cardDto = cardContainer.getCardDto();
+                        Card card;
+                        if (cardDto.getCardId() != null) {
+                            card = em.find(Card.class, cardDto.getCardId());
+                        } else {
+                            card = new Card();
+                            card.setCardFaceUp(cardDto.isCardFaceUp());
+                            card.setCardSuit(cardDto.getCardSuit());
+                            card.setCardValue(cardDto.getCardValue());
+                            card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
+                            card.setCardVersion(cardDto.getCardVersion());
+
+                        }
+                        card.setCardBcolmnFk(col);
+                        colCards.add(card);
+                    }
+                    col.setCardList(colCards);
+                    totalCardsPersisted += colCards.size();
+                }
+                columns.add(col);
+            }
+            game.setBoardColumnList(columns);
+        }
+
+        System.out.println("Total cartas asociadas a persistir: " + totalCardsPersisted);
+    }
+
+    public Respuesta saveGameDto(GameDto gameDto) {
         try {
             et = em.getTransaction();
             et.begin();
-            
+
             Game game;
             boolean isUpdate = false;
-            
+
+            UserAccount userAccount = null;
+            if (gameDto.getGameUserFk() != null) {
+                userAccount = em.find(UserAccount.class, gameDto.getGameUserFk());
+                if (userAccount == null) {
+                    et.rollback();
+                    return new Respuesta(false, "Usuario no encontrado para asociar al juego", "saveGame UserNotFound");
+                }
+            }
+
             if (gameDto.getGameId() != null) {
                 game = em.find(Game.class, gameDto.getGameId());
                 if (game == null) {
                     et.rollback();
                     return new Respuesta(false, "Juego no encontrado para actualizar", "saveGame GameNotFound");
                 }
-                
+
                 game.update(gameDto);
+                // Set relation with UserAccount if is necessary
+                if (userAccount != null) {
+                    game.setGameUserFk(userAccount);
+                    userAccount.setGame(game); //keep relation bidirectional
+                }
+                mapGameRelationsFromDto(game, gameDto, em);
                 game = em.merge(game);
                 isUpdate = true;
-                
+
             } else {
                 game = new Game(gameDto);
+                if (userAccount != null) {
+                    game.setGameUserFk(userAccount);
+                    userAccount.setGame(game);
+                }
+                mapGameRelationsFromDto(game, gameDto, em);
+
                 em.persist(game);
             }
-            
+
             et.commit();
-            
+
             String message = isUpdate ? "Juego actualizado exitosamente" : "Juego creado exitosamente";
             return new Respuesta(true, message, "saveGame success", "Game", new GameDto(game));
-            
+
         } catch (Exception ex) {
             if (et != null && et.isActive()) {
                 et.rollback();
@@ -60,7 +207,7 @@ public class GameService {
             return new Respuesta(false, "Error guardando el juego", "saveGame " + ex.getMessage());
         }
     }
-    
+
     public Respuesta getGameById(Long gameId) {
         try {
             Query qryGame = em.createNamedQuery("Game.findByGameId");

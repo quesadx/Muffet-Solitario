@@ -2,6 +2,7 @@ package cr.ac.una.muffetsolitario.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import cr.ac.una.muffetsolitario.model.BoardColumnDto;
@@ -23,6 +24,12 @@ public class GameLogic {
 
     public GameLogic(GameDto gameDto) {
         this.gameDto = gameDto;
+    }
+
+    private void updateCardPositions(List<CardContainer> cardList) {
+        for (int i = 0; i < cardList.size(); i++) {
+            cardList.get(i).getCardDto().setCardPositionInContainer(i);
+        }
     }
 
     public void initializeDeck(GameDto gameDto) {
@@ -65,12 +72,34 @@ public class GameLogic {
         }
 
         Collections.shuffle(cardContainers);
+        updateCardPositions(cardContainers);
 
         if (gameDto.getDeckDto() == null) {
             gameDto.setDeckDto(new DeckDto());
         }
         gameDto.getDeckDto().setCardList(FXCollections.observableArrayList(cardContainers));
     }
+
+    public void sortBoardColumnsByIndex(GameDto gameDto) {
+        gameDto.getBoardColumnList().sort(Comparator.comparing(BoardColumnDto::getBcolmnIndex));
+    }
+
+    public void sortCardsInAllColumns(GameDto gameDto) {
+        for (BoardColumnDto col : gameDto.getBoardColumnList()) {
+            col.getCardList().sort(Comparator.comparing(c -> c.getCardDto().getCardPositionInContainer()));
+        }
+    }
+
+    public void sortDeckCards(GameDto gameDto) {
+        gameDto.getDeckDto().getCardList().sort(Comparator.comparing(c -> c.getCardDto().getCardPositionInContainer()));
+    }
+
+    public void sortCompletedSequences(GameDto gameDto) {
+        for (CompletedSequenceDto seq : gameDto.getCompletedSequenceList()) {
+            seq.getCardList().sort(Comparator.comparing(c -> c.getCardDto().getCardPositionInContainer()));
+        }
+    }
+
 
     public void loadCardsToColumn() {
         if (gameDto == null || gameDto.getDeckDto() == null || gameDto.getBoardColumnList() == null)
@@ -95,6 +124,14 @@ public class GameLogic {
         }
         if (deckIndex > 0)
             deckCards.subList(0, deckIndex).clear();
+
+        for (BoardColumnDto boardColumn : columns) {
+            List<CardContainer> cardList = boardColumn.getCardList();
+            updateCardPositions(cardList);
+        }
+
+        // ACTUALIZA POSICIONES EN EL DECK RESTANTE
+        updateCardPositions(deckCards);
     }
 
     public void moveCardsBetweenColumns(int fromColumnIndex, int toColumnIndex, CardContainer firstCardOfSequence) {
@@ -131,6 +168,9 @@ public class GameLogic {
         fromCards.subList(startIndex, fromCards.size()).clear();
         if (!fromCards.isEmpty())
             fromCards.get(fromCards.size() - 1).getCardDto().setCardFaceUp(true);
+
+        updateCardPositions(toCards);
+        updateCardPositions(fromCards);
 
         moveHistory.add(new Move(fromColumnIndex, toColumnIndex, sequence, lastCardFaceUpBeforeMove));
 
@@ -170,6 +210,12 @@ public class GameLogic {
 
             }
         }
+
+        for (int i = 0; i < columns.size(); i++) {
+            List<CardContainer> cardList = columns.get(i).getCardList();
+            updateCardPositions(cardList);
+        }
+
         gameDto.decrementDealsRemaining(); // Usar método del DTO si existe
         moveHistory.add(new Move(columnsDealtTo, dealtCards));
 
@@ -191,6 +237,8 @@ public class GameLogic {
                 card.getCardDto().setCardCseqId(completed.getCseqId());
                 completed.addCard(card);
             }
+
+            updateCardPositions(completed.getCardList());
 
             gameDto.addCompletedSequence(completed);
             gameDto.incrementCompletedSequences();
@@ -330,8 +378,12 @@ public class GameLogic {
             if (fromColumn.getCardList().size() > lastMove.getMovedSequence().size()) {
                 int idx = fromColumn.getCardList().size() - lastMove.getMovedSequence().size() - 1;
                 fromColumn.getCardList().get(idx).getCardDto().setCardFaceUp(lastMove.wasLastCardFaceUpBeforeMove());
-            }            
+            }
             gameDto.setGameTotalPoints(gameDto.getGameTotalPoints()-1);
+
+            // Actualizar posiciones en ambas columnas
+            updateCardPositions(fromColumn.getCardList());
+            updateCardPositions(toColumn.getCardList());
 
         } else if (lastMove.getType() == Move.MoveType.DEAL_FROM_DECK) {
             // Deshacer repartir del deck
@@ -350,8 +402,11 @@ public class GameLogic {
                     colCards.remove(colCards.size() - 1);
                     card.getCardDto().setCardFaceUp(false);
                     deckCardList.add(0, card); // Devuelve al tope del deck
+                    updateCardPositions(colCards); // Actualiza la columna después de quitar la carta
                 }
             }
+            updateCardPositions(deckCardList); // Actualiza el deck después de devolver todas las cartas
+
             gameDto.setGameTotalPoints(gameDto.getGameTotalPoints()-1);
             gameDto.setGameDealsRemaining(gameDto.getGameDealsRemaining() + 1);
         }
