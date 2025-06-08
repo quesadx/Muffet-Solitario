@@ -4,9 +4,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import cr.ac.una.muffetsolitario.util.AnimationHandler;
+import cr.ac.una.muffetsolitario.util.AppContext;
 import cr.ac.una.muffetsolitario.util.FlowController;
 import cr.ac.una.muffetsolitario.util.SoundUtils;
 import io.github.palexdev.materialfx.controls.MFXButton;
+import cr.ac.una.muffetsolitario.model.UserAccountDto;
 import cr.ac.una.muffetsolitario.service.UserAccountService;
 import cr.ac.una.muffetsolitario.util.Respuesta;
 import io.github.palexdev.materialfx.controls.MFXTextField;
@@ -89,6 +91,8 @@ public class SettingsController extends Controller implements Initializable {
         // Apply style 1 (default undertale style)
         root.getStylesheets().clear();
         root.getStylesheets().add(getClass().getResource("/cr/ac/una/muffetsolitario/view/styles.css").toExternalForm());
+        UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+        userAccountDto.setUserCardDesign(0);
         animationHandler.playHitEffect(btnSelectEstilo1);
     }
 
@@ -135,6 +139,8 @@ public class SettingsController extends Controller implements Initializable {
     @FXML
     private void onActionBtnSelectEstilo2(ActionEvent event) {
         // Apply style 2 (alternative style - could be implemented later)
+        UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+        userAccountDto.setUserCardDesign(1);
         animationHandler.playHitEffect(btnSelectEstilo2);
     }
 

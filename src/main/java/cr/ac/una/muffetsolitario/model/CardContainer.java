@@ -23,6 +23,8 @@ public class CardContainer extends ImageView {
         super(image);
         this.cardDto = cardDto;
         this.imagePath = imagePath;
+        setFitHeight(120);
+        setFitHeight(160);
     }
 
     public CardDto getCardDto() {

@@ -307,7 +307,8 @@ public class GameController extends Controller implements Initializable {
             currentGameDto.setGameUserFk(userAccountDto.getUserId());
             userAccountDto.setGameId(currentGameDto.getGameId()); // TODO: CHANGE GAMESERVICE TO MAKE THIS WORK
             currentGameDto.setGameDifficulty(difficultySelected);
-            currentGameDto.setGameCreatedDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            currentGameDto
+                    .setGameCreatedDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
             System.out.println("dia de creacion: " + currentGameDto.getGameCreatedDate());
             currentGameDto.setGameTotalPoints(500);
         }
@@ -320,16 +321,16 @@ public class GameController extends Controller implements Initializable {
         UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         int userDesign = 1; // Valor por defecto
         if (userAccountDto != null) {
-            userDesign = userAccountDto.getUserCardDesign(); // Asegúrate que este método retorna 1, 2 o 3
+            userDesign = userAccountDto.getUserCardDesign();
         }
-        String versionFolder = "v" + (userDesign+1);
+        String versionFolder = "v" + (userDesign + 1);
 
         String imagePath;
         if (cardDto.isCardFaceUp()) {
             String suitFolder = cardDto.getCardSuit().equals("C") ? "Corazones"
                     : cardDto.getCardSuit().equals("T") ? "Treboles"
-                    : cardDto.getCardSuit().equals("P") ? "Picas"
-                    : "Diamantes";
+                            : cardDto.getCardSuit().equals("P") ? "Picas"
+                                    : "Diamantes";
             imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
                     + versionFolder + "/" + suitFolder + "/"
                     + cardDto.getCardSuit() + "_" + cardDto.getCardValue() + ".png";
@@ -345,6 +346,7 @@ public class GameController extends Controller implements Initializable {
             System.err.println("Error cargando imagen de carta: " + imagePath);
         }
     }
+
     private void moveSequenceToRoot(List<CardContainer> sequence) {
         for (CardContainer card : sequence) {
             Point2D scenePos = card.localToScene(0, 0);
@@ -438,6 +440,7 @@ public class GameController extends Controller implements Initializable {
                 cardContainer.setFitWidth(120);
                 cardContainer.setFitHeight(160);
                 cardContainer.setLayoutX(0);
+                cardContainer.setPreserveRatio(true);
                 cardContainer.setLayoutY(j * CARD_OFFSET);
 
                 cardContainer.setOnMousePressed(event -> {
@@ -662,10 +665,22 @@ public class GameController extends Controller implements Initializable {
         List<CardContainer> deckCards = deckDto.getCardList();
         int cantCardsToShow = Math.min(3, deckCards.size());
         double offsetX = 18;
+
+        // Obtener el usuario logueado y su versión de cartas
+        UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+        int userDesign = 1; // Valor por defecto
+        if (userAccountDto != null) {
+            userDesign = userAccountDto.getUserCardDesign(); // Debe retornar 1, 2 o 3
+        }
+        String versionFolder = "v" + (userDesign+1);
+
+        // Ruta dinámica para el reverso de carta según la versión
+        String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
+                + versionFolder + "/Card_Back1.png";
+
         for (int i = 0; i < cantCardsToShow; i++) {
             int cardIdx = deckCards.size() - 1 - i;
             CardContainer card = deckCards.get(cardIdx);
-            String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/Card_Back1.png";
             try {
                 URL resource = getClass().getResource(imagePath);
                 if (resource != null) {
