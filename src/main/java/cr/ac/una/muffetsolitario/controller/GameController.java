@@ -141,6 +141,7 @@ public class GameController extends Controller implements Initializable {
             showAlert("Error", "No se pudo inicializar la partida.");
         }
         startRandomLightning();
+
     }
 
     @Override
@@ -781,7 +782,7 @@ public class GameController extends Controller implements Initializable {
             }
         }
 
-        //FlowController.getInstance().goView("LogInView");
+        FlowController.getInstance().goView("LogInView");
     }
 
     /**

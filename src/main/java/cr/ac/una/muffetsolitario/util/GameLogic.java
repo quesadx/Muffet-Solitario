@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import cr.ac.una.muffetsolitario.model.*;
+import cr.ac.una.muffetsolitario.service.UserAccountService;
 import javafx.collections.FXCollections;
 
 public class GameLogic {
@@ -344,6 +345,16 @@ public class GameLogic {
             game.setGameStatus("WIN");
 
             setUserStats(user, game);
+            if(!user.isUserGuest()){
+                UserAccountService userAccountService = new UserAccountService();
+                Respuesta respuesta = userAccountService.saveUserAccount(user);
+
+                if(respuesta.getEstado()){
+                    System.out.println("Se actualizó el usuario y sus stats" + respuesta.getMensaje());
+                } else {
+                    System.out.println("No se actualizó el usuario" + respuesta.getMensaje());
+                }
+            }
             return "WIN";
         }
 
