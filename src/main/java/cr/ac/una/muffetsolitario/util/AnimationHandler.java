@@ -21,8 +21,6 @@ public class AnimationHandler {
     private final Map<ImageView, Timeline> heartTimelines = new HashMap<>();
     private final Random random = new Random();
 
-    private double mouseX = -1000, mouseY = -1000; // Offscreen by default
-
     private AnimationHandler() {}
 
     public static AnimationHandler getInstance() {
@@ -971,5 +969,340 @@ public class AnimationHandler {
         );
         
         glitchEffect.play();
+    }
+
+    /**
+     * Creates a red glitch effect similar to LoginController transitions
+     * @param node The node to apply the red glitch effect to
+     * @param duration Duration of the effect in milliseconds
+     */
+    public void playRedGlitchEffect(Node node, double duration) {
+        Timeline redGlitch = new Timeline(
+            new KeyFrame(Duration.ZERO, ev -> {
+                playHitEffect(node);
+                node.setOpacity(0.2 + random.nextDouble() * 0.2);
+                node.setTranslateX(random.nextBoolean() ? random.nextInt(6) : -random.nextInt(6));
+            }),
+            new KeyFrame(Duration.millis(duration * 0.2), ev -> {
+                playHitEffect(node);
+                node.setOpacity(0.5 + random.nextDouble() * 0.2);
+                node.setTranslateX(random.nextBoolean() ? random.nextInt(8) : -random.nextInt(8));
+            }),
+            new KeyFrame(Duration.millis(duration * 0.4), ev -> {
+                playHitEffect(node);
+                node.setOpacity(0.3 + random.nextDouble() * 0.2);
+                node.setTranslateX(random.nextBoolean() ? random.nextInt(5) : -random.nextInt(5));
+            }),
+            new KeyFrame(Duration.millis(duration * 0.6), ev -> {
+                playHitEffect(node);
+                node.setOpacity(0.7 + random.nextDouble() * 0.2);
+                node.setTranslateX(random.nextBoolean() ? random.nextInt(4) : -random.nextInt(4));
+            }),
+            new KeyFrame(Duration.millis(duration), ev -> {
+                playHitEffect(node);
+                node.setOpacity(1.0);
+                node.setTranslateX(0);
+            })
+        );
+        redGlitch.play();
+    }
+
+    /**
+     * Creates neon blue particles that emanate from a source position
+     * @param parentPane The container to add particles to
+     * @param sourceX Source X position
+     * @param sourceY Source Y position
+     * @param particleCount Number of particles to create
+     */
+    public void createNeonBlueParticles(Pane parentPane, double sourceX, double sourceY, int particleCount) {
+        for (int i = 0; i < particleCount; i++) {
+            // Create neon blue rectangle particles
+            Rectangle particle = new Rectangle(4, 4, Color.LIGHTCYAN);
+            javafx.scene.effect.Glow glow = new javafx.scene.effect.Glow(1.0);
+            particle.setEffect(glow);
+            
+            particle.setLayoutX(sourceX);
+            particle.setLayoutY(sourceY);
+            
+            // Random direction and distance
+            double angle = random.nextDouble() * 2 * Math.PI;
+            double distance = 40 + random.nextDouble() * 60;
+            double targetX = sourceX + Math.cos(angle) * distance;
+            double targetY = sourceY + Math.sin(angle) * distance;
+            
+            parentPane.getChildren().add(particle);
+            
+            Timeline particleAnim = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(particle.layoutXProperty(), sourceX),
+                    new KeyValue(particle.layoutYProperty(), sourceY),
+                    new KeyValue(particle.opacityProperty(), 1.0),
+                    new KeyValue(particle.scaleXProperty(), 1.0),
+                    new KeyValue(particle.scaleYProperty(), 1.0)
+                ),
+                new KeyFrame(Duration.millis(400 + random.nextInt(200)),
+                    new KeyValue(particle.layoutXProperty(), targetX),
+                    new KeyValue(particle.layoutYProperty(), targetY),
+                    new KeyValue(particle.opacityProperty(), 0.0),
+                    new KeyValue(particle.scaleXProperty(), 0.1),
+                    new KeyValue(particle.scaleYProperty(), 0.1)
+                )
+            );
+            
+            particleAnim.setOnFinished(e -> parentPane.getChildren().remove(particle));
+            particleAnim.play();
+        }
+    }
+    
+    // ====================== SANS BATTLE ATTACK PATTERNS ======================
+    
+    /**
+     * Creates vertical projectiles attack pattern
+     */
+    public void createVerticalAttack(Pane battleArea, double difficultyMultiplier, List<Rectangle> activeProjectiles, 
+                                   List<Timeline> projectileTimelines, Random battleRandom) {
+        int projectileCount = (int)(3 * difficultyMultiplier); // Base 3, scales to 4-5
+        double speed = 180.0 * difficultyMultiplier * 1.2;
+        
+        // Create waves of projectiles
+        for (int wave = 0; wave < 2; wave++) {
+            for (int i = 0; i < projectileCount; i++) {
+                final int delayIndex = i + (wave * projectileCount);
+                Timeline delay = new Timeline(
+                    new KeyFrame(Duration.millis(delayIndex * 300 + wave * 1200), 
+                        e -> createVerticalProjectile(battleArea, speed, activeProjectiles, projectileTimelines, battleRandom))
+                );
+                delay.play();
+            }
+        }
+    }
+    
+    /**
+     * Creates horizontal projectiles attack pattern
+     */
+    public void createHorizontalAttack(Pane battleArea, double difficultyMultiplier, List<Rectangle> activeProjectiles, 
+                                     List<Timeline> projectileTimelines, Random battleRandom) {
+        int projectileCount = (int)(3 * difficultyMultiplier); // Base 3, scales to 4-5
+        double speed = 180.0 * difficultyMultiplier * 1.3;
+        
+        // Alternating sides attack pattern
+        for (int i = 0; i < projectileCount * 2; i++) {
+            final int delayIndex = i;
+            Timeline delay = new Timeline(
+                new KeyFrame(Duration.millis(delayIndex * 400), 
+                    e -> createHorizontalProjectile(battleArea, speed, activeProjectiles, projectileTimelines, battleRandom))
+            );
+            delay.play();
+        }
+    }
+    
+    /**
+     * Creates spiral projectiles attack pattern
+     */
+    public void createSpiralAttack(Pane battleArea, double difficultyMultiplier, List<Rectangle> activeProjectiles, 
+                                 List<Timeline> projectileTimelines, Random battleRandom) {
+        int projectileCount = (int)(3 * difficultyMultiplier); // Base 3, scales to 4-5
+        double speed = 180.0 * difficultyMultiplier * 1.1;
+        
+        for (int i = 0; i < projectileCount; i++) {
+            final int delayIndex = i;
+            Timeline delay = new Timeline(
+                new KeyFrame(Duration.millis(delayIndex * 500), 
+                    e -> createSpiralProjectile(battleArea, speed, delayIndex, activeProjectiles, projectileTimelines, battleRandom))
+            );
+            delay.play();
+        }
+    }
+    
+    /**
+     * Creates directional pillar attack pattern
+     */
+    public void createPillarAttack(Pane battleArea, double difficultyMultiplier, List<Rectangle> activeProjectiles, 
+                                 List<Timeline> projectileTimelines, Random battleRandom) {
+        createDirectionalPillar(battleArea, difficultyMultiplier, activeProjectiles, projectileTimelines, battleRandom);
+    }
+    
+    // ====================== INDIVIDUAL PROJECTILE CREATORS ======================
+    
+    /**
+     * Creates a single vertical projectile
+     */
+    private void createVerticalProjectile(Pane battleArea, double speed, List<Rectangle> activeProjectiles, 
+                                        List<Timeline> projectileTimelines, Random battleRandom) {
+        Rectangle projectile = new Rectangle(10, 20, Color.CYAN);
+        projectile.setLayoutX(battleRandom.nextDouble() * (battleArea.getPrefWidth() - 10));
+        projectile.setLayoutY(-20);
+        
+        javafx.scene.effect.Glow glow = new javafx.scene.effect.Glow(0.8);
+        projectile.setEffect(glow);
+        
+        battleArea.getChildren().add(projectile);
+        activeProjectiles.add(projectile);
+        
+        Timeline movement = new Timeline(
+            new KeyFrame(Duration.ZERO, new KeyValue(projectile.layoutYProperty(), -20)),
+            new KeyFrame(Duration.millis(2500), new KeyValue(projectile.layoutYProperty(), battleArea.getPrefHeight() + 20))
+        );
+        
+        movement.setOnFinished(e -> {
+            battleArea.getChildren().remove(projectile);
+            activeProjectiles.remove(projectile);
+        });
+        
+        projectileTimelines.add(movement);
+        movement.play();
+    }
+    
+    /**
+     * Creates a single horizontal projectile
+     */
+    private void createHorizontalProjectile(Pane battleArea, double speed, List<Rectangle> activeProjectiles, 
+                                          List<Timeline> projectileTimelines, Random battleRandom) {
+        Rectangle projectile = new Rectangle(20, 10, Color.LIGHTCYAN);
+        boolean fromLeft = battleRandom.nextBoolean();
+        
+        projectile.setLayoutX(fromLeft ? -20 : battleArea.getPrefWidth() + 20);
+        projectile.setLayoutY(battleRandom.nextDouble() * (battleArea.getPrefHeight() - 10));
+        
+        javafx.scene.effect.Glow glow = new javafx.scene.effect.Glow(0.8);
+        projectile.setEffect(glow);
+        
+        battleArea.getChildren().add(projectile);
+        activeProjectiles.add(projectile);
+        
+        Timeline movement = new Timeline(
+            new KeyFrame(Duration.ZERO, new KeyValue(projectile.layoutXProperty(), projectile.getLayoutX())),
+            new KeyFrame(Duration.millis(2200), new KeyValue(projectile.layoutXProperty(), 
+                fromLeft ? battleArea.getPrefWidth() + 20 : -20))
+        );
+        
+        movement.setOnFinished(e -> {
+            battleArea.getChildren().remove(projectile);
+            activeProjectiles.remove(projectile);
+        });
+        
+        projectileTimelines.add(movement);
+        movement.play();
+    }
+    
+    /**
+     * Creates a single spiral projectile
+     */
+    private void createSpiralProjectile(Pane battleArea, double speed, int index, List<Rectangle> activeProjectiles, 
+                                      List<Timeline> projectileTimelines, Random battleRandom) {
+        Rectangle projectile = new Rectangle(8, 8, Color.YELLOW);
+        
+        double centerX = battleArea.getPrefWidth() / 2;
+        double centerY = battleArea.getPrefHeight() / 2;
+        
+        double startAngle = (index * Math.PI / 2);
+        double startRadius = 120;
+        double startX = centerX + Math.cos(startAngle) * startRadius;
+        double startY = centerY + Math.sin(startAngle) * startRadius;
+        
+        projectile.setLayoutX(startX);
+        projectile.setLayoutY(startY);
+        
+        javafx.scene.effect.Glow glow = new javafx.scene.effect.Glow(1.0);
+        projectile.setEffect(glow);
+        
+        battleArea.getChildren().add(projectile);
+        activeProjectiles.add(projectile);
+        
+        Timeline movement = new Timeline();
+        int steps = 60;
+        
+        for (int i = 0; i <= steps; i++) {
+            final int step = i;
+            double progress = (double) step / steps;
+            double angle = startAngle + progress * Math.PI * 3;
+            double radius = startRadius * (1.0 - progress * 0.7);
+            
+            double x = centerX + Math.cos(angle) * radius;
+            double y = centerY + Math.sin(angle) * radius;
+            
+            movement.getKeyFrames().add(
+                new KeyFrame(Duration.millis(step * 40),
+                    new KeyValue(projectile.layoutXProperty(), x),
+                    new KeyValue(projectile.layoutYProperty(), y))
+            );
+        }
+        
+        movement.setOnFinished(e -> {
+            battleArea.getChildren().remove(projectile);
+            activeProjectiles.remove(projectile);
+        });
+        
+        projectileTimelines.add(movement);
+        movement.play();
+    }
+    
+    /**
+     * Creates a directional pillar
+     */
+    private void createDirectionalPillar(Pane battleArea, double difficultyMultiplier, List<Rectangle> activeProjectiles, 
+                                       List<Timeline> projectileTimelines, Random battleRandom) {
+        int direction = battleRandom.nextInt(4);
+        
+        Rectangle pillar;
+        double startX, startY, endX, endY;
+        double speed = 2000 + (1000 / difficultyMultiplier);
+        
+        switch (direction) {
+            case 0: // Top to bottom
+                pillar = new Rectangle(20, battleArea.getPrefHeight() + 40, Color.WHITE);
+                startX = battleArea.getPrefWidth() * 0.3 + battleRandom.nextDouble() * battleArea.getPrefWidth() * 0.4;
+                startY = -battleArea.getPrefHeight() - 20;
+                endX = startX;
+                endY = battleArea.getPrefHeight() + 20;
+                break;
+            case 1: // Bottom to top
+                pillar = new Rectangle(20, battleArea.getPrefHeight() + 40, Color.WHITE);
+                startX = battleArea.getPrefWidth() * 0.3 + battleRandom.nextDouble() * battleArea.getPrefWidth() * 0.4;
+                startY = battleArea.getPrefHeight() + 20;
+                endX = startX;
+                endY = -battleArea.getPrefHeight() - 20;
+                break;
+            case 2: // Left to right
+                pillar = new Rectangle(battleArea.getPrefWidth() + 40, 20, Color.WHITE);
+                startX = -battleArea.getPrefWidth() - 20;
+                startY = battleArea.getPrefHeight() * 0.3 + battleRandom.nextDouble() * battleArea.getPrefHeight() * 0.4;
+                endX = battleArea.getPrefWidth() + 20;
+                endY = startY;
+                break;
+            default: // Right to left
+                pillar = new Rectangle(battleArea.getPrefWidth() + 40, 20, Color.WHITE);
+                startX = battleArea.getPrefWidth() + 20;
+                startY = battleArea.getPrefHeight() * 0.3 + battleRandom.nextDouble() * battleArea.getPrefHeight() * 0.4;
+                endX = -battleArea.getPrefWidth() - 20;
+                endY = startY;
+                break;
+        }
+        
+        pillar.setLayoutX(startX);
+        pillar.setLayoutY(startY);
+        pillar.setStroke(Color.WHITE);
+        pillar.setStrokeWidth(2);
+        pillar.setFill(Color.WHITE);
+        
+        battleArea.getChildren().add(pillar);
+        activeProjectiles.add(pillar);
+        
+        Timeline movement = new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(pillar.layoutXProperty(), startX),
+                new KeyValue(pillar.layoutYProperty(), startY)),
+            new KeyFrame(Duration.millis(speed),
+                new KeyValue(pillar.layoutXProperty(), endX),
+                new KeyValue(pillar.layoutYProperty(), endY))
+        );
+        
+        movement.setOnFinished(e -> {
+            battleArea.getChildren().remove(pillar);
+            activeProjectiles.remove(pillar);
+        });
+        
+        projectileTimelines.add(movement);
+        movement.play();
     }
 }

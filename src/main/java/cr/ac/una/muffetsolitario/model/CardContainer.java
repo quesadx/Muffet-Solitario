@@ -13,6 +13,10 @@ import javafx.scene.image.ImageView;
  * @author kendallbadilla
  */
 public class CardContainer extends ImageView {
+    // Fixed card dimensions for consistent sizing across all assets
+    public static final double CARD_WIDTH = 120.0;
+    public static final double CARD_HEIGHT = 160.0;
+    
     private CardDto cardDto;
     private String imagePath;
     private Image cardImage;
@@ -23,8 +27,9 @@ public class CardContainer extends ImageView {
         super(image);
         this.cardDto = cardDto;
         this.imagePath = imagePath;
-        setFitHeight(120);
-        setFitHeight(160);
+        setFitWidth(CARD_WIDTH);
+        setFitHeight(CARD_HEIGHT);
+        setPreserveRatio(false);
     }
 
     public CardDto getCardDto() {
@@ -54,6 +59,15 @@ public class CardContainer extends ImageView {
     
     public void setCardImage(Image cardImage){
         this.cardImage = cardImage;
+    }
+    
+    /**
+     * Applies the fixed card sizing settings to ensure consistent appearance across all assets
+     */
+    public void applyFixedCardSizing() {
+        setFitWidth(CARD_WIDTH);
+        setFitHeight(CARD_HEIGHT);
+        setPreserveRatio(false);
     }
     
 }

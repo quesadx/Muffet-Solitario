@@ -14,12 +14,21 @@ public class GameLogic {
     public GameDto gameDto;
     private final GameRuleValidator rulesValidator = new GameRuleValidator();
     private final List<Move> moveHistory = new ArrayList<>();
+    private SequenceCompletionCallback sequenceCompletionCallback;
+    
+    public interface SequenceCompletionCallback {
+        void onSequenceCompleted(int columnIndex, List<CardContainer> completedSequence);
+    }
 
     public GameLogic() {
     }
 
     public GameLogic(GameDto gameDto) {
         this.gameDto = gameDto;
+    }
+    
+    public void setSequenceCompletionCallback(SequenceCompletionCallback callback) {
+        this.sequenceCompletionCallback = callback;
     }
 
     private void updateCardPositions(List<CardContainer> cardList) {
@@ -247,6 +256,11 @@ public class GameLogic {
             gameDto.setGameTotalPoints(gameDto.getGameTotalPoints() + 100);
             if (!cards.isEmpty())
                 cards.get(cards.size() - 1).getCardDto().setCardFaceUp(true);
+                
+            // Trigger battle sequence callback
+            if (sequenceCompletionCallback != null) {
+                sequenceCompletionCallback.onSequenceCompleted(columnIndex, last13Cards);
+            }
         }
     }
 

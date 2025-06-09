@@ -6,7 +6,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.HashSet;
 
 import cr.ac.una.muffetsolitario.model.*;
 import cr.ac.una.muffetsolitario.service.GameService;
@@ -15,17 +18,17 @@ import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.input.KeyCode;
 import javafx.geometry.Point2D;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
-import javafx.animation.FadeTransition;
 import javafx.scene.layout.VBox;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
@@ -35,7 +38,6 @@ public class GameController extends Controller implements Initializable {
 
     private GameDto currentGameDto;
     private GameLogic gameLogic;
-    private GameRuleValidator gameRuleValidator;
     private List<Pane> columns;
     private List<Pane> sequencePanes;
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
@@ -44,17 +46,49 @@ public class GameController extends Controller implements Initializable {
     // Drag & drop variables
     private List<CardContainer> draggedSequence = null;
     private double[] dragOffsetsX, dragOffsetsY;
-    private int fromColIdx = -1, fromCardIdx = -1;
+    private int fromColIdx = -1;
     private static final double CARD_OFFSET = 25;
+    
+    // Fixed card dimensions for consistent sizing across all assets
+    private static final double CARD_WIDTH = CardContainer.CARD_WIDTH;
+    private static final double CARD_HEIGHT = CardContainer.CARD_HEIGHT;
+    
     private int elapsedSeconds = 0;
 
     // Lightning effect timer
     private Timeline lightningTimer;
     private Timeline gameTimer;
 
+    // Battle system variables
+    private boolean battleActive = false;
+    private boolean isRecovering = false; // New variable to track recovery state
+    private Timeline battleTimer;
+    private Timeline heartMovementTimer;
+    private List<Rectangle> activeProjectiles = new ArrayList<>();
+    private List<Timeline> projectileTimelines = new ArrayList<>();
+    private int currentAttackPhase = 0;
+    private int maxAttackPhases = 5; // Battle ends after 5 attacks
+    private int playerLives = 2; // Will be set based on difficulty
+    private Set<KeyCode> pressedKeys = new HashSet<>();
+    private static final double HEART_SPEED = 180.0; // pixels per second
+    private Random battleRandom = new Random();
+    private Set<Double> usedPillarPositions = new HashSet<>();
+    
+    // Dynamic battle area sizing variables
+    private static final double DEFAULT_BATTLE_AREA_WIDTH = 200.0;
+    private static final double DEFAULT_BATTLE_AREA_HEIGHT = 200.0;
+    private static final double RECTANGULAR_BATTLE_AREA_WIDTH = 280.0;
+    private static final double RECTANGULAR_BATTLE_AREA_HEIGHT = 160.0;
+    private Timeline battleAreaResizeTimeline;
+    
+    // Battle trigger callback
+    public interface SequenceCompletionCallback {
+        void onSequenceCompleted(int columnIndex, List<CardContainer> completedSequence);
+    }
+
     @FXML
     private Pane pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
-            pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen;
+            pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen, pnBattleArea;
     @FXML
     private AnchorPane root;
     @FXML
@@ -65,22 +99,25 @@ public class GameController extends Controller implements Initializable {
     @FXML
     private MFXButton btnUndo;
     @FXML
-    private VBox vboxAlert;
+    private VBox vboxAlert, vboxBattle;
     @FXML
-    private Label lblAlertMessage;
+    private Label lblAlertMessage, lblLifesRemaining;
+    @FXML private ImageView imgSans, imgBattleHeart;
+
+    GameRuleValidator gameRuleValidator;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        FlowController.getInstance().limpiarLoader("PreGameView");
         columns = List.of(pnColumn0ne, pnColumnTwo, pnColumnThree, pnColumnFour, pnColumnFive,
                 pnColumnSix, pnColumnSeven, pnColumnEight, pnColumnNine, pnColumnTen);
         sequencePanes = List.of(pnSequence1, pnSequence2, pnSequence3, pnSequence4,
                 pnSequence5, pnSequence6, pnSequence7, pnSequence8);
-                gameRuleValidator=new GameRuleValidator();
+        gameRuleValidator = new GameRuleValidator();
         pnDeck.setOnMouseClicked(event -> {
             try {
                 soundUtils.playAttackSound();
                 gameLogic.dealFromDeck();
-                updateGameInfo(); 
                 List<BoardColumnDto> columns = currentGameDto.getBoardColumnList();
                 for (int i = 0; i < columns.size(); i++) {
                     BoardColumnDto column = columns.get(i);
@@ -152,6 +189,11 @@ public class GameController extends Controller implements Initializable {
         // Requerido por la herencia, no eliminar.
     }
 
+    @FXML
+    void onActionStartBattle(ActionEvent event) {
+        startSansBattle();
+    }
+
     public void startGame() {
 
         if (currentGameDto.isGameLoaded()) {
@@ -191,7 +233,7 @@ public class GameController extends Controller implements Initializable {
         gameTimer = new Timeline(
                 new KeyFrame(Duration.seconds(1), e -> {
                     elapsedSeconds++;
-                    currentGameDto.setGameDurationSeconds(elapsedSeconds); 
+                    currentGameDto.setGameDurationSeconds(elapsedSeconds); // <-- Sincroniza el modelo
                     updateTimerLabel();
                 }));
         gameTimer.setCycleCount(Timeline.INDEFINITE);
@@ -318,6 +360,9 @@ public class GameController extends Controller implements Initializable {
             currentGameDto.setGameTotalPoints(500);
         }
         gameLogic = new GameLogic(currentGameDto);
+        
+        // Set up battle trigger callback for sequence completion
+        gameLogic.setSequenceCompletionCallback(this::onSequenceCompleted);
     }
 
     private void updateCardImage(CardContainer cardContainer) {
@@ -408,168 +453,157 @@ public class GameController extends Controller implements Initializable {
             animationHandler.playLightningEffect(root);
         }
     }
+
     private void renderBoard() {
         List<BoardColumnDto> boardColumns = currentGameDto.getBoardColumnList();
         if (boardColumns == null) {
             System.err.println("Error: BoardColumnList is null");
             return;
         }
-    
+
+        // Adjust columns to match available board columns
         int columnsToRender = Math.min(boardColumns.size(), columns.size());
+
+        // Clear all columns first to prevent duplicate children
         columns.forEach(pane -> pane.getChildren().clear());
-    
+
         for (int i = 0; i < columnsToRender; i++) {
             final int columnIdx = i;
             Pane pane = columns.get(i);
-            BoardColumnDto boardColumn = boardColumns.get(i);
+            final BoardColumnDto boardColumn = boardColumns.get(i); // Make it final for closure
             List<CardContainer> cards = boardColumn.getCardList();
-    
+
+            // Skip if no cards in this column
             if (cards == null || cards.isEmpty()) {
                 continue;
             }
-    
+
+            // Create new card containers for each card
             for (int j = 0; j < cards.size(); j++) {
                 CardContainer cardContainer = cards.get(j);
-    
-                // Remove previous handlers
-                cardContainer.setOnMousePressed(null);
-                cardContainer.setOnMouseDragged(null);
-                cardContainer.setOnMouseReleased(null);
-    
-                // Remove from previous parent if needed
+
+                // Ensure card is not already in a parent
                 if (cardContainer.getParent() != null) {
                     ((Pane) cardContainer.getParent()).getChildren().remove(cardContainer);
                 }
-    
                 updateCardImage(cardContainer);
-                cardContainer.setFitWidth(120);
-                cardContainer.setFitHeight(160);
+                cardContainer.applyFixedCardSizing();
                 cardContainer.setLayoutX(0);
-                cardContainer.setPreserveRatio(true);
                 cardContainer.setLayoutY(j * CARD_OFFSET);
-    
-                if (cardContainer.getCardDto().isCardFaceUp()) {
-                    // Construir la secuencia potencial desde esta carta hacia abajo
-                    List<CardContainer> cardsInColumn = boardColumn.getCardList();
-                    List<CardContainer> potentialSequence = new ArrayList<>();
-                    for (int k = j; k < cardsInColumn.size(); k++) {
-                        potentialSequence.add(cardsInColumn.get(k));
-                    }
-    
-                    if (gameRuleValidator.isValidSequence(potentialSequence)) {
-                        cardContainer.setDisable(false);
-                        cardContainer.setOnMousePressed(event -> {
 
-                            List<BoardColumnDto> boardColumnsActual = currentGameDto.getBoardColumnList();
-                            BoardColumnDto boardColumnActual = boardColumnsActual.get(columnIdx);
-                            List<CardContainer> cardsInColumnActual = boardColumnActual.getCardList();
-    
-                            int idx = -1;
-                            for (int k = 0; k < cardsInColumnActual.size(); k++) {
-                                if (cardsInColumnActual.get(k) == cardContainer) {
-                                    idx = k;
-                                    break;
-                                }
+                cardContainer.setOnMousePressed(event -> {
+                    if (!cardContainer.getCardDto().isCardFaceUp())
+                        return;
+
+                    // Get the current state of the column directly from the game data
+                    List<CardContainer> cardsInColumn = currentGameDto.getBoardColumnList().get(columnIdx).getCardList();
+                    int idx = cardsInColumn.indexOf(cardContainer);
+                    
+                    // Debug: Add safety check
+                    if (idx == -1) {
+                        System.err.println("Warning: Card not found in column " + columnIdx + ". Searching by card data...");
+                        // Alternative search by card data if direct reference fails
+                        for (int k = 0; k < cardsInColumn.size(); k++) {
+                            if (cardsInColumn.get(k).getCardDto().getCardValue() == cardContainer.getCardDto().getCardValue() &&
+                                cardsInColumn.get(k).getCardDto().getCardSuit().equals(cardContainer.getCardDto().getCardSuit())) {
+                                idx = k;
+                                break;
                             }
-                            if (idx == -1) {
-                                for (int k = 0; k < cardsInColumnActual.size(); k++) {
-                                    if (cardsInColumnActual.get(k).getCardDto().getCardId()
-                                            .equals(cardContainer.getCardDto().getCardId())) {
-                                        idx = k;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (idx == -1) {
-                                return;
-                            }
-    
-                            // Crear la secuencia real desde la carta seleccionada hacia abajo
-                            List<CardContainer> sequenceToDrag = new ArrayList<>();
-                            for (int k = idx; k < cardsInColumnActual.size(); k++) {
-                                sequenceToDrag.add(cardsInColumnActual.get(k));
-                            }
-    
-                            if (!gameRuleValidator.isValidSequence(sequenceToDrag)) {
-                                showAlert("Secuencia inválida", "Solo puedes mover secuencias descendentes del mismo palo.");
-                                return;
-                            }
-                            draggedSequence = new ArrayList<>(sequenceToDrag);
-                            dragOffsetsX = new double[draggedSequence.size()];
-                            dragOffsetsY = new double[draggedSequence.size()];
-                            Point2D mouseScene = new Point2D(event.getSceneX(), event.getSceneY());
-                            for (int k = 0; k < draggedSequence.size(); k++) {
-                                CardContainer c = draggedSequence.get(k);
-                                Point2D cardScene = c.localToScene(0, 0);
-                                dragOffsetsX[k] = mouseScene.getX() - cardScene.getX();
-                                dragOffsetsY[k] = mouseScene.getY() - cardScene.getY();
-                            }
-                            moveSequenceToRoot(draggedSequence);
-                            fromColIdx = columnIdx;
-                            fromCardIdx = idx;
-                        });
-    
-                        cardContainer.setOnMouseDragged(event -> {
-                            if (draggedSequence != null) {
-                                double mouseX = event.getSceneX(), mouseY = event.getSceneY();
-    
-                                int potentialTargetCol = getTargetColumnIndex(mouseX, mouseY);
-                                columns.forEach(col -> col.setStyle(""));
-                                if (potentialTargetCol != -1) {
-                                    columns.get(potentialTargetCol).setStyle(
-                                            "-fx-border-color: #ff0000; -fx-border-width: 2; -fx-border-style: dashed;");
-                                }
-    
-                                for (int k = 0; k < draggedSequence.size(); k++) {
-                                    CardContainer c = draggedSequence.get(k);
-                                    double wiggleAmount = Math.min((k + 1) * 2.0, 8.0);
-                                    double wiggleX = Math.sin(System.currentTimeMillis() * 0.01) * wiggleAmount;
-                                    double wiggleY = Math.cos(System.currentTimeMillis() * 0.008) * (wiggleAmount * 0.5);
-                                    double reducedOffset = CARD_OFFSET * 0.6;
-                                    c.setLayoutX(mouseX - dragOffsetsX[k] + wiggleX);
-                                    c.setLayoutY(mouseY - dragOffsetsY[k] + k * reducedOffset + wiggleY);
-                                    double rotation = Math.sin(System.currentTimeMillis() * 0.005) * wiggleAmount;
-                                    c.setRotate(rotation);
-                                    c.toFront();
-                                }
-                            }
-                        });
-    
-                        cardContainer.setOnMouseReleased(mouseEvent -> {
-                            if (draggedSequence != null) {
-                                columns.forEach(col -> col.setStyle(""));
-                                for (CardContainer card : draggedSequence) {
-                                    card.setRotate(0);
-                                }
-    
-                                int targetColIdx = getTargetColumnIndex(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                                boolean moved = false;
-                                if (targetColIdx != -1) {
-                                    try {
-                                        handleMoveCards(fromColIdx, targetColIdx, draggedSequence.get(0));
-                                        moved = true;
-                                        addColumnGlitchEffect(targetColIdx);
-                                    } catch (Exception e) {
-                                        showAlert("Movimiento inválido", e.getMessage());
-                                    }
-                                }
-                                Pane targetPane = columns.get((moved && targetColIdx != -1) ? targetColIdx : fromColIdx);
-                                moveSequenceToColumn(draggedSequence, targetPane);
-                                draggedSequence = null;
-                                dragOffsetsX = null;
-                                dragOffsetsY = null;
-                                fromColIdx = -1;
-                                fromCardIdx = -1;
-                                updateBoard();
-                            }
-                        });
-                    } else {
-                        cardContainer.setDisable(true);
+                        }
+                        if (idx == -1) {
+                            System.err.println("Error: Could not find card in column " + columnIdx);
+                            return;
+                        }
                     }
-                } else {
-                    cardContainer.setDisable(true);
-                }
-    
+
+                    // Check if we can pick up this sequence (Spider Solitaire rules)
+                    List<CardContainer> potentialSequence = cardsInColumn.subList(idx, cardsInColumn.size());
+                    if (!isValidSequenceToPickUp(potentialSequence)) {
+                        showAlert("Secuencia inválida", "Solo puedes mover secuencias descendentes del mismo palo.");
+                        return;
+                    }
+
+                    draggedSequence = new ArrayList<>(potentialSequence);
+                    dragOffsetsX = new double[draggedSequence.size()];
+                    dragOffsetsY = new double[draggedSequence.size()];
+                    Point2D mouseScene = new Point2D(event.getSceneX(), event.getSceneY());
+                    for (int k = 0; k < draggedSequence.size(); k++) {
+                        CardContainer c = draggedSequence.get(k);
+                        Point2D cardScene = c.localToScene(0, 0);
+                        dragOffsetsX[k] = mouseScene.getX() - cardScene.getX();
+                        dragOffsetsY[k] = mouseScene.getY() - cardScene.getY();
+                    }
+                    moveSequenceToRoot(draggedSequence);
+                    fromColIdx = columnIdx;
+                });
+
+                cardContainer.setOnMouseDragged(event -> {
+                    if (draggedSequence != null) {
+                        double mouseX = event.getSceneX(), mouseY = event.getSceneY();
+
+                        // Simple column highlighting
+                        int potentialTargetCol = getTargetColumnIndex(mouseX, mouseY);
+                        columns.forEach(col -> col.setStyle(""));
+                        if (potentialTargetCol != -1) {
+                            columns.get(potentialTargetCol).setStyle(
+                                    "-fx-border-color: #ff0000; -fx-border-width: 2; -fx-border-style: dashed;");
+                        }
+
+                        // Animate dragged cards
+                        for (int k = 0; k < draggedSequence.size(); k++) {
+                            CardContainer c = draggedSequence.get(k);
+
+                            // Simple wiggle effect
+                            double wiggleAmount = Math.min((k + 1) * 2.0, 8.0); // Cap maximum wiggle
+                            double wiggleX = Math.sin(System.currentTimeMillis() * 0.01) * wiggleAmount;
+                            double wiggleY = Math.cos(System.currentTimeMillis() * 0.008) * (wiggleAmount * 0.5);
+
+                            // Update card position with reduced vertical spacing
+                            double reducedOffset = CARD_OFFSET * 0.6; // Reduce spacing by 40%
+                            c.setLayoutX(mouseX - dragOffsetsX[k] + wiggleX);
+                            c.setLayoutY(mouseY - dragOffsetsY[k] + k * reducedOffset + wiggleY);
+
+                            // Gentle rotation
+                            double rotation = Math.sin(System.currentTimeMillis() * 0.005) * wiggleAmount;
+                            c.setRotate(rotation);
+
+                            c.toFront();
+                        }
+                    }
+                });
+
+                cardContainer.setOnMouseReleased(mouseEvent -> {
+                    if (draggedSequence != null) {
+                        // Clear all column highlighting
+                        columns.forEach(col -> col.setStyle(""));
+
+                        // Reset rotation for all cards in sequence
+                        for (CardContainer card : draggedSequence) {
+                            card.setRotate(0);
+                        }
+
+                        int targetColIdx = getTargetColumnIndex(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                        boolean moved = false;
+                        if (targetColIdx != -1) {
+                            try {
+                                handleMoveCards(fromColIdx, targetColIdx, draggedSequence.get(0));
+                                moved = true;
+                                // Add glitch effect to target column on successful move
+                                addColumnGlitchEffect(targetColIdx);
+                            } catch (Exception e) {
+                                showAlert("Movimiento inválido", e.getMessage());
+                            }
+                        }
+                        Pane targetPane = columns.get((moved && targetColIdx != -1) ? targetColIdx : fromColIdx);
+                        moveSequenceToColumn(draggedSequence, targetPane);
+                        draggedSequence = null;
+                        dragOffsetsX = null;
+                        dragOffsetsY = null;
+                        fromColIdx = -1;
+                        updateBoard();
+                    }
+                });
+
                 pane.getChildren().add(cardContainer);
             }
         }
@@ -626,7 +660,6 @@ public class GameController extends Controller implements Initializable {
                         updateBoard();
                     }));
             updateDelay.play();
-            showAlert("Posible movimiento", gameLogic.suggestPossibleMoves(currentGameDto));
         } catch (IllegalArgumentException e) {
             showAlert("Movimiento inválido", e.getMessage());
         }
@@ -702,7 +735,7 @@ public class GameController extends Controller implements Initializable {
         if (userAccountDto != null) {
             userDesign = userAccountDto.getUserCardDesign(); // Debe retornar 1, 2 o 3
         }
-        String versionFolder = "v" + (userDesign + 1);
+        String versionFolder = "v" + (userDesign+1);
 
         // Ruta dinámica para el reverso de carta según la versión
         String imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
@@ -720,8 +753,7 @@ public class GameController extends Controller implements Initializable {
             } catch (Exception e) {
                 System.err.println("Error cargando imagen del mazo: " + imagePath);
             }
-            card.setFitWidth(120);
-            card.setFitHeight(160);
+            card.applyFixedCardSizing();
             card.setLayoutX(i * offsetX);
             card.setLayoutY(0);
             card.setDisable(true);
@@ -777,8 +809,7 @@ public class GameController extends Controller implements Initializable {
 
                 card.getCardDto().setCardFaceUp(true);
                 updateCardImage(card);
-                card.setFitWidth(120);
-                card.setFitHeight(160);
+                card.applyFixedCardSizing();
                 card.setLayoutX(j * cardOffset);
                 card.setLayoutY(0);
                 card.setDisable(true);
@@ -801,11 +832,11 @@ public class GameController extends Controller implements Initializable {
         UserAccountDto user = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         GameService gameService = new GameService();
 
-        if (!user.isUserGuest()) {
+        if(!user.isUserGuest()){
             currentGameDto.setGameStatus("SAVED");
             Respuesta respuesta = gameService.saveGameDto(currentGameDto);
 
-            if (respuesta.getEstado()) {
+            if(respuesta.getEstado()){
                 System.out.println(respuesta.getMensaje());
             }
         }
@@ -862,8 +893,767 @@ public class GameController extends Controller implements Initializable {
             removeGlow.play();
         }
     }
+
+    /**
+     * Checks if a sequence of cards is valid to pick up according to Spider
+     * Solitaire rules.
+     * Cards must be in descending order and of the same suit.
+     */
+    private boolean isValidSequenceToPickUp(List<CardContainer> sequence) {
+        if (sequence == null || sequence.isEmpty()) {
+            return false;
+        }
+
+        // Single card is always valid
+        if (sequence.size() == 1) {
+            return true;
+        }
+
+        // Check descending order and same suit
+        String suit = sequence.get(0).getCardDto().getCardSuit();
+        int prevValue = sequence.get(0).getCardDto().getCardValue();
+
+        // Debug info
+        System.out.println("Validating sequence starting with: " + prevValue + suit);
+
+        for (int i = 1; i < sequence.size(); i++) {
+            CardDto currentCard = sequence.get(i).getCardDto();
+            // Must be same suit and value must be exactly one less than previous
+            if (!currentCard.getCardSuit().equals(suit) ||
+                    currentCard.getCardValue() != prevValue - 1) {
+                System.out.println("Invalid sequence at position " + i + ": expected " + (prevValue - 1) + suit + 
+                                 " but got " + currentCard.getCardValue() + currentCard.getCardSuit());
+                return false;
+            }
+            prevValue = currentCard.getCardValue();
+        }
+
+        System.out.println("Valid sequence of " + sequence.size() + " cards");
+        return true;
+    }
+
     @FXML
     private void onActionBtnHint(ActionEvent event) {
         showAlert("Posible movimiento", gameLogic.suggestPossibleMoves(currentGameDto));
+    }
+
+    // ====================== SANS BATTLE SYSTEM ======================
+
+    /**
+     * Starts the Sans battle minigame
+     */
+    private void startSansBattle() {
+        if (battleActive) return;
+        
+        battleActive = true;
+        isRecovering = false; // Reset recovery state
+        currentAttackPhase = 0;
+        
+        // Initialize player lives based on difficulty
+        String difficulty = currentGameDto.getGameDifficulty();
+        playerLives = getLivesForDifficulty(difficulty);
+        updateLifeDisplay();
+        
+        // Debug: Print difficulty and lives for verification
+        System.out.println("Battle started - Difficulty: " + difficulty + ", Lives: " + playerLives);
+        
+        // Clear any previous pillar positions
+        usedPillarPositions.clear();
+        
+        // Show battle UI
+        vboxBattle.setVisible(true);
+        vboxBattle.toFront();
+        
+        // Initialize battle area to default square size
+        resetBattleAreaSize();
+        
+        // Initialize heart position and ensure it's fully visible
+        double centerX = pnBattleArea.getPrefWidth() / 2 - imgBattleHeart.getFitWidth() / 2;
+        double centerY = pnBattleArea.getPrefHeight() / 2 - imgBattleHeart.getFitHeight() / 2;
+        imgBattleHeart.setLayoutX(centerX);
+        imgBattleHeart.setLayoutY(centerY);
+        imgBattleHeart.setOpacity(1.0); // Ensure heart is fully visible at start
+        
+        // Setup key handling for heart movement
+        setupBattleKeyHandling();
+        
+        // Start heart movement system
+        startHeartMovement();
+        
+        // Play dramatic battle entrance effect instead of shaking
+        animationHandler.playDramaticFlash(root, Color.BLUE, 800);
+        animationHandler.playRedGlitchEffect(imgSans, 800);
+        soundUtils.playAttackSound();
+        
+        // Add neon blue particles when battle starts
+        double sansX = imgSans.getLayoutX() + imgSans.getFitWidth() / 2;
+        double sansY = imgSans.getLayoutY() + imgSans.getFitHeight() / 2;
+        animationHandler.createNeonBlueParticles(root, sansX, sansY, 25);
+        
+        // Start first attack after a brief delay
+        Timeline startDelay = new Timeline(
+            new KeyFrame(Duration.millis(1500), e -> startNextAttack())
+        );
+        startDelay.play();
+    }
+
+    /**
+     * Sets up keyboard input handling for the battle
+     */
+    private void setupBattleKeyHandling() {
+        root.setFocusTraversable(true);
+        root.requestFocus();
+        
+        root.setOnKeyPressed(event -> {
+            if (!battleActive) return;
+            
+            KeyCode code = event.getCode();
+            if (code == KeyCode.W || code == KeyCode.UP ||
+                code == KeyCode.A || code == KeyCode.LEFT ||
+                code == KeyCode.S || code == KeyCode.DOWN ||
+                code == KeyCode.D || code == KeyCode.RIGHT) {
+                
+                pressedKeys.add(code);
+                event.consume();
+            }
+        });
+        
+        root.setOnKeyReleased(event -> {
+            if (!battleActive) return;
+            
+            KeyCode code = event.getCode();
+            pressedKeys.remove(code);
+            event.consume();
+        });
+    }
+
+    /**
+     * Starts the heart movement system (60 FPS)
+     */
+    private void startHeartMovement() {
+        heartMovementTimer = new Timeline(
+            new KeyFrame(Duration.millis(16), e -> updateHeartPosition())
+        );
+        heartMovementTimer.setCycleCount(Timeline.INDEFINITE);
+        heartMovementTimer.play();
+    }
+
+    /**
+     * Updates heart position based on pressed keys
+     */
+    private void updateHeartPosition() {
+        if (!battleActive) return;
+        
+        double deltaTime = 0.016; // 16ms = ~60 FPS
+        double moveDistance = HEART_SPEED * deltaTime;
+        
+        double currentX = imgBattleHeart.getLayoutX();
+        double currentY = imgBattleHeart.getLayoutY();
+        double newX = currentX;
+        double newY = currentY;
+        
+        // Calculate movement
+        if (pressedKeys.contains(KeyCode.W) || pressedKeys.contains(KeyCode.UP)) {
+            newY -= moveDistance;
+        }
+        if (pressedKeys.contains(KeyCode.S) || pressedKeys.contains(KeyCode.DOWN)) {
+            newY += moveDistance;
+        }
+        if (pressedKeys.contains(KeyCode.A) || pressedKeys.contains(KeyCode.LEFT)) {
+            newX -= moveDistance;
+        }
+        if (pressedKeys.contains(KeyCode.D) || pressedKeys.contains(KeyCode.RIGHT)) {
+            newX += moveDistance;
+        }
+        
+        // Apply boundary constraints (keep heart inside battle area)
+        double minX = 5;
+        double maxX = pnBattleArea.getPrefWidth() - imgBattleHeart.getFitWidth() - 5;
+        double minY = 5;
+        double maxY = pnBattleArea.getPrefHeight() - imgBattleHeart.getFitHeight() - 5;
+        
+        newX = Math.max(minX, Math.min(maxX, newX));
+        newY = Math.max(minY, Math.min(maxY, newY));
+        
+        imgBattleHeart.setLayoutX(newX);
+        imgBattleHeart.setLayoutY(newY);
+        
+        // Check collision with projectiles
+        checkProjectileCollisions();
+    }
+
+    /**
+     * Starts the next attack phase
+     */
+    private void startNextAttack() {
+        if (!battleActive) return;
+        
+        // Check if we've reached the maximum number of attacks (5 attacks total)
+        if (currentAttackPhase >= maxAttackPhases) {
+            // Battle ends after 5 attacks, player wins by surviving
+            endBattle(true);
+            return;
+        }
+        
+        clearAllProjectiles();
+        
+        // Get difficulty multiplier
+        String difficulty = currentGameDto.getGameDifficulty();
+        double difficultyMultiplier = getDifficultyMultiplier(difficulty);
+        
+        // Select random attack pattern (now includes pillar attack)
+        int attackType = battleRandom.nextInt(4);
+        
+        switch (attackType) {
+            case 0:
+                startVerticalAttack(difficultyMultiplier);
+                break;
+            case 1:
+                startHorizontalAttack(difficultyMultiplier);
+                break;
+            case 2:
+                startSpiralAttack(difficultyMultiplier);
+                break;
+            case 3:
+                startPillarAttack(difficultyMultiplier);
+                break;
+        }
+        
+        currentAttackPhase++;
+    }
+
+    /**
+     * Gets the number of lives based on difficulty
+     */
+    private int getLivesForDifficulty(String difficulty) {
+        if (difficulty == null) return 1;
+        
+        switch (difficulty.toUpperCase()) {
+            case "F": // Easy (Fácil)
+                return 2; // Easy: 2 lives (can survive 2 hits)
+            case "N": // Medium (Normal)
+                return 1; // Medium: 1 life (can survive 1 hit)
+            case "D": // Hard (Difícil)
+                return 0; // Hard: 0 lives (instant death on hit)
+            default:
+                return 1;
+        }
+    }
+    
+    /**
+     * Updates the life counter display
+     */
+    private void updateLifeDisplay() {
+        if (playerLives > 0) {
+            lblLifesRemaining.setText("Vidas: " + playerLives);
+        } else {
+            lblLifesRemaining.setText("Vidas: 0 (¡Sin vidas restantes!)");
+        }
+    }
+
+    /**
+     * Gets difficulty multiplier for projectile speed and count
+     */
+    private double getDifficultyMultiplier(String difficulty) {
+        if (difficulty == null) return 1.0;
+        
+        switch (difficulty.toUpperCase()) {
+            case "F": // Easy (Fácil)
+                return 1.0; // 3 projectiles base
+            case "N": // Medium (Normal)
+                return 1.33; // 4 projectiles (3 * 1.33 ≈ 4)
+            case "D": // Hard (Difícil)
+                return 1.67; // 5 projectiles (3 * 1.67 ≈ 5)
+            default:
+                return 1.0;
+        }
+    }
+
+    /**
+     * Attack Pattern 1: Vertical projectiles from top
+     */
+    private void startVerticalAttack(double difficultyMultiplier) {
+        // Set battle area to square shape for optimal vertical attack patterns
+        setBattleAreaSquare();
+        
+        // Add neon blue particles when Sans attacks
+        double sansX = imgSans.getLayoutX() + imgSans.getFitWidth() / 2;
+        double sansY = imgSans.getLayoutY() + imgSans.getFitHeight() / 2;
+        animationHandler.createNeonBlueParticles(root, sansX, sansY, 12);
+        
+        // Use AnimationHandler for attack pattern
+        animationHandler.createVerticalAttack(pnBattleArea, difficultyMultiplier, activeProjectiles, projectileTimelines, battleRandom);
+        
+        // Schedule next attack or end battle
+        Timeline nextPhase = new Timeline(
+            new KeyFrame(Duration.millis(3000), e -> {
+                if (currentAttackPhase >= maxAttackPhases) {
+                    endBattle(true);
+                } else {
+                    startNextAttack();
+                }
+            })
+        );
+        nextPhase.play();
+    }
+
+    /**
+     * Attack Pattern 2: Horizontal projectiles from sides
+     */
+    private void startHorizontalAttack(double difficultyMultiplier) {
+        // Set battle area to rectangular shape for optimal horizontal attack patterns
+        setBattleAreaRectangular();
+        
+        // Add neon blue particles when Sans attacks
+        double sansX = imgSans.getLayoutX() + imgSans.getFitWidth() / 2;
+        double sansY = imgSans.getLayoutY() + imgSans.getFitHeight() / 2;
+        animationHandler.createNeonBlueParticles(root, sansX, sansY, 15);
+        
+        // Use AnimationHandler for attack pattern
+        animationHandler.createHorizontalAttack(pnBattleArea, difficultyMultiplier, activeProjectiles, projectileTimelines, battleRandom);
+        
+        Timeline nextPhase = new Timeline(
+            new KeyFrame(Duration.millis(3500), e -> {
+                if (currentAttackPhase >= maxAttackPhases) {
+                    endBattle(true);
+                } else {
+                    startNextAttack();
+                }
+            })
+        );
+        nextPhase.play();
+    }
+
+    /**
+     * Attack Pattern 3: Spiral projectiles
+     */
+    private void startSpiralAttack(double difficultyMultiplier) {
+        // Set battle area to square shape for optimal spiral attack patterns
+        setBattleAreaSquare();
+        
+        // Add neon blue particles when Sans attacks
+        double sansX = imgSans.getLayoutX() + imgSans.getFitWidth() / 2;
+        double sansY = imgSans.getLayoutY() + imgSans.getFitHeight() / 2;
+        animationHandler.createNeonBlueParticles(root, sansX, sansY, 20);
+        
+        // Use AnimationHandler for attack pattern
+        animationHandler.createSpiralAttack(pnBattleArea, difficultyMultiplier, activeProjectiles, projectileTimelines, battleRandom);
+        
+        Timeline nextPhase = new Timeline(
+            new KeyFrame(Duration.millis(2800), e -> {
+                if (currentAttackPhase >= maxAttackPhases) {
+                    endBattle(true);
+                } else {
+                    startNextAttack();
+                }
+            })
+        );
+        nextPhase.play();
+    }
+
+    /**
+     * Attack Pattern 4: Directional wall pillar (Undertale-style)
+     */
+    private void startPillarAttack(double difficultyMultiplier) {
+        // Set battle area to rectangular shape for optimal pillar attack patterns
+        setBattleAreaRectangular();
+        
+        // Add neon blue particles when Sans attacks
+        double sansX = imgSans.getLayoutX() + imgSans.getFitWidth() / 2;
+        double sansY = imgSans.getLayoutY() + imgSans.getFitHeight() / 2;
+        animationHandler.createNeonBlueParticles(root, sansX, sansY, 25);
+        
+        // Use AnimationHandler for attack pattern
+        animationHandler.createPillarAttack(pnBattleArea, difficultyMultiplier, activeProjectiles, projectileTimelines, battleRandom);
+        
+        Timeline nextPhase = new Timeline(
+            new KeyFrame(Duration.millis(4000), e -> {
+                if (currentAttackPhase >= maxAttackPhases) {
+                    endBattle(true);
+                } else {
+                    startNextAttack();
+                }
+            })
+        );
+        nextPhase.play();
+    }
+
+
+
+
+
+
+
+
+
+    /**
+     * Checks for collisions between heart and projectiles
+     */
+    private void checkProjectileCollisions() {
+        // Skip collision detection if player is recovering from a hit
+        if (isRecovering) return;
+        
+        double heartX = imgBattleHeart.getLayoutX();
+        double heartY = imgBattleHeart.getLayoutY();
+        double heartWidth = imgBattleHeart.getFitWidth();
+        double heartHeight = imgBattleHeart.getFitHeight();
+        
+        for (Rectangle projectile : new ArrayList<>(activeProjectiles)) {
+            double projX = projectile.getLayoutX();
+            double projY = projectile.getLayoutY();
+            double projWidth = projectile.getWidth();
+            double projHeight = projectile.getHeight();
+            
+            // Simple bounding box collision detection
+            if (heartX < projX + projWidth &&
+                heartX + heartWidth > projX &&
+                heartY < projY + projHeight &&
+                heartY + heartHeight > projY) {
+                
+                // Collision detected!
+                onHeartHit();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Handles when the heart gets hit
+     */
+    private void onHeartHit() {
+        // Prevent multiple hits during recovery
+        if (isRecovering) return;
+        
+        // Set recovery state
+        isRecovering = true;
+        
+        // Play hit effect on heart
+        animationHandler.playHeartHitEffect(imgBattleHeart);
+        soundUtils.playAttackSound();
+        
+        // IMMEDIATELY stop all current attacks and clear projectiles
+        clearAllProjectiles();
+        
+        // Reduce player lives
+        if (playerLives > 0) {
+            playerLives--;
+            updateLifeDisplay();
+            
+            if (playerLives > 0) {
+                // Player still has lives, continue battle
+                showAlert("¡GOLPEADO!", "Te han golpeado. Vidas restantes: " + playerLives + ". Recuperándose...");
+                
+                // Reset heart position to center
+                double centerX = pnBattleArea.getPrefWidth() / 2 - imgBattleHeart.getFitWidth() / 2;
+                double centerY = pnBattleArea.getPrefHeight() / 2 - imgBattleHeart.getFitHeight() / 2;
+                imgBattleHeart.setLayoutX(centerX);
+                imgBattleHeart.setLayoutY(centerY);
+                
+                // Add visual recovery effect (flashing heart)
+                addRecoveryEffect();
+                
+                // Wait 1 second for recovery, then continue with next attack
+                Timeline recoveryDelay = new Timeline(
+                    new KeyFrame(Duration.millis(1000), e -> {
+                        isRecovering = false;
+                        startNextAttack();
+                    })
+                );
+                recoveryDelay.play();
+            } else {
+                // No lives left, end battle with loss
+                isRecovering = false;
+                endBattle(false);
+            }
+        } else {
+            // Hard difficulty or no lives remaining
+            isRecovering = false;
+            endBattle(false);
+        }
+    }
+    
+    /**
+     * Adds a visual recovery effect to the heart (flashing)
+     */
+    private void addRecoveryEffect() {
+        Timeline flashEffect = new Timeline(
+            new KeyFrame(Duration.millis(0), new KeyValue(imgBattleHeart.opacityProperty(), 1.0)),
+            new KeyFrame(Duration.millis(150), new KeyValue(imgBattleHeart.opacityProperty(), 0.3)),
+            new KeyFrame(Duration.millis(300), new KeyValue(imgBattleHeart.opacityProperty(), 1.0)),
+            new KeyFrame(Duration.millis(450), new KeyValue(imgBattleHeart.opacityProperty(), 0.3)),
+            new KeyFrame(Duration.millis(600), new KeyValue(imgBattleHeart.opacityProperty(), 1.0)),
+            new KeyFrame(Duration.millis(750), new KeyValue(imgBattleHeart.opacityProperty(), 0.3)),
+            new KeyFrame(Duration.millis(900), new KeyValue(imgBattleHeart.opacityProperty(), 1.0))
+        );
+        flashEffect.play();
+    }
+
+    /**
+     * Ends the battle
+     */
+    private void endBattle(boolean victory) {
+        battleActive = false;
+        isRecovering = false; // Reset recovery state
+        
+        // Stop all timers
+        if (heartMovementTimer != null) heartMovementTimer.stop();
+        if (battleTimer != null) battleTimer.stop();
+        
+        // Clear projectiles and pillar positions
+        clearAllProjectiles();
+        usedPillarPositions.clear();
+        
+        // Stop any ongoing battle area resize animations
+        if (battleAreaResizeTimeline != null) {
+            battleAreaResizeTimeline.stop();
+        }
+        
+        // Reset battle area to default size
+        resetBattleAreaSize();
+        
+        // Remove key handlers
+        root.setOnKeyPressed(null);
+        root.setOnKeyReleased(null);
+        
+        // Ensure heart is fully visible
+        imgBattleHeart.setOpacity(1.0);
+        
+        // Show result
+        String message;
+        if (victory) {
+            if (currentAttackPhase >= maxAttackPhases) {
+                message = "¡HAS SOBREVIVIDO A TODOS LOS ATAQUES DE SANS!";
+            } else {
+                message = "¡HAS DERROTADO A SANS!";
+            }
+        } else {
+            message = "SANS TE HA DERROTADO...";
+        }
+        
+        showAlert(victory ? "¡VICTORIA!" : "DERROTA", message);
+        
+        // Implement battle rewards system
+        if (victory) {
+            // Victory: Continue without extra points (just the sequence completion bonus)
+            showAlert("¡VICTORIA!", "Has sobrevivido al ataque de Sans. Continúa jugando.");
+        } else {
+            // Loss: Give small point bonus as consolation
+            int consolationBonus = 25; // Small bonus for trying
+            currentGameDto.setGameTotalPoints(currentGameDto.getGameTotalPoints() + consolationBonus);
+            updateGameInfo();
+            showAlert("DERROTA", "Sans te ha derrotado, pero recibes " + consolationBonus + " puntos de consolación.");
+        }
+        
+        // Reset battle variables for next battle
+        currentAttackPhase = 0;
+        playerLives = 0;
+        
+        // Hide battle UI after delay
+        Timeline hideDelay = new Timeline(
+            new KeyFrame(Duration.millis(2000), e -> {
+                vboxBattle.setVisible(false);
+                pressedKeys.clear();
+            })
+        );
+        hideDelay.play();
+    }
+
+    /**
+     * Clears all active projectiles
+     */
+    private void clearAllProjectiles() {
+        // Stop all projectile animations
+        for (Timeline timeline : projectileTimelines) {
+            timeline.stop();
+        }
+        projectileTimelines.clear();
+        
+        // Remove all projectiles from battle area
+        pnBattleArea.getChildren().removeIf(node -> activeProjectiles.contains(node));
+        activeProjectiles.clear();
+    }
+    
+    /**
+     * Smoothly transitions the battle area size to accommodate different attack patterns
+     * @param targetWidth The target width for the battle area
+     * @param targetHeight The target height for the battle area
+     * @param duration The duration of the transition in milliseconds
+     */
+    private void resizeBattleArea(double targetWidth, double targetHeight, double duration) {
+        // Stop any existing resize animation
+        if (battleAreaResizeTimeline != null) {
+            battleAreaResizeTimeline.stop();
+        }
+        
+        double currentWidth = pnBattleArea.getPrefWidth();
+        double currentHeight = pnBattleArea.getPrefHeight();
+        
+        // Add brief visual feedback when area changes significantly
+        if (Math.abs(targetWidth - currentWidth) > 20 || Math.abs(targetHeight - currentHeight) > 20) {
+            // Brief border flash to indicate area change
+            javafx.scene.effect.DropShadow resizeGlow = new javafx.scene.effect.DropShadow();
+            resizeGlow.setColor(Color.CYAN);
+            resizeGlow.setRadius(10);
+            resizeGlow.setSpread(0.6);
+            pnBattleArea.setEffect(resizeGlow);
+            
+            // Remove glow after short time
+            Timeline removeGlow = new Timeline(
+                new KeyFrame(Duration.millis(400), e -> pnBattleArea.setEffect(null))
+            );
+            removeGlow.play();
+        }
+        
+        // Create smooth transition animation
+        battleAreaResizeTimeline = new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(pnBattleArea.prefWidthProperty(), currentWidth),
+                new KeyValue(pnBattleArea.prefHeightProperty(), currentHeight)
+            ),
+            new KeyFrame(Duration.millis(duration),
+                new KeyValue(pnBattleArea.prefWidthProperty(), targetWidth),
+                new KeyValue(pnBattleArea.prefHeightProperty(), targetHeight)
+            )
+        );
+        
+        battleAreaResizeTimeline.setOnFinished(e -> {
+            // Battle area resize complete - no automatic heart repositioning
+            // The heart should stay where the player positioned it
+            // Only reposition if heart is outside new boundaries
+            double heartX = imgBattleHeart.getLayoutX();
+            double heartY = imgBattleHeart.getLayoutY();
+            double heartWidth = imgBattleHeart.getFitWidth();
+            double heartHeight = imgBattleHeart.getFitHeight();
+            
+            double minX = 5;
+            double maxX = pnBattleArea.getPrefWidth() - heartWidth - 5;
+            double minY = 5;
+            double maxY = pnBattleArea.getPrefHeight() - heartHeight - 5;
+            
+            // Only adjust position if heart is outside new boundaries
+            double newX = Math.max(minX, Math.min(maxX, heartX));
+            double newY = Math.max(minY, Math.min(maxY, heartY));
+            
+            // Only move if necessary (boundary violation)
+            if (newX != heartX || newY != heartY) {
+                Timeline boundaryAdjust = new Timeline(
+                    new KeyFrame(Duration.ZERO,
+                        new KeyValue(imgBattleHeart.layoutXProperty(), heartX),
+                        new KeyValue(imgBattleHeart.layoutYProperty(), heartY)
+                    ),
+                    new KeyFrame(Duration.millis(200),
+                        new KeyValue(imgBattleHeart.layoutXProperty(), newX),
+                        new KeyValue(imgBattleHeart.layoutYProperty(), newY)
+                    )
+                );
+                boundaryAdjust.play();
+            }
+        });
+        
+        battleAreaResizeTimeline.play();
+    }
+    
+    /**
+     * Sets battle area to square shape for vertical and spiral attacks
+     */
+    private void setBattleAreaSquare() {
+        resizeBattleArea(DEFAULT_BATTLE_AREA_WIDTH, DEFAULT_BATTLE_AREA_HEIGHT, 800);
+    }
+    
+    /**
+     * Sets battle area to rectangular shape for horizontal and pillar attacks
+     */
+    private void setBattleAreaRectangular() {
+        resizeBattleArea(RECTANGULAR_BATTLE_AREA_WIDTH, RECTANGULAR_BATTLE_AREA_HEIGHT, 800);
+    }
+    
+    /**
+     * Resets battle area to default square size
+     */
+    private void resetBattleAreaSize() {
+        resizeBattleArea(DEFAULT_BATTLE_AREA_WIDTH, DEFAULT_BATTLE_AREA_HEIGHT, 500);
+    }
+
+    /**
+     * Called when a sequence (K to A) is completed. Triggers column damage animation and Sans battle.
+     */
+    private void onSequenceCompleted(int columnIndex, List<CardContainer> completedSequence) {
+        System.out.println("Sequence completed in column " + columnIndex + " with " + completedSequence.size() + " cards");
+        
+        // First, show visual effect on all columns taking damage
+        playColumnDamageAnimation(() -> {
+            // After damage animation completes, start the battle
+            startSansBattle();
+        });
+    }
+    
+    /**
+     * Plays damage animation on all columns before battle starts
+     */
+    private void playColumnDamageAnimation(Runnable onComplete) {
+        System.out.println("Playing column damage animation...");
+        
+        // Create simultaneous damage effects on all columns
+        List<Timeline> columnAnimations = new ArrayList<>();
+        
+        for (int i = 0; i < columns.size(); i++) {
+            Pane column = columns.get(i);
+            
+            // Create damage effect for this column
+            Timeline columnDamage = new Timeline();
+            
+            // Red flash effect
+            DropShadow redGlow = new DropShadow();
+            redGlow.setColor(Color.RED);
+            redGlow.setRadius(20);
+            redGlow.setSpread(0.8);
+            
+            // Shake effect with color flash
+            double originalLayoutX = column.getLayoutX();
+            columnDamage.getKeyFrames().addAll(
+                // Initial flash
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(column.effectProperty(), null)),
+                new KeyFrame(Duration.millis(100),
+                    new KeyValue(column.effectProperty(), redGlow),
+                    new KeyValue(column.layoutXProperty(), originalLayoutX + 5)),
+                new KeyFrame(Duration.millis(200),
+                    new KeyValue(column.layoutXProperty(), originalLayoutX - 5)),
+                new KeyFrame(Duration.millis(300),
+                    new KeyValue(column.layoutXProperty(), originalLayoutX + 3)),
+                new KeyFrame(Duration.millis(400),
+                    new KeyValue(column.layoutXProperty(), originalLayoutX - 2)),
+                new KeyFrame(Duration.millis(500),
+                    new KeyValue(column.layoutXProperty(), originalLayoutX),
+                    new KeyValue(column.effectProperty(), null))
+            );
+            
+            columnAnimations.add(columnDamage);
+        }
+        
+        // Play all column animations simultaneously
+        for (Timeline animation : columnAnimations) {
+            animation.play();
+        }
+        
+        // Add screen shake and lightning effects
+        animationHandler.playDramaticFlash(root, Color.RED, 1000);
+        animationHandler.playLightningEffect(root);
+        soundUtils.playAttackSound();
+        
+        // Create particles from Sans position
+        double sansX = imgSans.getLayoutX() + imgSans.getFitWidth() / 2;
+        double sansY = imgSans.getLayoutY() + imgSans.getFitHeight() / 2;
+        animationHandler.createNeonBlueParticles(root, sansX, sansY, 30);
+        
+        // Wait for animation to complete, then trigger callback
+        Timeline completeCallback = new Timeline(
+            new KeyFrame(Duration.millis(1200), e -> {
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+            })
+        );
+        completeCallback.play();
     }
 }
