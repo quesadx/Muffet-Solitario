@@ -211,9 +211,9 @@ public class GameLogic {
             updateCardPositions(cardList);
         }
 
-        gameDto.decrementDealsRemaining(); 
+        gameDto.decrementDealsRemaining();         
+        gameDto.setGameTotalPoints(gameDto.getGameTotalPoints()-1);
         moveHistory.add(new Move(columnsDealtTo, dealtCards));
-
         checkGameFinished(gameDto);
     }
 
@@ -454,7 +454,7 @@ public class GameLogic {
             updateCardPositions(gameDto.getDeckDto().getCardList());
     
             gameDto.setGameDealsRemaining(gameDto.getGameDealsRemaining() + 1);
-    
+            gameDto.setGameTotalPoints(gameDto.getGameTotalPoints() - 1);
         } else if (lastMove.getType() == Move.MoveType.COMPLETE_SEQUENCE) {
             List<BoardColumnDto> columns = gameDto.getBoardColumnList();
             BoardColumnDto column = columns.get(lastMove.getFromColumnIndex());
