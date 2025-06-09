@@ -44,6 +44,12 @@ public class GameService {
                     Card card;
                     if (cardDto.getCardId() != null) {
                         card = em.find(Card.class, cardDto.getCardId());
+
+                        card.setCardFaceUp(cardDto.isCardFaceUp());
+                        card.setCardSuit(cardDto.getCardSuit());
+                        card.setCardValue(cardDto.getCardValue());
+                        card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
+                        card.setCardVersion(cardDto.getCardVersion());
                     } else {
                         card = new Card();
                         card.setCardFaceUp(cardDto.isCardFaceUp());
@@ -51,9 +57,11 @@ public class GameService {
                         card.setCardValue(cardDto.getCardValue());
                         card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
                         card.setCardVersion(cardDto.getCardVersion());
-                        // ...asigna otros campos si es necesario
                     }
-                    card.setCardDeckFk(deck); // Relación inversa
+
+                    card.setCardDeckFk(deck);
+                    card.setCardBcolmnFk(null);
+                    card.setCardCseqFk(null);
                     deckCards.add(card);
                 }
                 deck.setCardList(deckCards);
@@ -84,6 +92,12 @@ public class GameService {
                         Card card;
                         if (cardDto.getCardId() != null) {
                             card = em.find(Card.class, cardDto.getCardId());
+
+                            card.setCardFaceUp(cardDto.isCardFaceUp());
+                            card.setCardSuit(cardDto.getCardSuit());
+                            card.setCardValue(cardDto.getCardValue());
+                            card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
+                            card.setCardVersion(cardDto.getCardVersion());
                         } else {
                             card = new Card();
                             card.setCardFaceUp(cardDto.isCardFaceUp());
@@ -91,9 +105,11 @@ public class GameService {
                             card.setCardValue(cardDto.getCardValue());
                             card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
                             card.setCardVersion(cardDto.getCardVersion());
-                            // ...asigna otros campos si es necesario
                         }
-                        card.setCardCseqFk(cs); // Relación inversa
+
+                        card.setCardCseqFk(cs);
+                        card.setCardDeckFk(null);
+                        card.setCardBcolmnFk(null);
                         csCards.add(card);
                     }
                     cs.setCardList(csCards);
@@ -116,7 +132,7 @@ public class GameService {
                     col.setBcolmnIndex(colDto.getBcolmnIndex());
                     col.setBcolmnVersion(colDto.getBcolmnVersion());
                 }
-                col.setBcolmnGameFk(game); // Relación inversa
+                col.setBcolmnGameFk(game);
 
                 // --- Cards From BoardColumn ---
                 if (colDto.getCardList() != null) {
@@ -126,6 +142,12 @@ public class GameService {
                         Card card;
                         if (cardDto.getCardId() != null) {
                             card = em.find(Card.class, cardDto.getCardId());
+                            // Actualizar SIEMPRE los campos
+                            card.setCardFaceUp(cardDto.isCardFaceUp());
+                            card.setCardSuit(cardDto.getCardSuit());
+                            card.setCardValue(cardDto.getCardValue());
+                            card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
+                            card.setCardVersion(cardDto.getCardVersion());
                         } else {
                             card = new Card();
                             card.setCardFaceUp(cardDto.isCardFaceUp());
@@ -133,9 +155,11 @@ public class GameService {
                             card.setCardValue(cardDto.getCardValue());
                             card.setCardPositionInContainer(cardDto.getCardPositionInContainer());
                             card.setCardVersion(cardDto.getCardVersion());
-
                         }
+
                         card.setCardBcolmnFk(col);
+                        card.setCardDeckFk(null);
+                        card.setCardCseqFk(null);
                         colCards.add(card);
                     }
                     col.setCardList(colCards);
