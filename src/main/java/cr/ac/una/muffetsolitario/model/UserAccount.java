@@ -24,7 +24,9 @@ import java.util.List;
     @NamedQuery(name = "UserAccount.findByUserTotalGames", query = "SELECT u FROM UserAccount u WHERE u.userTotalGames = :userTotalGames"),
     @NamedQuery(name = "UserAccount.findByUserWonGames", query = "SELECT u FROM UserAccount u WHERE u.userWonGames = :userWonGames"),
     @NamedQuery(name = "UserAccount.findByUserTotalScore", query = "SELECT u FROM UserAccount u WHERE u.userTotalScore = :userTotalScore"),
-    @NamedQuery(name = "UserAccount.findByUserBestScore", query = "SELECT u FROM UserAccount u WHERE u.userBestScore = :userBestScore")})
+    @NamedQuery(name = "UserAccount.findByUserBestScore", query = "SELECT u FROM UserAccount u WHERE u.userBestScore = :userBestScore"),
+    @NamedQuery(name = "UserAccount.findByUserFavWord", query = "SELECT u FROM UserAccount u WHERE u.userFavWord = :userFavWord")})
+
 public class UserAccount implements Serializable {
 
     private static final long serialVersionUID = 1L;

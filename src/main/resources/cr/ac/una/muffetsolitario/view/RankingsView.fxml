@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane id="AnchorPane" fx:id="root" prefHeight="600.0" prefWidth="1000.0" stylesheets="@styles.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="cr.ac.una.muffetsolitario.controller.RankingsController">
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="600.0" prefWidth="1000.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.muffetsolitario.controller.RankingsController">
    <children>
       <ImageView fx:id="imgBackground" fitHeight="470.0" fitWidth="797.0" pickOnBounds="true">
          <image>
@@ -33,7 +32,7 @@
                     <columns>
                       <TableColumn fx:id="tbcUsername" prefWidth="75.0" text="USUARIO" />
                       <TableColumn fx:id="tbcUserPoints" prefWidth="75.0" text="PUNTOS" />
-                        <TableColumn fx:id="tbcUserPlayedGames" prefWidth="75.0" text="PARTIDAS JUGADAS" />
+                        <TableColumn fx:id="tbcUserPlayedGames" prefWidth="75.0" text="N. PARTIDAS" />
                         <TableColumn fx:id="tbcRanking" prefWidth="75.0" text="RANKING" />
                     </columns>
                      <columnResizePolicy>

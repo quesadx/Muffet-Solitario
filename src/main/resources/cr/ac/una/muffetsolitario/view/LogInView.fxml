@@ -84,6 +84,7 @@
                         <MFXButton fx:id="btnSignUp" onAction="#onActionBtnSignUp" prefWidth="250.0" text="CREAR USUARIO" />
                         <MFXButton fx:id="btnGuest" onAction="#onActionBtnGuest" prefWidth="250.0" text="MODO INVITADO" />
                         <MFXButton fx:id="btnAbout" onAction="#onActionBtnAbout" prefWidth="250.0" text="ACERCA DE" />
+                        <MFXButton onAction="#onActionForgotPassword" prefWidth="250.0" text="RESET CLAVE" />
                      </children>
                   </HBox>
                </children>

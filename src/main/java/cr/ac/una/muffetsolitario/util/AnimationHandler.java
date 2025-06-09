@@ -642,7 +642,7 @@ public class AnimationHandler {
      * Each child starts invisible, glitches in, and then becomes fully visible.
      * @param pane The parent container whose children will be animated.
      */
-    public void glitchyFadeInChildren(Pane pane) {
+    public void glitchyFadeInChildren(Pane pane, double... delays) {
         List<Node> children = new ArrayList<>(pane.getChildren());
         ParallelTransition glitchFadeIn = new ParallelTransition();
 
@@ -651,7 +651,7 @@ public class AnimationHandler {
             child.setOpacity(0.0);
 
             // Optionally, randomize the order for a more chaotic effect
-            int delay = i * 60 + random.nextInt(40);
+            int delay = (int) (i * 60 + (delays.length > i ? delays[i] : random.nextInt(40)));
 
             Timeline glitch = new Timeline(
                 new KeyFrame(Duration.ZERO, e -> {
@@ -856,5 +856,120 @@ public class AnimationHandler {
             if (onFinished != null) onFinished.run();
         });
         dealSequence.play();
+    }
+
+    /**
+     * Creates an epic screen shake effect that gradually reduces in intensity
+     * @param root The root AnchorPane to shake
+     * @param duration Total duration of the shake effect in milliseconds
+     * @param intensity Maximum shake intensity
+     */
+    public void playEpicScreenShake(AnchorPane root, double duration, double intensity) {
+        Timeline shakeTimeline = new Timeline();
+        int steps = (int)(duration / 30); // Shake every 30ms
+        
+        for (int i = 0; i < steps; i++) {
+            double progress = (double) i / steps;
+            double currentIntensity = intensity * (1.0 - progress); // Fade out intensity
+            
+            double shakeX = (random.nextBoolean() ? 1 : -1) * random.nextDouble() * currentIntensity;
+            double shakeY = (random.nextBoolean() ? 1 : -1) * random.nextDouble() * currentIntensity * 0.6;
+            
+            shakeTimeline.getKeyFrames().add(
+                new KeyFrame(Duration.millis(i * 30),
+                    new KeyValue(root.translateXProperty(), shakeX),
+                    new KeyValue(root.translateYProperty(), shakeY)
+                )
+            );
+        }
+        
+        // Return to center
+        shakeTimeline.getKeyFrames().add(
+            new KeyFrame(Duration.millis(duration),
+                new KeyValue(root.translateXProperty(), 0),
+                new KeyValue(root.translateYProperty(), 0)
+            )
+        );
+        
+        shakeTimeline.play();
+    }
+
+    /**
+     * Creates a dramatic flash effect with color tinting
+     * @param root The root AnchorPane
+     * @param flashColor The color of the flash
+     * @param duration Duration of the flash effect
+     */
+    public void playDramaticFlash(AnchorPane root, Color flashColor, double duration) {
+        Rectangle flashOverlay = new Rectangle(1280, 720, flashColor);
+        flashOverlay.setOpacity(0);
+        root.getChildren().add(flashOverlay);
+        
+        Timeline flashEffect = new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(flashOverlay.opacityProperty(), 0)
+            ),
+            new KeyFrame(Duration.millis(duration * 0.1),
+                new KeyValue(flashOverlay.opacityProperty(), 0.8)
+            ),
+            new KeyFrame(Duration.millis(duration * 0.3),
+                new KeyValue(flashOverlay.opacityProperty(), 0.4)
+            ),
+            new KeyFrame(Duration.millis(duration),
+                new KeyValue(flashOverlay.opacityProperty(), 0)
+            )
+        );
+        
+        flashEffect.setOnFinished(e -> root.getChildren().remove(flashOverlay));
+        flashEffect.play();
+    }
+
+    /**
+     * Creates an enhanced glitch effect for dramatic moments
+     * @param node The node to glitch
+     * @param intensity Intensity of the glitch (1.0 = normal, 2.0 = double intensity)
+     * @param duration Duration of the glitch effect
+     */
+    public void playEnhancedGlitchEffect(Node node, double intensity, double duration) {
+        Timeline glitchEffect = new Timeline();
+        int glitchSteps = (int)(duration / 40); // Glitch every 40ms
+        
+        // Store original values
+        double origX = node.getTranslateX();
+        double origY = node.getTranslateY();
+        double origScaleX = node.getScaleX();
+        double origScaleY = node.getScaleY();
+        double origRotate = node.getRotate();
+        
+        for (int i = 0; i < glitchSteps; i++) {
+            double glitchX = origX + (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 10 * intensity;
+            double glitchY = origY + (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 8 * intensity;
+            double glitchScaleX = origScaleX + (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 0.1 * intensity;
+            double glitchScaleY = origScaleY + (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 0.1 * intensity;
+            double glitchRotate = origRotate + (random.nextBoolean() ? 1 : -1) * random.nextDouble() * 5 * intensity;
+            
+            glitchEffect.getKeyFrames().add(
+                new KeyFrame(Duration.millis(i * 40),
+                    new KeyValue(node.translateXProperty(), glitchX),
+                    new KeyValue(node.translateYProperty(), glitchY),
+                    new KeyValue(node.scaleXProperty(), glitchScaleX),
+                    new KeyValue(node.scaleYProperty(), glitchScaleY),
+                    new KeyValue(node.rotateProperty(), glitchRotate)
+                )
+            );
+        }
+        
+        // Restore original values
+        glitchEffect.getKeyFrames().add(
+            new KeyFrame(Duration.millis(duration),
+                new KeyValue(node.translateXProperty(), origX),
+                new KeyValue(node.translateYProperty(), origY),
+                new KeyValue(node.scaleXProperty(), origScaleX),
+                new KeyValue(node.scaleYProperty(), origScaleY),
+                new KeyValue(node.rotateProperty(), origRotate)
+            )
+        );
+        
+        glitchEffect.play();
     }
 }

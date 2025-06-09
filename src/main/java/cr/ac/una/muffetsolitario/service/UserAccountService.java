@@ -205,4 +205,22 @@ public class UserAccountService {
             return new Respuesta(false, "Error obteniendo usuarios", "getAllUsers " + ex.getMessage());
         }
     }
+
+        public Respuesta getUserAccountByFavWord(String favWord) {
+        try {
+            Query qryUser = em.createNamedQuery("UserAccount.findByUserFavWord", UserAccount.class);
+            qryUser.setParameter("userFavWord", favWord);
+    
+            UserAccount userAccount = (UserAccount) qryUser.getSingleResult();
+            UserAccountDto userAccountDto = new UserAccountDto(userAccount);
+    
+            return new Respuesta(true, "Usuario encontrado", "getUserAccountByFavWord success", "UserAccount", userAccountDto);
+
+        } catch (NoResultException ex) {
+            return new Respuesta(false, "Usuario no encontrado", "getUserAccountByFavWord NoResult");
+        } catch (Exception ex) {
+            Logger.getLogger(UserAccountService.class.getName()).log(Level.SEVERE, "Error obteniendo usuario por palabra favorita [" + favWord + "]", ex);
+            return new Respuesta(false, "Error obteniendo el usuario", "getUserAccountByFavWord " + ex.getMessage());
+        }
+    }
 }
