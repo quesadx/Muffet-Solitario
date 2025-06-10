@@ -21,7 +21,7 @@
             <VBox alignment="CENTER">
                <children>
                   <Label fx:id="lblAboutUs" minHeight="-Infinity" styleClass="jfx-subtitle" text="SOBRE NOSOTROS" />
-                  <Label minHeight="-Infinity" text="MUFFET SOLITARIO ES UN JUEGO DESARROLLADO EN JAVAFX v23.0.1 UTILIZANDO JAVA21" textAlignment="CENTER" wrapText="true" />
+                  <Label minHeight="-Infinity" styleClass="jfx-description" text="MUFFET SOLITARIO ES UN JUEGO DESARROLLADO EN JAVAFX v23.0.1 UTILIZANDO JAVA21" textAlignment="CENTER" wrapText="true" />
                </children>
             </VBox>
             <VBox alignment="CENTER" spacing="2.0">
@@ -36,7 +36,7 @@
                                  </image>
                               </ImageView>
                               <Label minHeight="-Infinity" text="ALEX" wrapText="true" />
-                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El hijueputa que hizo la base de datos en 3,7 meses" textAlignment="CENTER" wrapText="true" />
+                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El mae que hizo la base de datos en 3,7 meses" textAlignment="CENTER" wrapText="true" />
                            </children>
                            <padding>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
@@ -50,7 +50,7 @@
                                  </image>
                               </ImageView>
                               <Label minHeight="-Infinity" text="KENDAL" wrapText="true" />
-                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El mae mas negro de Perez Zeledon que hizo dos clases de java con 900 lineas cada una" textAlignment="CENTER" wrapText="true" />
+                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El mae mas negro de Perez Zeledon que hizo dos clases de java con 2000 lineas cada una" textAlignment="CENTER" wrapText="true" />
                            </children>
                            <padding>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
@@ -64,7 +64,7 @@
                                  </image>
                               </ImageView>
                               <Label minHeight="-Infinity" text="MATTEO" wrapText="true" />
-                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El que hizo todo el proyecto" textAlignment="CENTER" wrapText="true" />
+                              <Label minHeight="-Infinity" styleClass="jfx-description" text="El que solo hizo el sobre nosotros y elimino el repo" textAlignment="CENTER" wrapText="true" />
                            </children>
                            <padding>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />

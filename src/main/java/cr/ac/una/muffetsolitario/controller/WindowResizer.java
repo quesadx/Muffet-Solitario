@@ -14,6 +14,8 @@ public class WindowResizer {
     private static double xOffset = 0, yOffset = 0;
     private static boolean resizing = false;
     private static Cursor currentCursor = Cursor.DEFAULT;
+    // Add these fields for correct resize reference
+    private static double startX = 0, startY = 0, startWidth = 0, startHeight = 0;
 
     public static void addResizeListeners(Node root) {
         root.setOnMouseMoved(event -> {
@@ -26,80 +28,77 @@ public class WindowResizer {
             if (cursor != Cursor.DEFAULT) {
                 resizing = true;
                 currentCursor = cursor;
-                xOffset = event.getSceneX();
-                yOffset = event.getSceneY();
+                xOffset = event.getScreenX();
+                yOffset = event.getScreenY();
+                startX = ((Stage) root.getScene().getWindow()).getX();
+                startY = ((Stage) root.getScene().getWindow()).getY();
+                startWidth = ((Stage) root.getScene().getWindow()).getWidth();
+                startHeight = ((Stage) root.getScene().getWindow()).getHeight();
             }
         });
         root.setOnMouseDragged(event -> {
             if (!resizing) return;
             Stage stage = (Stage) root.getScene().getWindow();
-            double dx = event.getSceneX() - xOffset;
-            double dy = event.getSceneY() - yOffset;
-            Bounds bounds = root.getBoundsInParent();
+            double dx = event.getScreenX() - xOffset;
+            double dy = event.getScreenY() - yOffset;
             double minWidth = 400, minHeight = 300;
             switch (currentCursor.toString()) {
                 case "NW_RESIZE":
-                    if (stage.getWidth() - dx > minWidth) {
-                        stage.setX(stage.getX() + dx);
-                        stage.setWidth(stage.getWidth() - dx);
+                    if (startWidth - dx > minWidth) {
+                        stage.setX(startX + dx);
+                        stage.setWidth(startWidth - dx);
                     }
-                    if (stage.getHeight() - dy > minHeight) {
-                        stage.setY(stage.getY() + dy);
-                        stage.setHeight(stage.getHeight() - dy);
+                    if (startHeight - dy > minHeight) {
+                        stage.setY(startY + dy);
+                        stage.setHeight(startHeight - dy);
                     }
                     break;
                 case "NE_RESIZE":
-                    if (stage.getWidth() + dx > minWidth) {
-                        stage.setWidth(stage.getWidth() + dx);
-                        xOffset = event.getSceneX();
+                    if (startWidth + dx > minWidth) {
+                        stage.setWidth(startWidth + dx);
                     }
-                    if (stage.getHeight() - dy > minHeight) {
-                        stage.setY(stage.getY() + dy);
-                        stage.setHeight(stage.getHeight() - dy);
+                    if (startHeight - dy > minHeight) {
+                        stage.setY(startY + dy);
+                        stage.setHeight(startHeight - dy);
                     }
                     break;
                 case "SW_RESIZE":
-                    if (stage.getWidth() - dx > minWidth) {
-                        stage.setX(stage.getX() + dx);
-                        stage.setWidth(stage.getWidth() - dx);
+                    if (startWidth - dx > minWidth) {
+                        stage.setX(startX + dx);
+                        stage.setWidth(startWidth - dx);
                     }
-                    if (stage.getHeight() + dy > minHeight) {
-                        stage.setHeight(stage.getHeight() + dy);
-                        yOffset = event.getSceneY();
+                    if (startHeight + dy > minHeight) {
+                        stage.setHeight(startHeight + dy);
                     }
                     break;
                 case "SE_RESIZE":
-                    if (stage.getWidth() + dx > minWidth) {
-                        stage.setWidth(stage.getWidth() + dx);
-                        xOffset = event.getSceneX();
+                    if (startWidth + dx > minWidth) {
+                        stage.setWidth(startWidth + dx);
                     }
-                    if (stage.getHeight() + dy > minHeight) {
-                        stage.setHeight(stage.getHeight() + dy);
-                        yOffset = event.getSceneY();
+                    if (startHeight + dy > minHeight) {
+                        stage.setHeight(startHeight + dy);
                     }
                     break;
                 case "E_RESIZE":
-                    if (stage.getWidth() + dx > minWidth) {
-                        stage.setWidth(stage.getWidth() + dx);
-                        xOffset = event.getSceneX();
+                    if (startWidth + dx > minWidth) {
+                        stage.setWidth(startWidth + dx);
                     }
                     break;
                 case "W_RESIZE":
-                    if (stage.getWidth() - dx > minWidth) {
-                        stage.setX(stage.getX() + dx);
-                        stage.setWidth(stage.getWidth() - dx);
+                    if (startWidth - dx > minWidth) {
+                        stage.setX(startX + dx);
+                        stage.setWidth(startWidth - dx);
                     }
                     break;
                 case "N_RESIZE":
-                    if (stage.getHeight() - dy > minHeight) {
-                        stage.setY(stage.getY() + dy);
-                        stage.setHeight(stage.getHeight() - dy);
+                    if (startHeight - dy > minHeight) {
+                        stage.setY(startY + dy);
+                        stage.setHeight(startHeight - dy);
                     }
                     break;
                 case "S_RESIZE":
-                    if (stage.getHeight() + dy > minHeight) {
-                        stage.setHeight(stage.getHeight() + dy);
-                        yOffset = event.getSceneY();
+                    if (startHeight + dy > minHeight) {
+                        stage.setHeight(startHeight + dy);
                     }
                     break;
             }
