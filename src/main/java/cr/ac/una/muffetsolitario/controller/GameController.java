@@ -46,7 +46,7 @@ public class GameController extends Controller implements Initializable {
     // Drag & drop variables
     private List<CardContainer> draggedSequence = null;
     private double[] dragOffsetsX, dragOffsetsY;
-    private int fromColIdx = -1;
+    private int fromColIdx = -1, fromCardIdx = -1;
     private static final double CARD_OFFSET = 25;
     
     // Fixed card dimensions for consistent sizing across all assets
@@ -118,6 +118,7 @@ public class GameController extends Controller implements Initializable {
             try {
                 soundUtils.playAttackSound();
                 gameLogic.dealFromDeck();
+                updateGameInfo();
                 List<BoardColumnDto> columns = currentGameDto.getBoardColumnList();
                 for (int i = 0; i < columns.size(); i++) {
                     BoardColumnDto column = columns.get(i);
@@ -461,148 +462,160 @@ public class GameController extends Controller implements Initializable {
             return;
         }
 
-        // Adjust columns to match available board columns
         int columnsToRender = Math.min(boardColumns.size(), columns.size());
-
-        // Clear all columns first to prevent duplicate children
         columns.forEach(pane -> pane.getChildren().clear());
 
         for (int i = 0; i < columnsToRender; i++) {
             final int columnIdx = i;
             Pane pane = columns.get(i);
-            final BoardColumnDto boardColumn = boardColumns.get(i); // Make it final for closure
+            BoardColumnDto boardColumn = boardColumns.get(i);
             List<CardContainer> cards = boardColumn.getCardList();
 
-            // Skip if no cards in this column
             if (cards == null || cards.isEmpty()) {
                 continue;
             }
 
-            // Create new card containers for each card
             for (int j = 0; j < cards.size(); j++) {
                 CardContainer cardContainer = cards.get(j);
 
-                // Ensure card is not already in a parent
+                // Remove previous handlers
+                cardContainer.setOnMousePressed(null);
+                cardContainer.setOnMouseDragged(null);
+                cardContainer.setOnMouseReleased(null);
+
+                // Remove from previous parent if needed
                 if (cardContainer.getParent() != null) {
                     ((Pane) cardContainer.getParent()).getChildren().remove(cardContainer);
                 }
+
                 updateCardImage(cardContainer);
-                cardContainer.applyFixedCardSizing();
+                cardContainer.setFitWidth(120);
+                cardContainer.setFitHeight(160);
                 cardContainer.setLayoutX(0);
+                cardContainer.setPreserveRatio(true);
                 cardContainer.setLayoutY(j * CARD_OFFSET);
 
-                cardContainer.setOnMousePressed(event -> {
-                    if (!cardContainer.getCardDto().isCardFaceUp())
-                        return;
+                if (cardContainer.getCardDto().isCardFaceUp()) {
+                    // Construir la secuencia potencial desde esta carta hacia abajo
+                    List<CardContainer> cardsInColumn = boardColumn.getCardList();
+                    List<CardContainer> potentialSequence = new ArrayList<>();
+                    for (int k = j; k < cardsInColumn.size(); k++) {
+                        potentialSequence.add(cardsInColumn.get(k));
+                    }
 
-                    // Get the current state of the column directly from the game data
-                    List<CardContainer> cardsInColumn = currentGameDto.getBoardColumnList().get(columnIdx).getCardList();
-                    int idx = cardsInColumn.indexOf(cardContainer);
-                    
-                    // Debug: Add safety check
-                    if (idx == -1) {
-                        System.err.println("Warning: Card not found in column " + columnIdx + ". Searching by card data...");
-                        // Alternative search by card data if direct reference fails
-                        for (int k = 0; k < cardsInColumn.size(); k++) {
-                            if (cardsInColumn.get(k).getCardDto().getCardValue() == cardContainer.getCardDto().getCardValue() &&
-                                cardsInColumn.get(k).getCardDto().getCardSuit().equals(cardContainer.getCardDto().getCardSuit())) {
-                                idx = k;
-                                break;
+                    if (gameRuleValidator.isValidSequence(potentialSequence)) {
+                        cardContainer.setDisable(false);
+                        cardContainer.setOnMousePressed(event -> {
+
+                            List<BoardColumnDto> boardColumnsActual = currentGameDto.getBoardColumnList();
+                            BoardColumnDto boardColumnActual = boardColumnsActual.get(columnIdx);
+                            List<CardContainer> cardsInColumnActual = boardColumnActual.getCardList();
+
+                            int idx = -1;
+                            for (int k = 0; k < cardsInColumnActual.size(); k++) {
+                                if (cardsInColumnActual.get(k) == cardContainer) {
+                                    idx = k;
+                                    break;
+                                }
                             }
-                        }
-                        if (idx == -1) {
-                            System.err.println("Error: Could not find card in column " + columnIdx);
-                            return;
-                        }
-                    }
-
-                    // Check if we can pick up this sequence (Spider Solitaire rules)
-                    List<CardContainer> potentialSequence = cardsInColumn.subList(idx, cardsInColumn.size());
-                    if (!isValidSequenceToPickUp(potentialSequence)) {
-                        showAlert("Secuencia inválida", "Solo puedes mover secuencias descendentes del mismo palo.");
-                        return;
-                    }
-
-                    draggedSequence = new ArrayList<>(potentialSequence);
-                    dragOffsetsX = new double[draggedSequence.size()];
-                    dragOffsetsY = new double[draggedSequence.size()];
-                    Point2D mouseScene = new Point2D(event.getSceneX(), event.getSceneY());
-                    for (int k = 0; k < draggedSequence.size(); k++) {
-                        CardContainer c = draggedSequence.get(k);
-                        Point2D cardScene = c.localToScene(0, 0);
-                        dragOffsetsX[k] = mouseScene.getX() - cardScene.getX();
-                        dragOffsetsY[k] = mouseScene.getY() - cardScene.getY();
-                    }
-                    moveSequenceToRoot(draggedSequence);
-                    fromColIdx = columnIdx;
-                });
-
-                cardContainer.setOnMouseDragged(event -> {
-                    if (draggedSequence != null) {
-                        double mouseX = event.getSceneX(), mouseY = event.getSceneY();
-
-                        // Simple column highlighting
-                        int potentialTargetCol = getTargetColumnIndex(mouseX, mouseY);
-                        columns.forEach(col -> col.setStyle(""));
-                        if (potentialTargetCol != -1) {
-                            columns.get(potentialTargetCol).setStyle(
-                                    "-fx-border-color: #ff0000; -fx-border-width: 2; -fx-border-style: dashed;");
-                        }
-
-                        // Animate dragged cards
-                        for (int k = 0; k < draggedSequence.size(); k++) {
-                            CardContainer c = draggedSequence.get(k);
-
-                            // Simple wiggle effect
-                            double wiggleAmount = Math.min((k + 1) * 2.0, 8.0); // Cap maximum wiggle
-                            double wiggleX = Math.sin(System.currentTimeMillis() * 0.01) * wiggleAmount;
-                            double wiggleY = Math.cos(System.currentTimeMillis() * 0.008) * (wiggleAmount * 0.5);
-
-                            // Update card position with reduced vertical spacing
-                            double reducedOffset = CARD_OFFSET * 0.6; // Reduce spacing by 40%
-                            c.setLayoutX(mouseX - dragOffsetsX[k] + wiggleX);
-                            c.setLayoutY(mouseY - dragOffsetsY[k] + k * reducedOffset + wiggleY);
-
-                            // Gentle rotation
-                            double rotation = Math.sin(System.currentTimeMillis() * 0.005) * wiggleAmount;
-                            c.setRotate(rotation);
-
-                            c.toFront();
-                        }
-                    }
-                });
-
-                cardContainer.setOnMouseReleased(mouseEvent -> {
-                    if (draggedSequence != null) {
-                        // Clear all column highlighting
-                        columns.forEach(col -> col.setStyle(""));
-
-                        // Reset rotation for all cards in sequence
-                        for (CardContainer card : draggedSequence) {
-                            card.setRotate(0);
-                        }
-
-                        int targetColIdx = getTargetColumnIndex(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                        boolean moved = false;
-                        if (targetColIdx != -1) {
-                            try {
-                                handleMoveCards(fromColIdx, targetColIdx, draggedSequence.get(0));
-                                moved = true;
-                                // Add glitch effect to target column on successful move
-                                addColumnGlitchEffect(targetColIdx);
-                            } catch (Exception e) {
-                                showAlert("Movimiento inválido", e.getMessage());
+                            if (idx == -1) {
+                                for (int k = 0; k < cardsInColumnActual.size(); k++) {
+                                    if (cardsInColumnActual.get(k).getCardDto().getCardId()
+                                            .equals(cardContainer.getCardDto().getCardId())) {
+                                        idx = k;
+                                        break;
+                                    }
+                                }
                             }
-                        }
-                        Pane targetPane = columns.get((moved && targetColIdx != -1) ? targetColIdx : fromColIdx);
-                        moveSequenceToColumn(draggedSequence, targetPane);
-                        draggedSequence = null;
-                        dragOffsetsX = null;
-                        dragOffsetsY = null;
-                        fromColIdx = -1;
-                        updateBoard();
+                            if (idx == -1) {
+                                return;
+                            }
+
+                            // Crear la secuencia real desde la carta seleccionada hacia abajo
+                            List<CardContainer> sequenceToDrag = new ArrayList<>();
+                            for (int k = idx; k < cardsInColumnActual.size(); k++) {
+                                sequenceToDrag.add(cardsInColumnActual.get(k));
+                            }
+
+                            if (!gameRuleValidator.isValidSequence(sequenceToDrag)) {
+                                showAlert("Secuencia inválida", "Solo puedes mover secuencias descendentes del mismo palo.");
+                                return;
+                            }
+                            draggedSequence = new ArrayList<>(sequenceToDrag);
+                            dragOffsetsX = new double[draggedSequence.size()];
+                            dragOffsetsY = new double[draggedSequence.size()];
+                            Point2D mouseScene = new Point2D(event.getSceneX(), event.getSceneY());
+                            for (int k = 0; k < draggedSequence.size(); k++) {
+                                CardContainer c = draggedSequence.get(k);
+                                Point2D cardScene = c.localToScene(0, 0);
+                                dragOffsetsX[k] = mouseScene.getX() - cardScene.getX();
+                                dragOffsetsY[k] = mouseScene.getY() - cardScene.getY();
+                            }
+                            moveSequenceToRoot(draggedSequence);
+                            fromColIdx = columnIdx;
+                            fromCardIdx = idx;
+                        });
+
+                        cardContainer.setOnMouseDragged(event -> {
+                            if (draggedSequence != null) {
+                                double mouseX = event.getSceneX(), mouseY = event.getSceneY();
+
+                                int potentialTargetCol = getTargetColumnIndex(mouseX, mouseY);
+                                columns.forEach(col -> col.setStyle(""));
+                                if (potentialTargetCol != -1) {
+                                    columns.get(potentialTargetCol).setStyle(
+                                            "-fx-border-color: #ff0000; -fx-border-width: 2; -fx-border-style: dashed;");
+                                }
+
+                                for (int k = 0; k < draggedSequence.size(); k++) {
+                                    CardContainer c = draggedSequence.get(k);
+                                    double wiggleAmount = Math.min((k + 1) * 2.0, 8.0);
+                                    double wiggleX = Math.sin(System.currentTimeMillis() * 0.01) * wiggleAmount;
+                                    double wiggleY = Math.cos(System.currentTimeMillis() * 0.008) * (wiggleAmount * 0.5);
+                                    double reducedOffset = CARD_OFFSET * 0.6;
+                                    c.setLayoutX(mouseX - dragOffsetsX[k] + wiggleX);
+                                    c.setLayoutY(mouseY - dragOffsetsY[k] + k * reducedOffset + wiggleY);
+                                    double rotation = Math.sin(System.currentTimeMillis() * 0.005) * wiggleAmount;
+                                    c.setRotate(rotation);
+                                    c.toFront();
+                                }
+                            }
+                        });
+
+                        cardContainer.setOnMouseReleased(mouseEvent -> {
+                            if (draggedSequence != null) {
+                                columns.forEach(col -> col.setStyle(""));
+                                for (CardContainer card : draggedSequence) {
+                                    card.setRotate(0);
+                                }
+
+                                int targetColIdx = getTargetColumnIndex(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                                boolean moved = false;
+                                if (targetColIdx != -1) {
+                                    try {
+                                        handleMoveCards(fromColIdx, targetColIdx, draggedSequence.get(0));
+                                        moved = true;
+                                        addColumnGlitchEffect(targetColIdx);
+                                    } catch (Exception e) {
+                                        showAlert("Movimiento inválido", e.getMessage());
+                                    }
+                                }
+                                Pane targetPane = columns.get((moved && targetColIdx != -1) ? targetColIdx : fromColIdx);
+                                moveSequenceToColumn(draggedSequence, targetPane);
+                                draggedSequence = null;
+                                dragOffsetsX = null;
+                                dragOffsetsY = null;
+                                fromColIdx = -1;
+                                fromCardIdx = -1;
+                                updateBoard();
+                            }
+                        });
+                    } else {
+                        cardContainer.setDisable(true);
                     }
-                });
+                } else {
+                    cardContainer.setDisable(true);
+                }
 
                 pane.getChildren().add(cardContainer);
             }
