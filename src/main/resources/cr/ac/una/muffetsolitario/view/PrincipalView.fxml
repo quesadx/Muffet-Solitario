@@ -17,11 +17,11 @@
    <top>
       <HBox alignment="CENTER" minHeight="-Infinity" BorderPane.alignment="CENTER">
          <children>
-            <HBox fx:id="hboxWindowBar" alignment="CENTER_RIGHT" minHeight="-Infinity" minWidth="-Infinity" styleClass="jfx-window-border" HBox.hgrow="ALWAYS">
+            <HBox fx:id="hboxWindowBar" alignment="CENTER_RIGHT" minHeight="-Infinity" styleClass="jfx-window-border" HBox.hgrow="ALWAYS">
                <children>
-                  <MFXButton fx:id="btnMinimize" onAction="#onActionMinimize" text="_" />
-                  <MFXButton fx:id="btnMaximize" onAction="#onActionMaximize" text="[]" />
-                  <MFXButton fx:id="btnClose" onAction="#onActionBtnClose" text="x" />
+                  <MFXButton fx:id="btnMinimize" minHeight="-Infinity" onAction="#onActionMinimize" text="_" />
+                  <MFXButton fx:id="btnMaximize" minHeight="-Infinity" onAction="#onActionMaximize" text="[]" />
+                  <MFXButton fx:id="btnClose" minHeight="-Infinity" onAction="#onActionBtnClose" text="x" />
                </children>
             </HBox>
          </children>

@@ -32,7 +32,7 @@
                                     <MFXButton onAction="#onActionBtnHint" prefWidth="125.0" text="PISTA" />
                                     <MFXButton fx:id="btnUndo" onAction="#onActionBtnUndo" prefWidth="125.0" text="UNDO" />
                                     <MFXButton onAction="#onActionStartBattle" prefWidth="125.0" text="B" />
-                                    <MFXButton onAction="#onActionWin" prefWidth="125.0" text="W" />
+                                    <MFXButton disable="true" onAction="#onActionWin" prefWidth="125.0" text="W" visible="false" />
                                  </children>
                                  <padding>
                                     <Insets bottom="2.0" top="2.0" />

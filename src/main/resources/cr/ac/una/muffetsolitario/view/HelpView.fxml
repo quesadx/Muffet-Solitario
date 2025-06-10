@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="600.0" prefWidth="1000.0" minHeight="400.0" minWidth="600.0" maxHeight="800.0" maxWidth="1200.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.muffetsolitario.controller.HelpController">
+   <children>
+      <ImageView fx:id="imgBackground" fitHeight="600.0" fitWidth="1000.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../resources/assets/gifStars.gif" />
+         </image>
+      </ImageView>
+      <VBox alignment="CENTER" fillWidth="false" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" prefWidth="900.0" maxWidth="900.0" minWidth="600.0">
+         <children>
+            <Label styleClass="jfx-title" text="AYUDA" />
+            <HBox alignment="CENTER" spacing="2.0">
+               <children>
+                  <VBox alignment="CENTER" styleClass="jfx-container">
+                     <children>
+                        <Label prefWidth="500.0" text="Spider Solitario es un juego de cartas para un solo jugador donde el objetivo es formar ocho secuencias completas en orden descendente (de Rey a As) del mismo palo. Cada secuencia completa se elimina del tablero, y el juego termina cuando todas han sido retiradas." textAlignment="CENTER" wrapText="true" />
+                        <ImageView fitHeight="125.0" fitWidth="222.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../resources/assets/solitario.png" />
+                           </image>
+                        </ImageView>
+                        <Label prefWidth="500.0" text="Si completas una secuencia te encontraras con Muffet, donde tendras que esquivar al estilo Undertale para ganar puntos extra!" textAlignment="CENTER" wrapText="true" />
+                        <ImageView fitHeight="129.0" fitWidth="229.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../resources/assets/battle.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </VBox>
+                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="jfx-container">
+                     <children>
+                        <Label prefWidth="500.0" text="Hay tres niveles de dificultad: en fácil se juega con un solo palo, en medio con dos palos, y en difícil con los cuatro. Cuantos más palos, mayor el reto para ordenar y eliminar las cartas." textAlignment="CENTER" wrapText="true" />
+                        <ImageView fitHeight="163.0" fitWidth="329.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../resources/assets/dificultades.png" />
+                           </image>
+                        </ImageView>
+                        <MFXButton onAction="#onActionBtnExit" prefWidth="250.0" text="SALIR" />
+                     </children>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

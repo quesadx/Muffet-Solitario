@@ -959,4 +959,10 @@ public class LogInController extends Controller implements Initializable {
         double labelWidth = lblPlay.getBoundsInParent().getWidth();
         lblPlay.setLayoutX((paneWidth - labelWidth) / 2);
     }
+
+    @FXML
+    void onActionBtnHelp(ActionEvent event) {
+        // Show help dialog or view
+        FlowController.getInstance().goView("HelpView");
+    }
 }

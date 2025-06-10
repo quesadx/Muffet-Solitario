@@ -35,6 +35,8 @@ public class PasswordResetController extends Controller implements Initializable
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        imgBackground.fitHeightProperty().bind(root.heightProperty());
+        imgBackground.fitWidthProperty().bind(root.widthProperty());
         hideAllAlerts();
     }
 
