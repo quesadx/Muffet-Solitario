@@ -160,6 +160,7 @@ public class PreGameController extends Controller implements Initializable {
 
     @FXML
     private void onActionBtnStartGame(ActionEvent event) {
+        FlowController.getInstance().limpiarLoader("GameView");
         startGameLoading();
     }
 

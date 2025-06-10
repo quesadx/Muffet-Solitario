@@ -368,7 +368,6 @@ public class GameController extends Controller implements Initializable {
 
     private void updateCardImage(CardContainer cardContainer) {
         CardDto cardDto = cardContainer.getCardDto();
-        // Obtener el usuario logueado desde el contexto
         UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         int userDesign = 1; // Valor por defecto
         if (userAccountDto != null) {
@@ -386,13 +385,28 @@ public class GameController extends Controller implements Initializable {
                     + versionFolder + "/" + suitFolder + "/"
                     + cardDto.getCardSuit() + "_" + cardDto.getCardValue() + ".png";
         } else {
-            imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
-                    + versionFolder + "/Card_Back1.png";
+            // Check for custom card back image first
+            java.nio.file.Path customPath = java.nio.file.Paths.get(System.getProperty("user.dir"),
+                "src/main/resources/cr/ac/una/muffetsolitario/resources/assets/CardStyles/v3/Card_Back1.png");
+            if (java.nio.file.Files.exists(customPath)) {
+                cardContainer.setImagePath(customPath.toUri().toString());
+                cardContainer.setImage(new Image(customPath.toUri().toString()));
+                cardContainer.setFitWidth(CARD_WIDTH);
+                cardContainer.setFitHeight(CARD_HEIGHT);
+                cardContainer.setPreserveRatio(true);
+                return;
+            } else {
+                imagePath = "/cr/ac/una/muffetsolitario/resources/assets/CardStyles/"
+                        + versionFolder + "/Card_Back1.png";
+            }
         }
         try {
             URL resource = getClass().getResource(imagePath);
             cardContainer.setImagePath(resource != null ? resource.toExternalForm() : "");
             cardContainer.setImage(new Image(resource != null ? resource.toExternalForm() : ""));
+            cardContainer.setFitWidth(CARD_WIDTH);
+            cardContainer.setFitHeight(CARD_HEIGHT);
+            cardContainer.setPreserveRatio(true);
         } catch (Exception e) {
             System.err.println("Error cargando imagen de carta: " + imagePath);
         }
@@ -853,9 +867,9 @@ public class GameController extends Controller implements Initializable {
                 System.out.println(respuesta.getMensaje());
             }
         }
-        FlowController.getInstance().limpiarLoader("PreGameController");
+        FlowController.getInstance().limpiarLoader("PreGameView");
         FlowController.getInstance().goView("LogInView");
-        FlowController.getInstance().limpiarLoader("GameController");
+        //FlowController.getInstance().limpiarLoader("GameView");
     }
 
     /**
