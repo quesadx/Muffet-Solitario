@@ -218,6 +218,14 @@ public class PrincipalController extends Controller implements Initializable {
 
     @FXML
     private void onActionBtnClose(ActionEvent event) {
+        // Delete custom card back image if it exists
+        java.nio.file.Path customPath = java.nio.file.Paths.get(System.getProperty("user.dir"),
+            "src/main/resources/cr/ac/una/muffetsolitario/resources/assets/CardStyles/v3/Card_Back1.png");
+        try {
+            java.nio.file.Files.deleteIfExists(customPath);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         ((Stage) root.getScene().getWindow()).close();
     }
     

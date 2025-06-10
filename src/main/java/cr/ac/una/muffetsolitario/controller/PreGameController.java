@@ -243,4 +243,9 @@ public class PreGameController extends Controller implements Initializable {
                 }));
         glitchTimeline.play();
     }
+
+    @FXML
+    void onActionExit(ActionEvent event) {
+        FlowController.getInstance().goView("LogInView");
+    }
 }

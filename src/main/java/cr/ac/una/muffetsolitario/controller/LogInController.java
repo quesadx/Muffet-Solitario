@@ -677,6 +677,14 @@ public class LogInController extends Controller implements Initializable {
     isLoggedIn = false;
     if (muffetJumpscareTimeline != null) muffetJumpscareTimeline.stop();
 
+        java.nio.file.Path customPath = java.nio.file.Paths.get(System.getProperty("user.dir"),
+            "src/main/resources/cr/ac/una/muffetsolitario/resources/assets/CardStyles/v3/Card_Back1.png");
+        try {
+            java.nio.file.Files.deleteIfExists(customPath);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
     FlowController.getInstance().limpiarLoader("LogInView");
     FlowController.getInstance().goView("LogInView");
 
