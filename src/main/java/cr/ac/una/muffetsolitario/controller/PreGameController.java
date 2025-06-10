@@ -249,4 +249,9 @@ public class PreGameController extends Controller implements Initializable {
     void onActionExit(ActionEvent event) {
         FlowController.getInstance().goView("LogInView");
     }
+
+    @FXML
+    void onActionBtnEliminarPartida(ActionEvent event) {
+    }
+
 }
