@@ -99,7 +99,7 @@ public class GameController extends Controller implements Initializable {
     @FXML
     private MFXButton btnUndo;
     @FXML
-    private VBox vboxAlert, vboxBattle;
+    private VBox vboxAlert, vboxBattle, vboxGameFinished;
     @FXML
     private Label lblAlertMessage, lblLifesRemaining;
     @FXML private ImageView imgSans, imgBattleHeart;
@@ -668,9 +668,9 @@ public class GameController extends Controller implements Initializable {
     private void showAlert(String titulo, String mensaje) {
         // Use Platform.runLater to avoid issues during animation processing
         javafx.application.Platform.runLater(() -> {
-            // Set message and make vbox visible
             lblAlertMessage.setText(mensaje);
             vboxAlert.setVisible(true);
+            vboxAlert.toFront(); // Ensure alert is always on top
             vboxAlert.setOpacity(0);
             vboxAlert.setScaleY(0.7);
 
@@ -1655,5 +1655,30 @@ public class GameController extends Controller implements Initializable {
             })
         );
         completeCallback.play();
+    }
+
+    private void showGameFinishedBox() {
+        javafx.application.Platform.runLater(() -> {
+            vboxGameFinished.setVisible(true);
+            vboxGameFinished.toFront();
+            vboxGameFinished.setOpacity(0);
+            vboxGameFinished.setScaleY(0.7);
+            Timeline popInTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                    new KeyValue(vboxGameFinished.opacityProperty(), 0),
+                    new KeyValue(vboxGameFinished.scaleYProperty(), 0.7)),
+                new KeyFrame(Duration.millis(200),
+                    new KeyValue(vboxGameFinished.opacityProperty(), 1),
+                    new KeyValue(vboxGameFinished.scaleYProperty(), 1.1)),
+                new KeyFrame(Duration.millis(300),
+                    new KeyValue(vboxGameFinished.scaleYProperty(), 1.0))
+            );
+            popInTimeline.play();
+        });
+    }
+
+    // Call this after game ends (win or lose)
+    private void handleGameEnd() {
+        showGameFinishedBox();
     }
 }

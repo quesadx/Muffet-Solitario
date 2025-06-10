@@ -116,9 +116,9 @@ public class LogInController extends Controller implements Initializable {
         imgBackground.fitHeightProperty().bind(root.heightProperty());
         imgBackground.fitWidthProperty().bind(root.widthProperty());
 
-        imgHeart0.setVisible(false);
-        imgHeart1.setVisible(false);
-        imgHeart2.setVisible(false);
+        //imgHeart0.setVisible(false);
+        //imgHeart1.setVisible(false);
+        //imgHeart2.setVisible(false);
         imgSlash.setVisible(false);
 
         btnAbout.setVisible(false);
@@ -363,9 +363,9 @@ public class LogInController extends Controller implements Initializable {
                 // Instead of animateLoginEntrance, use the new glitchyFadeIn for children
                 animationHandler.glitchyFadeInChildren(vboxLoginDisplay);
 
-                imgHeart0.setVisible(true);
-                imgHeart1.setVisible(true);
-                imgHeart2.setVisible(true);
+                //imgHeart0.setVisible(true);
+                //imgHeart1.setVisible(true);
+                //imgHeart2.setVisible(true);
 
                 btnAbout.setVisible(true);
                 btnAbout.setManaged(true);
@@ -374,15 +374,13 @@ public class LogInController extends Controller implements Initializable {
                 btnSignUp.setVisible(true);
                 btnSignUp.setManaged(true);
 
-                Pane heartPane = (Pane) imgHeart0.getParent();
-                animationHandler.startUndertaleHeartBackground(
-                    Arrays.asList(imgHeart0, imgHeart1, imgHeart2),
-                    heartPane
-                );
+                // --- DISABLE heart background/cinematic animation ---
+                // Pane heartPane = (Pane) imgHeart0.getParent();
+                // animationHandler.startUndertaleHeartBackground(
+                //     Arrays.asList(imgHeart0, imgHeart1, imgHeart2),
+                //     heartPane
+                // );
 
-                // Start Undertale-inspired cinematic with hearts
-                playUndertaleHeartsCinematic(Arrays.asList(imgHeart0, imgHeart1, imgHeart2), heartPane);
-                
                 // Start background music 1.5 seconds after slash
                 PauseTransition musicDelay = new PauseTransition(Duration.millis(1500));
                 musicDelay.setOnFinished(musicEvent -> soundUtils.playBGM());
@@ -392,341 +390,22 @@ public class LogInController extends Controller implements Initializable {
         }, parentPane);
     }
 
+    // --- DISABLE heart cinematic and background animation methods ---
     private void playUndertaleHeartsCinematic(List<ImageView> hearts, Pane heartPane) {
-        // Stop any existing heart animations
-        animationHandler.stopUndertaleHeartBackground();
-        
-        // EPIC UNDERTALE-INSPIRED CINEMATIC SEQUENCE
-        SequentialTransition epicCinematic = new SequentialTransition();
-        
-        // === PHASE 1: HEART FORMATION (2 seconds) ===
-        ParallelTransition formationPhase = createHeartFormationPhase(hearts);
-        epicCinematic.getChildren().add(formationPhase);
-        
-        // === PHASE 2: ATTACK SEQUENCE 1 - BULLET HELL (3 seconds) ===
-        ParallelTransition bulletHellPhase = createBulletHellPhase(hearts, heartPane);
-        epicCinematic.getChildren().add(bulletHellPhase);
-        
-        // === PHASE 3: MUFFET JUMPSCARE + SLASH ATTACK (2.5 seconds) ===
-        ParallelTransition muffetAttackPhase = createMuffetAttackPhase(hearts, heartPane);
-        epicCinematic.getChildren().add(muffetAttackPhase);
-        
-        // === PHASE 4: FINAL PATTERN DANCE (3 seconds) ===
-        ParallelTransition finalPhase = createFinalDancePhase(hearts, heartPane);
-        epicCinematic.getChildren().add(finalPhase);
-        
-        // === FINALE: HEARTS SETTLE INTO PEACEFUL MOVEMENT ===
-        epicCinematic.setOnFinished(e -> {
-            // Reset hearts to normal state and start gentle background movement
-            for (ImageView heart : hearts) {
-                heart.setScaleX(1.0);
-                heart.setScaleY(1.0);
-                heart.setRotate(0);
-                heart.setEffect(null);
-            }
-            
-            // Start the normal Undertale heart background movement
-            animationHandler.startUndertaleHeartBackground(hearts, heartPane);
-        });
-        
-        epicCinematic.play();
+        // Disabled: do nothing
     }
-    
+
     private ParallelTransition createHeartFormationPhase(List<ImageView> hearts) {
-        ParallelTransition formation = new ParallelTransition();
-        
-        // Hearts start scattered and move into triangle formation
-        for (int i = 0; i < hearts.size(); i++) {
-            ImageView heart = hearts.get(i);
-            
-            // Set random starting positions (off center)
-            double startX = 200 + Math.random() * 800;
-            double startY = 100 + Math.random() * 400;
-            heart.setLayoutX(startX);
-            heart.setLayoutY(startY);
-            heart.setOpacity(0.3);
-            heart.setScaleX(0.5);
-            heart.setScaleY(0.5);
-            
-            // Target positions (triangle formation)
-            double targetX = 640 + (i - 1) * 80; // Center heart at 640, others spread
-            double targetY = 350 + (i == 0 ? -60 : 40); // Top heart higher
-            
-            // Create formation animation with dramatic easing
-            Timeline heartFormation = new Timeline(
-                new KeyFrame(Duration.ZERO,
-                    new KeyValue(heart.layoutXProperty(), startX),
-                    new KeyValue(heart.layoutYProperty(), startY),
-                    new KeyValue(heart.opacityProperty(), 0.3),
-                    new KeyValue(heart.scaleXProperty(), 0.5),
-                    new KeyValue(heart.scaleYProperty(), 0.5)
-                ),
-                new KeyFrame(Duration.millis(1500),
-                    new KeyValue(heart.layoutXProperty(), targetX, Interpolator.EASE_OUT),
-                    new KeyValue(heart.layoutYProperty(), targetY, Interpolator.EASE_OUT),
-                    new KeyValue(heart.opacityProperty(), 1.0),
-                    new KeyValue(heart.scaleXProperty(), 1.2),
-                    new KeyValue(heart.scaleYProperty(), 1.2)
-                ),
-                new KeyFrame(Duration.millis(2000),
-                    new KeyValue(heart.scaleXProperty(), 1.0),
-                    new KeyValue(heart.scaleYProperty(), 1.0)
-                )
-            );
-            
-            formation.getChildren().add(heartFormation);
-        }
-        
-        // Add screen flash effect at formation completion
-        Timeline formationFlash = new Timeline(
-            new KeyFrame(Duration.millis(1500), e -> {
-                animationHandler.playLightningEffect(root);
-                soundUtils.playAttackSound();
-            })
-        );
-        formation.getChildren().add(formationFlash);
-        
-        return formation;
+        return new ParallelTransition(); // Disabled
     }
-    
     private ParallelTransition createBulletHellPhase(List<ImageView> hearts, Pane heartPane) {
-        ParallelTransition bulletHell = new ParallelTransition();
-        
-        // Create bullet-like projectiles (using small rectangles)
-        List<Rectangle> bullets = new ArrayList<>();
-        for (int i = 0; i < 12; i++) {
-            Rectangle bullet = new Rectangle(8, 8, Color.LIGHTCYAN);
-            bullet.setLayoutX(-50); // Start off-screen
-            bullet.setLayoutY(100 + i * 50);
-            bullet.setVisible(true);
-            // Add glowing effect to bullets
-            javafx.scene.effect.Glow bulletGlow = new javafx.scene.effect.Glow(0.8);
-            bullet.setEffect(bulletGlow);
-            
-            root.getChildren().add(bullet);
-            bullets.add(bullet);
-            
-            // Animate bullets moving across screen
-            Timeline bulletMove = new Timeline(
-                new KeyFrame(Duration.ZERO,
-                    new KeyValue(bullet.layoutXProperty(), -50)
-                ),
-                new KeyFrame(Duration.millis(2000 + i * 100),
-                    new KeyValue(bullet.layoutXProperty(), 1330, Interpolator.LINEAR)
-                )
-            );
-            bulletMove.setOnFinished(e -> root.getChildren().remove(bullet));
-            bulletHell.getChildren().add(bulletMove);
-        }
-        
-        // Hearts dodge the bullets with precise timing
-        for (int i = 0; i < hearts.size(); i++) {
-            ImageView heart = hearts.get(i);
-            Timeline dodgeSequence = new Timeline();
-            
-            // Dodge pattern: move up, down, spiral
-            dodgeSequence.getKeyFrames().addAll(
-                // Initial dodge up
-                new KeyFrame(Duration.millis(200),
-                    new KeyValue(heart.translateYProperty(), -80, Interpolator.EASE_BOTH)
-                ),
-                // Quick dodge down
-                new KeyFrame(Duration.millis(800),
-                    new KeyValue(heart.translateYProperty(), 60, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.translateXProperty(), -40, Interpolator.EASE_BOTH)
-                ),
-                // Spiral dodge
-                new KeyFrame(Duration.millis(1400),
-                    new KeyValue(heart.translateYProperty(), -30, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.translateXProperty(), 50, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.rotateProperty(), 360)
-                ),
-                // Final dodge and stabilize
-                new KeyFrame(Duration.millis(2200),
-                    new KeyValue(heart.translateYProperty(), 20, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.translateXProperty(), -10, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.rotateProperty(), 0)
-                ),
-                new KeyFrame(Duration.millis(3000),
-                    new KeyValue(heart.translateYProperty(), 0),
-                    new KeyValue(heart.translateXProperty(), 0),
-                    new KeyValue(heart.rotateProperty(), 0)
-                )
-            );
-            
-            bulletHell.getChildren().add(dodgeSequence);
-        }
-        
-        // Add dramatic effects during bullet hell
-        Timeline effects = new Timeline(
-            new KeyFrame(Duration.millis(300), e -> {
-                soundUtils.playAttackSound();
-                animationHandler.playDramaticFlash(root, Color.CYAN, 200);
-            }),
-            new KeyFrame(Duration.millis(600), e -> animationHandler.playLightningEffect(root)),
-            new KeyFrame(Duration.millis(1200), e -> {
-                soundUtils.playAttackSound();
-                animationHandler.playEpicScreenShake(root, 300, 8);
-            }),
-            new KeyFrame(Duration.millis(1800), e -> animationHandler.playLightningEffect(root)),
-            new KeyFrame(Duration.millis(2400), e -> {
-                soundUtils.playAttackSound();
-                animationHandler.playDramaticFlash(root, Color.WHITE, 150);
-            })
-        );
-        bulletHell.getChildren().add(effects);
-        
-        return bulletHell;
+        return new ParallelTransition(); // Disabled
     }
-    
     private ParallelTransition createMuffetAttackPhase(List<ImageView> hearts, Pane heartPane) {
-        ParallelTransition muffetPhase = new ParallelTransition();
-        
-        // Show Muffet jumpscares with enhanced effects
-        Timeline jumpscareSequence = new Timeline(
-            new KeyFrame(Duration.ZERO, e -> {
-                imgMuffetJumpscare0.setVisible(true);
-                imgMuffetJumpscare0.setOpacity(0);
-                soundUtils.playAttackSound();
-                animationHandler.playDramaticFlash(root, Color.PURPLE, 300);
-            }),
-            new KeyFrame(Duration.millis(50),
-                new KeyValue(imgMuffetJumpscare0.opacityProperty(), 0.8)
-            ),
-            new KeyFrame(Duration.millis(400),
-                new KeyValue(imgMuffetJumpscare0.opacityProperty(), 0)
-            ),
-            new KeyFrame(Duration.millis(500), e -> {
-                imgMuffetJumpscare0.setVisible(false);
-                imgMuffetJumpscare1.setVisible(true);
-                imgMuffetJumpscare1.setOpacity(0);
-                animationHandler.playLightningEffect(root);
-                animationHandler.playEpicScreenShake(root, 400, 12);
-            }),
-            new KeyFrame(Duration.millis(550),
-                new KeyValue(imgMuffetJumpscare1.opacityProperty(), 0.9)
-            ),
-            new KeyFrame(Duration.millis(900),
-                new KeyValue(imgMuffetJumpscare1.opacityProperty(), 0)
-            ),
-            new KeyFrame(Duration.millis(1000), e -> {
-                imgMuffetJumpscare1.setVisible(false);
-                // Enhanced screen shake with dramatic flash
-                animationHandler.playEpicScreenShake(root, 600, 15);
-                animationHandler.playDramaticFlash(root, Color.RED, 400);
-                soundUtils.playAttackSound();
-            }),
-            new KeyFrame(Duration.millis(1600), e -> {
-                // Second wave of effects
-                animationHandler.playDramaticFlash(root, Color.DARKMAGENTA, 300);
-                soundUtils.playAttackSound();
-            })
-        );
-        muffetPhase.getChildren().add(jumpscareSequence);
-        
-        // Hearts react to Muffet attacks with enhanced defensive patterns
-        for (int i = 0; i < hearts.size(); i++) {
-            ImageView heart = hearts.get(i);
-            Timeline defensivePattern = new Timeline();
-            
-            // Hearts cluster together defensively, then spread out in panic
-            defensivePattern.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(200),
-                    new KeyValue(heart.translateXProperty(), (i - 1) * 20, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.translateYProperty(), -20, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.scaleXProperty(), 0.8),
-                    new KeyValue(heart.scaleYProperty(), 0.8)
-                ),
-                new KeyFrame(Duration.millis(500), e -> {
-                    animationHandler.playHeartHitEffect(heart);
-                    animationHandler.playEnhancedGlitchEffect(heart, 1.5, 200);
-                }),
-                new KeyFrame(Duration.millis(700),
-                    new KeyValue(heart.translateXProperty(), (i - 1) * 15, Interpolator.EASE_BOTH),
-                    new KeyValue(heart.translateYProperty(), 10, Interpolator.EASE_BOTH)
-                ),
-                new KeyFrame(Duration.millis(1000), e -> {
-                    animationHandler.playHeartHitEffect(heart);
-                    animationHandler.playEnhancedGlitchEffect(heart, 2.0, 300);
-                }),
-                new KeyFrame(Duration.millis(1200),
-                    new KeyValue(heart.translateXProperty(), (i - 1) * 60, Interpolator.EASE_OUT),
-                    new KeyValue(heart.translateYProperty(), (i % 2 == 0 ? -40 : 40), Interpolator.EASE_OUT),
-                    new KeyValue(heart.scaleXProperty(), 1.1),
-                    new KeyValue(heart.scaleYProperty(), 1.1)
-                ),
-                new KeyFrame(Duration.millis(1600), e -> {
-                    // Hearts show fear/stress response
-                    animationHandler.playEnhancedGlitchEffect(heart, 1.0, 400);
-                }),
-                new KeyFrame(Duration.millis(2000),
-                    new KeyValue(heart.translateXProperty(), 0),
-                    new KeyValue(heart.translateYProperty(), 0),
-                    new KeyValue(heart.scaleXProperty(), 1.0),
-                    new KeyValue(heart.scaleYProperty(), 1.0)
-                )
-            );
-            
-            muffetPhase.getChildren().add(defensivePattern);
-        }
-        
-        return muffetPhase;
+        return new ParallelTransition(); // Disabled
     }
-    
     private ParallelTransition createFinalDancePhase(List<ImageView> hearts, Pane heartPane) {
-        ParallelTransition finalDance = new ParallelTransition();
-        
-        // Hearts perform a synchronized victory dance
-        for (int i = 0; i < hearts.size(); i++) {
-            ImageView heart = hearts.get(i);
-            Timeline dancePattern = new Timeline();
-            
-            // Different dance pattern for each heart
-            double phaseOffset = i * 400; // Stagger the dance
-            
-            dancePattern.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(phaseOffset),
-                    new KeyValue(heart.scaleXProperty(), 1.0),
-                    new KeyValue(heart.scaleYProperty(), 1.0),
-                    new KeyValue(heart.rotateProperty(), 0)
-                ),
-                new KeyFrame(Duration.millis(phaseOffset + 300),
-                    new KeyValue(heart.scaleXProperty(), 1.3),
-                    new KeyValue(heart.scaleYProperty(), 1.3),
-                    new KeyValue(heart.rotateProperty(), 180, Interpolator.EASE_BOTH)
-                ),
-                new KeyFrame(Duration.millis(phaseOffset + 600),
-                    new KeyValue(heart.scaleXProperty(), 0.8),
-                    new KeyValue(heart.scaleYProperty(), 0.8),
-                    new KeyValue(heart.rotateProperty(), 360, Interpolator.EASE_BOTH)
-                ),
-                new KeyFrame(Duration.millis(phaseOffset + 900),
-                    new KeyValue(heart.scaleXProperty(), 1.2),
-                    new KeyValue(heart.scaleYProperty(), 1.2),
-                    new KeyValue(heart.rotateProperty(), 0, Interpolator.EASE_BOTH)
-                ),
-                new KeyFrame(Duration.millis(phaseOffset + 1200),
-                    new KeyValue(heart.scaleXProperty(), 1.0),
-                    new KeyValue(heart.scaleYProperty(), 1.0),
-                    new KeyValue(heart.rotateProperty(), 0)
-                )
-            );
-            
-            dancePattern.setCycleCount(2); // Repeat the dance twice
-            finalDance.getChildren().add(dancePattern);
-        }
-        
-        // Add celebration effects
-        Timeline celebrationEffects = new Timeline(
-            new KeyFrame(Duration.millis(200), e -> animationHandler.playLightningEffect(root)),
-            new KeyFrame(Duration.millis(800), e -> animationHandler.playLightningEffect(root)),
-            new KeyFrame(Duration.millis(1400), e -> animationHandler.playLightningEffect(root)),
-            new KeyFrame(Duration.millis(2000), e -> animationHandler.playLightningEffect(root)),
-            new KeyFrame(Duration.millis(2600), e -> animationHandler.playLightningEffect(root))
-        );
-        finalDance.getChildren().add(celebrationEffects);
-        
-        return finalDance;
+        return new ParallelTransition(); // Disabled
     }
 
     private void startLabelGlitch(Label label) {

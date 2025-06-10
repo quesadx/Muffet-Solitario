@@ -187,6 +187,27 @@
                   </VBox>
                </children>
             </VBox>
+            <VBox fx:id="vboxGameFinished" alignment="CENTER" fillWidth="false" styleClass="jfx-transparent-container" visible="false">
+               <children>
+                  <VBox alignment="CENTER" prefHeight="125.0" prefWidth="500.0" spacing="10.0" styleClass="jfx-container">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <children>
+                        <ImageView fitHeight="100.0" fitWidth="200.0" pickOnBounds="true">
+                           <image>
+                              <Image url="@../resources/assets/gifMuffetFace.gif" />
+                           </image>
+                        </ImageView>
+                        <Label text="HAZ GANADO!" />
+                        <MFXButton onAction="#onActionBtnExit" prefWidth="250.0" text="SALIR" />
+                     </children>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </VBox>
          </children>
       </StackPane>
    </children>

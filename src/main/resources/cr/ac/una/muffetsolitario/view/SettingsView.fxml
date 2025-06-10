@@ -43,6 +43,8 @@
                               <MFXButton fx:id="btnSelectEstilo2" onAction="#onActionBtnSelectEstilo2" prefWidth="125.0" styleClass="mfx-button-inverted" text="2" />
                            </children>
                         </HBox>
+                        <Label prefWidth="375.0" text="O SELECCIONA UNA IMAGEN PERONALIZADA PARA LA PARTE TRASERA DE LAS CARTAS" textAlignment="CENTER" wrapText="true" />
+                        <ImageView fx:id="imgDropArea" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="jfx-container" />
                         <HBox alignment="CENTER" spacing="2.0">
                            <children>
                               <Label maxWidth="1.7976931348623157E308" text="USUARIO: " HBox.hgrow="ALWAYS" />

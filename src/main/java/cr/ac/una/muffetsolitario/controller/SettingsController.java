@@ -26,7 +26,7 @@ import javafx.util.Duration;
 public class SettingsController extends Controller implements Initializable {
 
     @FXML private AnchorPane root;
-    @FXML private ImageView imgBackground;
+    @FXML private ImageView imgBackground, imgDropArea;
     @FXML private MFXButton btnBGM;
     @FXML private MFXButton btnConfirmNewUserName;
     @FXML private Label lblSignUpTitle;
