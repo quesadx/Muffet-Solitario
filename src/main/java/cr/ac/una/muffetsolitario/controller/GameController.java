@@ -878,13 +878,13 @@ public class GameController extends Controller implements Initializable {
     void onActionBtnExitGameEnd(ActionEvent event) {
         UserAccountDto user = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         GameService gameService = new GameService();
+        Long gameId = user.getGameId();
 
         if(!user.isUserGuest()){
-            currentGameDto.setGameStatus("SAVED");
-            Respuesta respuesta = gameService.saveGameDto(currentGameDto);
+            Respuesta respuesta = gameService.deleteGame(gameId);
 
             if(respuesta.getEstado()){
-                System.out.println(respuesta.getMensaje());
+                System.out.println("Partida: " + gameId + " eliminada");
             }
         }
         FlowController.getInstance().limpiarLoader("PreGameView");
