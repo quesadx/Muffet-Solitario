@@ -10,8 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane id="AnchorPane" fx:id="root" prefHeight="720.0" prefWidth="1280.0" stylesheets="@styles.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="cr.ac.una.muffetsolitario.controller.PreGameController">
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="720.0" prefWidth="1280.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.muffetsolitario.controller.PreGameController">
    <children>
       <ImageView fx:id="imgBackground" fitHeight="400.0" fitWidth="600.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
@@ -27,6 +26,9 @@
                   <HBox alignment="CENTER" spacing="2.0">
                      <children>
                         <Label maxWidth="1.7976931348623157E308" text="DIFICULTAD: " HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblGameDifficult" maxWidth="1.7976931348623157E308" />
+                        <Label fx:id="lblCreatedDate" maxWidth="1.7976931348623157E308" text=" FECHA CREACIÓN: " />
+                        <Label fx:id="lblGameCreatedDate" maxWidth="1.7976931348623157E308" />
                         <MFXButton fx:id="btnEasy" onAction="#onActionBtnEasy" prefWidth="125.0" text="FACIL" />
                         <MFXButton fx:id="btnMed" onAction="#onActionBtnMed" prefWidth="125.0" text="MEDIO" />
                         <MFXButton fx:id="btnHard" onAction="#onActionBtnHard" prefWidth="125.0" text="MUFFET" />

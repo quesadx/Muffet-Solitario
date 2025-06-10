@@ -30,6 +30,7 @@ public class SettingsController extends Controller implements Initializable {
     @FXML private MFXButton btnBGM;
     @FXML private MFXButton btnConfirmNewUserName;
     @FXML private Label lblSignUpTitle;
+    @FXML private MFXButton btnExit;
     @FXML private MFXTextField txfNewUsername;
     @FXML private MFXButton btnSelectEstilo1;
     @FXML private MFXButton btnSelectEstilo2;
@@ -94,6 +95,8 @@ public class SettingsController extends Controller implements Initializable {
         UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         userAccountDto.setUserCardDesign(0);
         animationHandler.playHitEffect(btnSelectEstilo1);
+
+        saveUserChanges(userAccountDto);
     }
 
     @FXML
@@ -142,6 +145,19 @@ public class SettingsController extends Controller implements Initializable {
         UserAccountDto userAccountDto = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
         userAccountDto.setUserCardDesign(1);
         animationHandler.playHitEffect(btnSelectEstilo2);
+
+        saveUserChanges(userAccountDto);
+    }
+
+    private void saveUserChanges(UserAccountDto userAccountDto) {
+        UserAccountService userAccountService = new UserAccountService();
+        Respuesta checkResponse = userAccountService.saveUserAccount(userAccountDto);
+
+        if(checkResponse.getEstado()){
+            System.out.println("Cambios guardados del usuario: " + userAccountDto.getUserNickname());
+        } else{
+            System.out.println("Cambios no guardados del usuario: " + userAccountDto.getUserNickname());
+        }
     }
 
     /**
