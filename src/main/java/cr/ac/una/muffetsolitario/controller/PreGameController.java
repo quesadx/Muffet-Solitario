@@ -7,6 +7,7 @@ import cr.ac.una.muffetsolitario.util.*;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXProgressBar;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -16,6 +17,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
@@ -40,6 +42,12 @@ public class PreGameController extends Controller implements Initializable {
     private String selectedDifficulty = "F";
     private Timeline loadingTimeline;
     private GameDto gameDto;
+    @FXML
+    private Label lblGameDifficult;
+    @FXML
+    private Label lblCreatedDate;
+    @FXML
+    private Label lblGameCreatedDate;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -55,9 +63,17 @@ public class PreGameController extends Controller implements Initializable {
                 System.out.println("No existe una PARTIDA");
                 return;
             }
-            btnEasy.setDisable(true);
-            btnMed.setDisable(true);
-            btnHard.setDisable(true);
+            lblGameDifficult.setManaged(true);
+            lblGameDifficult.setVisible(true);
+            lblGameDifficult.setText(getDifficultyText(gameDto.getGameDifficulty()));
+            lblCreatedDate.setManaged(true);
+            lblCreatedDate.setVisible(true);
+            lblGameCreatedDate.setManaged(true);
+            lblGameCreatedDate.setVisible(true);
+            lblGameCreatedDate.setText(formatDateToSpanish(gameDto.getGameCreatedDate()));
+            btnEasy.setManaged(false);
+            btnMed.setManaged(false);
+            btnHard.setManaged(false);
             btnEasy.setVisible(false);
             btnMed.setVisible(false);
             btnHard.setVisible(false);
@@ -65,10 +81,19 @@ public class PreGameController extends Controller implements Initializable {
             //TODO: aqui se puede cargar labels que reflejen la partida
         } else {
             System.out.println("No existe una PARTIDA. -Se procede a crear una PARTIDA.");
-            btnEasy.setDisable(false);
-            btnMed.setDisable(false);
-            btnHard.setDisable(false);
+            lblGameDifficult.setManaged(false);
+            lblGameDifficult.setVisible(false);
+            lblCreatedDate.setManaged(false);
+            lblCreatedDate.setVisible(false);
+            lblGameCreatedDate.setManaged(false);
+            lblGameCreatedDate.setVisible(false);
+            btnEasy.setManaged(true);
             btnEasy.setVisible(true);
+            btnMed.setManaged(true);
+            btnMed.setVisible(true);
+            btnHard.setManaged(true);
+            btnHard.setVisible(true);
+
         }
 
         AppContext.getInstance().set("GameLoaded", gameDto);
@@ -94,6 +119,25 @@ public class PreGameController extends Controller implements Initializable {
     @Override
     public void initialize() {
         // Required by Controller interface
+    }
+
+    private String getDifficultyText(String code) {
+        switch (code) {
+            case "F":
+                return "Fácil";
+            case "N":
+                return "Normal";
+            case "D":
+                return "Difícil";
+            default:
+                return "Desconocido";
+        }
+    }
+
+    private String formatDateToSpanish(Date date) {
+        if (date == null) return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE dd MMM yyyy", new java.util.Locale("es", "ES"));
+        return sdf.format(date);
     }
 
     @FXML
