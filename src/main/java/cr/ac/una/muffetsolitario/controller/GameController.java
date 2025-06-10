@@ -874,6 +874,23 @@ public class GameController extends Controller implements Initializable {
         //FlowController.getInstance().limpiarLoader("GameView");
     }
 
+    @FXML
+    void onActionBtnExitGameEnd(ActionEvent event) {
+        UserAccountDto user = (UserAccountDto) AppContext.getInstance().get("LoggedInUser");
+        GameService gameService = new GameService();
+
+        if(!user.isUserGuest()){
+            currentGameDto.setGameStatus("SAVED");
+            Respuesta respuesta = gameService.saveGameDto(currentGameDto);
+
+            if(respuesta.getEstado()){
+                System.out.println(respuesta.getMensaje());
+            }
+        }
+        FlowController.getInstance().limpiarLoader("PreGameView");
+        FlowController.getInstance().goView("LogInView");
+    }
+
     /**
      * Animates a card flipping from face down to face up
      */

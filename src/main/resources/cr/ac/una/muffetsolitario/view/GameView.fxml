@@ -201,7 +201,7 @@
                            </image>
                         </ImageView>
                         <Label text="HAZ GANADO!" />
-                        <MFXButton onAction="#onActionBtnExit" prefWidth="250.0" text="SALIR" />
+                        <MFXButton onAction="#onActionBtnExitGameEnd" prefWidth="250.0" text="SALIR" />
                      </children>
                      <padding>
                         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
@@ -222,7 +222,7 @@
                            </image>
                         </ImageView>
                         <Label text="HAS PERDIDO!" />
-                        <MFXButton onAction="#onActionBtnExit" prefWidth="250.0" text="SALIR" />
+                        <MFXButton onAction="#onActionBtnExitGameEnd" prefWidth="250.0" text="SALIR" />
                      </children>
                      <padding>
                         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
