@@ -48,7 +48,7 @@
                   <HBox alignment="CENTER" spacing="2.0">
                      <children>
                         <MFXButton onAction="#onActionExit" prefWidth="250.0" text="SALIR" />
-                        <MFXButton onAction="#onActionBtnEliminar" prefWidth="250.0" text="ELIMINAR" />
+                        <MFXButton fx:id="btnDelete" onAction="#onActionBtnDelete" prefWidth="250.0" text="ELIMINAR" />
                         <MFXButton onAction="#onActionBtnStartGame" prefWidth="250.0" text="INICIAR" />
                      </children>
                   </HBox>

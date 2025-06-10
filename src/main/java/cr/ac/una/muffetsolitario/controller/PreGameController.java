@@ -37,6 +37,7 @@ public class PreGameController extends Controller implements Initializable {
     @FXML
     private MFXProgressBar pbGamingLoadingBar;
 
+    private Long gameId;
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
     private final SoundUtils soundUtils = SoundUtils.getInstance();
     private String selectedDifficulty = "F";
@@ -48,6 +49,8 @@ public class PreGameController extends Controller implements Initializable {
     private Label lblCreatedDate;
     @FXML
     private Label lblGameCreatedDate;
+    @FXML
+    private MFXButton btnDelete;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -63,6 +66,8 @@ public class PreGameController extends Controller implements Initializable {
                 System.out.println("No existe una PARTIDA");
                 return;
             }
+            gameId = gameDto.getGameId();
+
             lblGameDifficult.setManaged(true);
             lblGameDifficult.setVisible(true);
             lblGameDifficult.setText(getDifficultyText(gameDto.getGameDifficulty()));
@@ -71,6 +76,8 @@ public class PreGameController extends Controller implements Initializable {
             lblGameCreatedDate.setManaged(true);
             lblGameCreatedDate.setVisible(true);
             lblGameCreatedDate.setText(formatDateToSpanish(gameDto.getGameCreatedDate()));
+            btnDelete.setManaged(true);
+            btnDelete.setVisible(true);
             btnEasy.setManaged(false);
             btnMed.setManaged(false);
             btnHard.setManaged(false);
@@ -87,6 +94,8 @@ public class PreGameController extends Controller implements Initializable {
             lblCreatedDate.setVisible(false);
             lblGameCreatedDate.setManaged(false);
             lblGameCreatedDate.setVisible(false);
+            btnDelete.setManaged(false);
+            btnDelete.setVisible(false);
             btnEasy.setManaged(true);
             btnEasy.setVisible(true);
             btnMed.setManaged(true);
@@ -251,7 +260,17 @@ public class PreGameController extends Controller implements Initializable {
     }
 
     @FXML
-    void onActionBtnEliminarPartida(ActionEvent event) {
+    private void onActionBtnDelete(ActionEvent event) {
+        GameService gameService = new GameService();
+        Respuesta checkResponse = gameService.deleteGame(gameId);
+
+        if(checkResponse.getEstado()){
+            System.out.println("Partida: " + gameId + " Eliminada");
+        } else{
+            System.out.println("Partida: " + gameId + " No eliminada");
+        }
+        FlowController.getInstance().goView("LogInView");
+        FlowController.getInstance().limpiarLoader("PreGameView");
     }
 
 }
