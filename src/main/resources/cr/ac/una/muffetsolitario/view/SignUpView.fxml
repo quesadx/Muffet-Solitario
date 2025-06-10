@@ -87,7 +87,7 @@
                      </padding>
                      <children>
                         <Label maxHeight="1.7976931348623157E308" styleClass="jfx-subtitle-2" text="USUARIO REGISTRADO" />
-                        <Label maxHeight="1.7976931348623157E308" text="USUARIO CREATO CORRECTAMENTE! HORA DE COGERME A ALEX SEXO VAGINA PENE CACA123" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
+                        <Label maxHeight="1.7976931348623157E308" text="USUARIO CREADO CORRECTAMENTE! INTENTA INICIAR SESION!" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
                         <MFXButton maxWidth="250.0" onAction="#onActionBtnConfirmUserCreated" text="ACEPTAR" />
                      </children>
                   </VBox>

@@ -77,14 +77,8 @@ public class SignUpController extends Controller implements Initializable {
             vboxMissingFieldsAlert.setVisible(true);
             return;
         }
-//        if(userExists(txfNewUser.getText())){
-//            vboxUserAlreadyExists.setManaged(true);
-//            vboxUserAlreadyExists.setVisible(true);
-//            return;
-//        }
-
-//        UserAccount user = new UserAccount();
-//        UserAccountDto userDto = new UserAccountDto(user);
+        // Save favorite word in uppercase
+        userDto.setUserFavWord(txfNewFavoriteWord.getText().toUpperCase());
         UserAccountService userAccountService = new UserAccountService();
         Respuesta answer = userAccountService.saveUserAccount(this.userDto);
         if(answer.getEstado()){
@@ -97,7 +91,6 @@ public class SignUpController extends Controller implements Initializable {
             psfNewConfirmPassword.clear();
             psfNewPassword.clear();
             txfNewUser.clear();
-            
         } else if(!answer.getEstado()){
             System.out.println(answer.getMensajeInterno());
         }
