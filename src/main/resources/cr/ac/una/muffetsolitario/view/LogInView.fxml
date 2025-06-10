@@ -24,14 +24,14 @@
          <children>
             <VBox fx:id="vboxStartDisplay" alignment="CENTER">
                <children>
-                  <Pane styleClass="jfx-title" VBox.vgrow="ALWAYS">
+                  <Pane fx:id="pnStartingPane" styleClass="jfx-title" VBox.vgrow="ALWAYS">
                      <children>
                         <ImageView fx:id="imgLeftCard" fitHeight="175.0" fitWidth="154.0" layoutX="147.0" layoutY="229.0" pickOnBounds="true" preserveRatio="true" rotate="-28.6" visible="false">
                            <image>
                               <Image url="@../resources/assets/imgHeart.png" />
                            </image>
                         </ImageView>
-                        <ImageView fx:id="imgCenterCard" fitHeight="362.0" fitWidth="364.0" layoutX="459.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="imgCenterCard" fitHeight="196.0" fitWidth="196.0" layoutX="542.0" layoutY="188.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../resources/assets/imgHeart.png" />
                            </image>
@@ -46,8 +46,8 @@
                               <Image url="@../resources/assets/giftSlash.gif" />
                            </image>
                         </ImageView>
-                        <Label fx:id="lblPlay" layoutX="490.0" layoutY="521.0" onMouseClicked="#onMouseClickedLblPlay" text="JUGAR" />
-                        <MFXButton layoutX="34.0" layoutY="29.0" onAction="#onActionDebugSkip" text="&gt; DEBUG SKIP TO GAMEVIEW" />
+                        <Label fx:id="lblPlay" layoutX="490.0" layoutY="442.0" onMouseClicked="#onMouseClickedLblPlay" text="JUGAR" />
+                        <MFXButton disable="true" layoutX="34.0" layoutY="29.0" onAction="#onActionDebugSkip" text="&gt; DEBUG SKIP TO GAMEVIEW" visible="false" />
                      </children>
                   </Pane>
                </children>

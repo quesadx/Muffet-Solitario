@@ -85,6 +85,8 @@ public class LogInController extends Controller implements Initializable {
     @FXML private VBox vboxLoggedIn;
     @FXML private VBox vboxContinueOrDeleteGame;
 
+    @FXML private Pane pnStartingPane;
+
     private final AnimationHandler animationHandler = AnimationHandler.getInstance();
     private final SoundUtils soundUtils = SoundUtils.getInstance();
 
@@ -182,6 +184,16 @@ public class LogInController extends Controller implements Initializable {
 
         startMuffetJumpscareLoop();
         startRandomLightning();
+
+        // --- Center imgCenterCard and lblPlay in pnStartingPane ---
+        pnStartingPane.widthProperty().addListener((obs, oldVal, newVal) -> centerStartElements());
+        pnStartingPane.heightProperty().addListener((obs, oldVal, newVal) -> centerStartElements());
+        if (imgCenterCard != null && lblPlay != null) {
+            imgCenterCard.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> centerStartElements());
+            lblPlay.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> centerStartElements());
+        }
+        // Initial centering
+        centerStartElements();
     }
 
      /**
@@ -929,4 +941,14 @@ public class LogInController extends Controller implements Initializable {
         FlowController.getInstance().goView("PasswordResetView");
     }
 
+    private void centerStartElements() {
+        if (pnStartingPane == null || imgCenterCard == null || lblPlay == null) return;
+        double paneWidth = pnStartingPane.getWidth();
+        // Center imgCenterCard
+        double cardWidth = imgCenterCard.getBoundsInParent().getWidth();
+        imgCenterCard.setLayoutX((paneWidth - cardWidth) / 2);
+        // Center lblPlay
+        double labelWidth = lblPlay.getBoundsInParent().getWidth();
+        lblPlay.setLayoutX((paneWidth - labelWidth) / 2);
+    }
 }
