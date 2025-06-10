@@ -841,7 +841,7 @@ public class GameController extends Controller implements Initializable {
             }
         }
         FlowController.getInstance().limpiarLoader("PreGameController");
-        FLowController.getInstance().limpiarLoader("GameController");
+        FlowController.getInstance().limpiarLoader("GameController");
         FlowController.getInstance().goView("LogInView");
     }
 
