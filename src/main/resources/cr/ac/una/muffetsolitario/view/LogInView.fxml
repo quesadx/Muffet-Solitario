@@ -22,7 +22,7 @@
       </ImageView>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox fx:id="vboxStartDisplay" alignment="CENTER" visible="false">
+            <VBox fx:id="vboxStartDisplay" alignment="CENTER">
                <children>
                   <Pane fx:id="pnStartingPane" styleClass="jfx-title" VBox.vgrow="ALWAYS">
                      <children>
@@ -95,7 +95,7 @@
                   <Insets bottom="25.0" top="25.0" />
                </padding>
             </VBox>
-            <VBox fx:id="vboxLoggedIn" alignment="CENTER" spacing="10.0">
+            <VBox fx:id="vboxLoggedIn" alignment="CENTER" spacing="10.0" visible="false">
                <children>
                   <VBox alignment="CENTER" fillWidth="false" VBox.vgrow="NEVER">
                      <children>
