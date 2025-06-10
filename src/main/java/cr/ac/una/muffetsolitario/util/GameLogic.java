@@ -266,38 +266,43 @@ public class GameLogic {
 
     private List<int[]> getPossibleMoves(GameDto game) {
         List<BoardColumnDto> columns = game.getBoardColumnList();
-        List<CardContainer> topFaceUpCards = new ArrayList<>();
         List<int[]> possibleMoves = new ArrayList<>();
 
-        for (BoardColumnDto column : columns) {
-            CardContainer lastFaceUp = null;
-            List<CardContainer> cards = column.getCardList();
-            for (int i = cards.size() - 1; i >= 0; i--) {
-                if (cards.get(i).getCardDto().isCardFaceUp()) {
-                    lastFaceUp = cards.get(i);
-                    break;
-                }
-            }
-            topFaceUpCards.add(lastFaceUp);
-        }
+        for (int fromIdx = 0; fromIdx < columns.size(); fromIdx++) {
+            BoardColumnDto fromCol = columns.get(fromIdx);
+            List<CardContainer> fromCards = fromCol.getCardList();
 
-        for (int i = 0; i < topFaceUpCards.size(); i++) {
-            CardContainer fromCard = topFaceUpCards.get(i);
-            if (fromCard == null)
-                continue;
-            for (int j = 0; j < topFaceUpCards.size(); j++) {
-                if (i == j)
-                    continue;
-                CardContainer toCard = topFaceUpCards.get(j);
-                if (toCard == null)
-                    continue;
+            // Buscar todas las posibles secuencias válidas en la columna
+            for (int start = 0; start < fromCards.size(); start++) {
+                // Solo considerar secuencias que empiezan en una carta boca arriba
+                if (!fromCards.get(start).getCardDto().isCardFaceUp()) continue;
 
-                CardDto fromDto = fromCard.getCardDto();
-                CardDto toDto = toCard.getCardDto();
+                List<CardContainer> sequence = fromCards.subList(start, fromCards.size());
+                if (sequence.size() < 1) continue;
 
-                if (fromDto.getCardSuit().equals(toDto.getCardSuit())
-                        && fromDto.getCardValue() == toDto.getCardValue() - 1) {
-                    possibleMoves.add(new int[] { i, j });
+                // Verificar si la secuencia es válida (descendente y mismo palo)
+                if (!rulesValidator.isValidSequence(sequence)) continue;
+
+                // Intentar mover la secuencia a cada otra columna
+                for (int toIdx = 0; toIdx < columns.size(); toIdx++) {
+                    if (toIdx == fromIdx) continue;
+                    BoardColumnDto toCol = columns.get(toIdx);
+                    List<CardContainer> toCards = toCol.getCardList();
+
+                    // Si la columna destino está vacía, solo se puede mover un Rey (13)
+                    if (toCards.isEmpty()) {
+                        if (sequence.get(0).getCardDto().getCardValue() == 13) {
+                            possibleMoves.add(new int[]{fromIdx, toIdx, start});
+                        }
+                    } else {
+                        CardContainer destTop = toCards.get(toCards.size() - 1);
+                        CardContainer seqFirst = sequence.get(0);
+
+                        // Verificar si la secuencia puede colocarse sobre la carta destino
+                        if (rulesValidator.isValidMove(seqFirst, toCol)) {
+                            possibleMoves.add(new int[]{fromIdx, toIdx, start});
+                        }
+                    }
                 }
             }
         }
@@ -310,36 +315,43 @@ public class GameLogic {
 
     public String suggestPossibleMoves(GameDto game) {
         List<BoardColumnDto> columns = game.getBoardColumnList();
-        List<CardContainer> topFaceUpCards = new ArrayList<>();
-        for (BoardColumnDto column : columns) {
-            CardContainer lastFaceUp = null;
-            List<CardContainer> cards = column.getCardList();
-            for (int i = cards.size() - 1; i >= 0; i--) {
-                if (cards.get(i).getCardDto().isCardFaceUp()) {
-                    lastFaceUp = cards.get(i);
-                    break;
-                }
-            }
-            topFaceUpCards.add(lastFaceUp);
-        }
-
         List<int[]> moves = getPossibleMoves(game);
         if (moves.isEmpty()) {
             return "No hay movimientos posibles entre columnas.";
         } else {
-            // Sugerir el primer movimiento posible
+            // Sugerir el primer movimiento posible de secuencia
             int[] move = moves.get(0);
-            CardContainer fromCard = topFaceUpCards.get(move[0]);
-            CardContainer toCard = topFaceUpCards.get(move[1]);
-            
-            if (fromCard == null || toCard == null) {
-                return "No hay movimientos posibles entre columnas.";
+            int fromIdx = move[0];
+            int toIdx = move[1];
+            int startIdx = move[2];
+
+            BoardColumnDto fromCol = columns.get(fromIdx);
+            BoardColumnDto toCol = columns.get(toIdx);
+
+            List<CardContainer> fromCards = fromCol.getCardList();
+            List<CardContainer> toCards = toCol.getCardList();
+
+            // La secuencia a mover
+            List<CardContainer> sequence = fromCards.subList(startIdx, fromCards.size());
+
+            // Descripción de la secuencia
+            StringBuilder seqDesc = new StringBuilder();
+            for (CardContainer card : sequence) {
+                seqDesc.append(card.getCardDto().getCardValue())
+                       .append(card.getCardDto().getCardSuit())
+                       .append(" ");
             }
 
-            return "Puedes mover la carta " +
-                    fromCard.getCardDto().getCardValue() + fromCard.getCardDto().getCardSuit() +
-                    " de la columna " + (move[0] + 1) + " a la columna " + (move[1] + 1) +
-                    " sobre la carta " + toCard.getCardDto().getCardValue() + toCard.getCardDto().getCardSuit();
+            String toCardDesc;
+            if (!toCards.isEmpty()) {
+                CardContainer destTop = toCards.get(toCards.size() - 1);
+                toCardDesc = destTop.getCardDto().getCardValue() + destTop.getCardDto().getCardSuit();
+            } else {
+                toCardDesc = "columna vacía";
+            }
+
+            return "Puedes mover la secuencia [" + seqDesc.toString().trim() + "] de la columna " + (fromIdx + 1) +
+                    " a la columna " + (toIdx + 1) + " sobre " + toCardDesc + ".";
         }
     }
 
