@@ -28,11 +28,11 @@
                         <Insets top="2.0" />
                      </padding>
                   </Label>
-                  <VBox alignment="CENTER" spacing="2.0" styleClass="jfx-container">
+                  <VBox alignment="CENTER" fillWidth="false" spacing="10.0" styleClass="jfx-container">
                      <children>
-                        <HBox alignment="CENTER" spacing="2.0">
+                        <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" spacing="2.0">
                            <children>
-                              <Label maxWidth="1.7976931348623157E308" prefWidth="250.0" text="MUSICA DE FONDO:" HBox.hgrow="ALWAYS" />
+                              <Label maxWidth="1.7976931348623157E308" text="MUSICA DE FONDO:" HBox.hgrow="ALWAYS" />
                               <MFXButton fx:id="btnBGM" onAction="#onActionToggleBtnBGM" prefWidth="125.0" styleClass="mfx-button-inverted" text="SI" />
                            </children>
                         </HBox>
@@ -44,13 +44,24 @@
                            </children>
                         </HBox>
                         <Label prefWidth="375.0" text="O SELECCIONA UNA IMAGEN PERONALIZADA PARA LA PARTE TRASERA DE LAS CARTAS" textAlignment="CENTER" wrapText="true" />
-                        <ImageView fx:id="imgDropArea" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="jfx-container" />
+                        <HBox alignment="CENTER" styleClass="jfx-container">
+                           <children>
+                              <ImageView fx:id="imgDropArea" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" />
+                           </children>
+                        </HBox>
+                        <MFXButton fx:id="btnDelete" onAction="#onActionBtnDeleteImage" text="ELIMINAR" />
                         <HBox alignment="CENTER" spacing="2.0">
                            <children>
                               <Label maxWidth="1.7976931348623157E308" text="USUARIO: " HBox.hgrow="ALWAYS" />
-                              <MFXTextField fx:id="txfNewUsername" floatingText="NUEVO USUARIO" prefWidth="250.0" text="USUARIO" />
+                              <MFXTextField fx:id="txfNewUsername" floatingText="NUEVO NOMBRE" prefWidth="250.0" text="USUARIO" />
                               <MFXButton fx:id="btnConfirmNewUserName" onAction="#onActionConfirmNewUserName" prefWidth="125.0" styleClass="mfx-button-inverted" text="CHECK" />
                            </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets left="2.0" />
+                           </padding>
                         </HBox>
                         <HBox alignment="CENTER" spacing="2.0">
                            <children>

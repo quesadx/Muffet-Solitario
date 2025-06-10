@@ -352,7 +352,7 @@
 }
 
 /* ========== TABLEVIEW ========== */
-.table-view {
+.table-view, .table-view *, .table-view .table-cell, .table-view .table-row-cell, .table-view .column-header, .table-view .column-header-background, .table-view .filler {
     -fx-font-family: 'Press Start 2P', monospace;
     -fx-font-size: 13px;
     -fx-background-color: #000000;
@@ -362,12 +362,6 @@
     -fx-border-radius: 0;
     -fx-background-radius: 0;
 }
-
-.table-view:focused {
-    -fx-background-color: #000000;
-    -fx-border-color: #FFFFFF;
-}
-
 .table-view .column-header-background {
     -fx-background-color: #000000;
     -fx-border-color: #FFFFFF;
@@ -375,7 +369,6 @@
     -fx-background-radius: 0;
     -fx-border-radius: 0;
 }
-
 .table-view .column-header, .table-view .filler {
     -fx-background-color: #000000;
     -fx-border-color: #FFFFFF;
@@ -388,11 +381,6 @@
     -fx-background-radius: 0;
     -fx-border-radius: 0;
 }
-
-.table-view .column-header:last-visible {
-    -fx-border-width: 0;
-}
-
 .table-view .table-row-cell {
     -fx-background-color: #000000;
     -fx-border-color: #FFFFFF;
@@ -403,16 +391,13 @@
     -fx-background-radius: 0;
     -fx-border-radius: 0;
 }
-
 .table-view .table-row-cell:odd {
     -fx-background-color: #111111;
 }
-
 .table-view .table-row-cell:selected, .table-view .table-row-cell:focused {
     -fx-background-color: #FFFFFF;
     -fx-text-fill: #000000;
 }
-
 .table-view .table-cell {
     -fx-font-family: 'Press Start 2P', monospace;
     -fx-font-size: 13px;
@@ -424,26 +409,22 @@
     -fx-background-radius: 0;
     -fx-border-radius: 0;
 }
-
 .table-view .table-row-cell:selected .table-cell,
 .table-view .table-row-cell:focused .table-cell {
     -fx-text-fill: #000000;
     -fx-background-color: transparent;
 }
-
 .table-view .placeholder {
     -fx-font-family: 'Press Start 2P', monospace;
     -fx-font-size: 13px;
     -fx-text-fill: #AAAAAA;
     -fx-background-color: #000000;
 }
-
 .table-view .column-drag-header {
     -fx-background-color: #222222;
     -fx-border-color: #FFFFFF;
     -fx-border-width: 0 0 2px 0;
 }
-
 .table-view .corner {
     -fx-background-color: #000000;
     -fx-border-color: #FFFFFF;
@@ -530,4 +511,13 @@
 * {
     -fx-background-radius: 0 !important;
     -fx-border-radius: 0 !important;
+}
+
+/* ========== DRAG AREA FOR IMAGE UPLOAD ========== */
+.jfx-drag-area {
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
 }

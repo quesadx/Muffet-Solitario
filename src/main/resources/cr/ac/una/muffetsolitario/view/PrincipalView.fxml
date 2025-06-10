@@ -17,7 +17,7 @@
    <top>
       <HBox alignment="CENTER" minHeight="-Infinity" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER_RIGHT" minHeight="-Infinity" minWidth="-Infinity" styleClass="jfx-window-border" HBox.hgrow="ALWAYS">
+            <HBox fx:id="hboxWindowBar" alignment="CENTER_RIGHT" minHeight="-Infinity" minWidth="-Infinity" styleClass="jfx-window-border" HBox.hgrow="ALWAYS">
                <children>
                   <MFXButton fx:id="btnMinimize" onAction="#onActionMinimize" text="_" />
                   <MFXButton fx:id="btnMaximize" onAction="#onActionMaximize" text="[]" />

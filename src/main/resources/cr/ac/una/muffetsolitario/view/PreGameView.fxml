@@ -21,19 +21,23 @@
          <children>
             <Label styleClass="jfx-subtitle" text="INICIO DE JUEGO" />
             <Label styleClass="jfx-description" text="El juego esta apunto de iniciar. Personaliza los ajustes e inicia la partida." wrapText="true" />
-            <VBox alignment="CENTER" spacing="2.0" styleClass="jfx-container" VBox.vgrow="NEVER">
+            <VBox alignment="CENTER" spacing="10.0" styleClass="jfx-container" VBox.vgrow="NEVER">
                <children>
                   <HBox alignment="CENTER" spacing="2.0">
                      <children>
                         <Label maxWidth="1.7976931348623157E308" text="DIFICULTAD: " HBox.hgrow="ALWAYS" />
                         <Label fx:id="lblGameDifficult" maxWidth="1.7976931348623157E308" />
-                        <Label fx:id="lblCreatedDate" maxWidth="1.7976931348623157E308" text=" FECHA CREACIÓN: " />
                         <Label fx:id="lblGameCreatedDate" maxWidth="1.7976931348623157E308" />
-                        <MFXButton fx:id="btnEasy" onAction="#onActionBtnEasy" prefWidth="125.0" text="FACIL" />
-                        <MFXButton fx:id="btnMed" onAction="#onActionBtnMed" prefWidth="125.0" text="MEDIO" />
-                        <MFXButton fx:id="btnHard" onAction="#onActionBtnHard" prefWidth="125.0" text="MUFFET" />
+                        <VBox alignment="CENTER" spacing="2.0">
+                           <children>
+                              <MFXButton fx:id="btnEasy" onAction="#onActionBtnEasy" prefWidth="250.0" text="FACIL" />
+                              <MFXButton fx:id="btnMed" onAction="#onActionBtnMed" prefWidth="250.0" text="MEDIO" />
+                              <MFXButton fx:id="btnHard" onAction="#onActionBtnHard" prefWidth="250.0" text="DIFICIL" />
+                           </children>
+                        </VBox>
                      </children>
                   </HBox>
+                  <Label fx:id="lblCreatedDate" maxWidth="1.7976931348623157E308" text=" FECHA CREACIÓN: " />
                   <MFXButton onAction="#onActionBtnStartGame" prefWidth="250.0" text="INICIAR" />
                   <MFXProgressBar fx:id="pbGamingLoadingBar" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="250.0" VBox.vgrow="NEVER" />
                </children>

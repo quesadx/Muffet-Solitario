@@ -840,7 +840,8 @@ public class GameController extends Controller implements Initializable {
                 System.out.println(respuesta.getMensaje());
             }
         }
-
+        FlowController.getInstance().limpiarLoader("PreGameController");
+        FLowController.getInstance().limpiarLoader("GameController");
         FlowController.getInstance().goView("LogInView");
     }
 

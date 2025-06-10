@@ -27,7 +27,7 @@ public class SettingsController extends Controller implements Initializable {
 
     @FXML private AnchorPane root;
     @FXML private ImageView imgBackground, imgDropArea;
-    @FXML private MFXButton btnBGM;
+    @FXML private MFXButton btnBGM, btnDelete;
     @FXML private MFXButton btnConfirmNewUserName;
     @FXML private Label lblSignUpTitle;
     @FXML private MFXButton btnExit;
@@ -57,6 +57,8 @@ public class SettingsController extends Controller implements Initializable {
         startGlitchEffect(btnConfirmNewUserName, false);
         startGlitchEffect(btnSelectEstilo1, false);
         startGlitchEffect(btnSelectEstilo2, false);
+
+        initializeDragAndDrop();
     }
 
     @Override
@@ -84,7 +86,20 @@ public class SettingsController extends Controller implements Initializable {
     }
 
     private void updateBGMButtonText() {
-        btnBGM.setText("MUSICA: " + (soundUtils.isMuted() ? "NO" : "SI"));
+        btnBGM.setText(soundUtils.isMuted() ? "NO" : "SI");
+    }
+
+    @FXML
+    private void onActionBtnDeleteImage(ActionEvent event) {
+        java.nio.file.Path customPath = java.nio.file.Paths.get(System.getProperty("user.dir"),
+            "src/main/resources/cr/ac/una/muffetsolitario/resources/assets/CardStyles/v3/Card_Back1.png");
+        try {
+            java.nio.file.Files.deleteIfExists(customPath);
+            imgDropArea.setImage(null);
+            btnDelete.setDisable(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @FXML
@@ -191,5 +206,47 @@ public class SettingsController extends Controller implements Initializable {
         vboxUserUpdated.setManaged(false);
         vboxTakenUsername.setVisible(false);
         vboxTakenUsername.setManaged(false);
+    }
+
+    @FXML
+    private void initializeDragAndDrop() {
+        imgDropArea.setOnDragOver(event -> {
+            if (event.getGestureSource() != imgDropArea && event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(javafx.scene.input.TransferMode.COPY);
+            }
+            event.consume();
+        });
+        imgDropArea.setOnDragDropped(event -> {
+            var db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                java.io.File file = db.getFiles().get(0);
+                try {
+                    // Only allow image files
+                    String lower = file.getName().toLowerCase();
+                    if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+                        java.nio.file.Path dest = java.nio.file.Paths.get(System.getProperty("user.dir"),
+                            "src/main/resources/cr/ac/una/muffetsolitario/resources/assets/CardStyles/v3/Card_Back1.png");
+                        java.nio.file.Files.copy(file.toPath(), dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        imgDropArea.setImage(new javafx.scene.image.Image(dest.toUri().toString()));
+                        btnDelete.setDisable(false);
+                        success = true;
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+        // On startup, check if custom image exists
+        java.nio.file.Path customPath = java.nio.file.Paths.get(System.getProperty("user.dir"),
+            "src/main/resources/cr/ac/una/muffetsolitario/resources/assets/CardStyles/v3/Card_Back1.png");
+        if (java.nio.file.Files.exists(customPath)) {
+            imgDropArea.setImage(new javafx.scene.image.Image(customPath.toUri().toString()));
+            btnDelete.setDisable(false);
+        } else {
+            btnDelete.setDisable(true);
+        }
     }
 }
