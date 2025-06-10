@@ -182,11 +182,12 @@ public class GameController extends Controller implements Initializable {
             showAlert("Error", "No se pudo inicializar la partida.");
         }
         startRandomLightning();
-
+        updateBoard();
     }
 
     @Override
     public void initialize() {
+        updateBoard();
         // Requerido por la herencia, no eliminar.
     }
 
