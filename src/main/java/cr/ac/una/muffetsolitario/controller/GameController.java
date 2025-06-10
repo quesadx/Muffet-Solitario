@@ -99,7 +99,7 @@ public class GameController extends Controller implements Initializable {
     @FXML
     private MFXButton btnUndo;
     @FXML
-    private VBox vboxAlert, vboxBattle, vboxGameFinished;
+    private VBox vboxAlert, vboxBattle, vboxGameFinished, vboxGameFail;
     @FXML
     private Label lblAlertMessage, lblLifesRemaining;
     @FXML private ImageView imgSans, imgBattleHeart;
@@ -686,6 +686,7 @@ public class GameController extends Controller implements Initializable {
             Timeline updateDelay = new Timeline(
                     new KeyFrame(Duration.millis(500), e -> {
                         updateBoard();
+                        checkGameFinishedAndShowResult();
                     }));
             updateDelay.play();
         } catch (IllegalArgumentException e) {
@@ -1464,13 +1465,12 @@ public class GameController extends Controller implements Initializable {
         // Implement battle rewards system
         if (victory) {
             // Victory: Continue without extra points (just the sequence completion bonus)
-            showAlert("¡VICTORIA!", "Has sobrevivido al ataque de Sans. Continúa jugando.");
-        } else {
-            // Loss: Give small point bonus as consolation
-            int consolationBonus = 25; // Small bonus for trying
-            currentGameDto.setGameTotalPoints(currentGameDto.getGameTotalPoints() + consolationBonus);
+            showAlert("¡VICTORIA!", "Has sobrevivido al ataque de Muffet. Continúa jugando.");
+            int currentPoints = currentGameDto.getGameTotalPoints() != null ? currentGameDto.getGameTotalPoints() : 0;
+            currentGameDto.setGameTotalPoints(currentPoints + 50);
             updateGameInfo();
-            showAlert("DERROTA", "Sans te ha derrotado, pero recibes " + consolationBonus + " puntos de consolación.");
+        } else {
+            showAlert("¡DERROTA!", "Muffet te ha derrotado. Vuelve a intentarlo.");
         }
         
         // Reset battle variables for next battle
@@ -1608,10 +1608,8 @@ public class GameController extends Controller implements Initializable {
      */
     private void onSequenceCompleted(int columnIndex, List<CardContainer> completedSequence) {
         System.out.println("Sequence completed in column " + columnIndex + " with " + completedSequence.size() + " cards");
-        
-        // First, show visual effect on all columns taking damage
+        // Always play damage animation and start bossfight, regardless of win state
         playColumnDamageAnimation(() -> {
-            // After damage animation completes, start the battle
             startSansBattle();
         });
     }
@@ -1709,5 +1707,37 @@ public class GameController extends Controller implements Initializable {
     // Call this after game ends (win or lose)
     private void handleGameEnd() {
         showGameFinishedBox();
+    }
+
+    private void checkGameFinishedAndShowResult() {
+        String result = gameLogic.checkGameFinished(currentGameDto);
+        if ("WIN".equals(result)) {
+            handleGameEnd();
+        } else if ("LOST".equals(result)) {
+            vboxGameFail.setVisible(true);
+            vboxGameFail.setManaged(true);
+            vboxGameFail.toFront();
+            animationHandler.playHitEffect(vboxGameFail);
+        }
+    }
+
+    @FXML
+    void onActionWin(ActionEvent event) {
+        // Set completed sequences to 1 (simulate partial win for testing)
+        if (currentGameDto != null) {
+            List<CompletedSequenceDto> completed = currentGameDto.getCompletedSequenceList();
+            if (completed == null) {
+                currentGameDto.setCompletedSequenceList(javafx.collections.FXCollections.observableArrayList());
+            }
+            // Only add if not already present
+            if (currentGameDto.getCompletedSequenceList().size() < 1) {
+                CompletedSequenceDto seq = new CompletedSequenceDto();
+                seq.setCseqOrder(1);
+                currentGameDto.getCompletedSequenceList().add(seq);
+            }
+            // Update the model's count if needed
+            currentGameDto.setGameCompletedSequences(currentGameDto.getCompletedSequenceList().size());
+        }
+        checkGameFinishedAndShowResult();
     }
 }
