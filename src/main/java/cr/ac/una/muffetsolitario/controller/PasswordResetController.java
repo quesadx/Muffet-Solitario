@@ -110,7 +110,7 @@ public class PasswordResetController extends Controller implements Initializable
         UserAccountDto userDto = (UserAccountDto) userResp.getResultado("UserAccount");
 
         // Check favorite word
-        if (!userDto.getUserFavWord().equalsIgnoreCase(favWord.trim())) {
+        if (!userDto.getUserFavWord().toUpperCase().equals(favWord.trim().toUpperCase())) {
             vboxWrongFavoriteWord.setVisible(true);
             vboxWrongFavoriteWord.setManaged(true);
             return;
