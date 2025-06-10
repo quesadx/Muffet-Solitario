@@ -79,6 +79,8 @@ public class SignUpController extends Controller implements Initializable {
         }
         // Save favorite word in uppercase
         userDto.setUserFavWord(txfNewFavoriteWord.getText().toUpperCase());
+        // Enable BGM by default for new users
+        userDto.setUserIsMusicActive(true);
         UserAccountService userAccountService = new UserAccountService();
         Respuesta answer = userAccountService.saveUserAccount(this.userDto);
         if(answer.getEstado()){
