@@ -39,17 +39,6 @@ Muffet Solitario is a solitaire card game implemented in Java, with additional s
 - `scripts/` – Auxiliary Python scripts for automation or utilities (if any).
 - `docs/` – Documentation and extra guides (if present).
 
-## Contributing
-
-Contributions are welcome! To contribute:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Commit your changes with clear descriptions.
-4. Push your branch and open a pull request.
-
-Please ensure your code follows the existing style and includes relevant documentation and tests if applicable.
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -60,5 +49,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - Play testers and contributors.
 
 ---
-
-For issues or feature requests, please use the [GitHub Issues](https://github.com/quesadx/muffet-solitario/issues) page.
