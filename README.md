@@ -1,6 +1,6 @@
 # Muffet Solitario
 
-Muffet Solitario is a solitaire card game implemented in Java, with additional styling provided by CSS and some auxiliary Python scripts. This project aims to provide a digital version of the classic solitaire experience, focusing on clean design, user interaction, and extensibility.
+Muffet Solitario is a solitaire card game implemented in Java, with additional styling provided by CSS. This project aims to provide a digital version of the classic solitaire experience, focusing on clean design, user interaction, and extensibility.
 
 ## Features
 
